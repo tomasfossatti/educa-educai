@@ -1,0 +1,937 @@
+// Educai — modelo de datos del MVP.
+//
+// Separación de capas (ver docs/ARCHITECTURE.md):
+//   Declared Context  → StudentProfile.declared*        (lo que el estudiante dice)
+//   Observed Evidence → EvidenceObject (+ Signal)        (lo que hizo, con provenance)
+//   Inference         → Inference (+ InferenceSupport)   (hipótesis trazables a evidencia)
+//   Evaluation        → Evaluation                       (comparación contra un criterio explícito)
+//   Human review      → TeacherReview / StudentResponse
+//   Action            → SuggestedAction / Intervention / Feedback
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Identidad y acceso ─────────────────────────────
+
+enum Role {
+  STUDENT
+  TEACHER
+}
+
+model Institution {
+  id        String           @id @default(cuid())
+  name      String
+  createdAt DateTime         @default(now())
+  teachers  TeacherProfile[]
+  courses   Course[]
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String
+  passwordHash   String
+  role           Role
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  sessions       Session[]
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  productEvents  ProductEvent[]
+  aiUsageEvents  AIUsageEvent[]  @relation("AIUsageActor")
+}
+
+/// La cookie guarda un token aleatorio; acá solo se persiste su SHA-256.
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model StudentProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Declared Context: hipótesis inicial declarada. Nunca es evidencia.
+  declaredCurrentContext  String?
+  declaredInterests       String?
+  declaredGoals           String?
+  declaredStrengths       String?
+  declaredDifficulties    String?
+  declaredWorkPreferences String?
+  declaredUpdatedAt       DateTime?
+
+  /// Consentimiento para analizar conversaciones y entregas dentro de Educai.
+  consentAnalysisAt        DateTime?
+  consentVersion           String?
+  shareContextWithTeachers Boolean   @default(false)
+  onboardingCompletedAt    DateTime?
+
+  enrollments       Enrollment[]
+  experiences       Experience[]
+  conversations     AIConversation[]
+  submissions       Submission[]
+  evidence          EvidenceObject[]
+  signals           Signal[]
+  inferences        Inference[]
+  evaluations       Evaluation[]
+  studentResponses  StudentResponse[]
+  snapshots         DevelopmentSnapshot[]
+  suggestedActions  SuggestedAction[]
+  feedback          Feedback[]
+  runs              InterpretationRun[]
+  interventionLinks InterventionTarget[]
+  aiUsageEvents     AIUsageEvent[]        @relation("AIUsageStudent")
+}
+
+model TeacherProfile {
+  userId        String         @id
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institutionId String
+  institution   Institution    @relation(fields: [institutionId], references: [id])
+  courses       Course[]
+  reviews       TeacherReview[]
+  interventions Intervention[]
+}
+
+// ───────────────────────────── Materia y currícula ─────────────────────────────
+
+enum CurriculumStatus {
+  NOT_STARTED
+  EXTRACTING
+  IN_REVIEW
+  CONFIGURED
+  FAILED
+}
+
+model Course {
+  id                    String           @id @default(cuid())
+  institutionId         String
+  institution           Institution      @relation(fields: [institutionId], references: [id])
+  teacherId             String
+  teacher               TeacherProfile   @relation(fields: [teacherId], references: [userId])
+  name                  String
+  description           String?
+  joinCode              String           @unique
+  programText           String?
+  programFileName       String?
+  curriculumStatus      CurriculumStatus @default(NOT_STARTED)
+  curriculumError       String?
+  /// Advertencias de la extracción con IA (ambigüedades del programa).
+  curriculumNotes       String?
+  curriculumConfirmedAt DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  enrollments      Enrollment[]
+  invites          CourseInvite[]
+  curriculumItems  CurriculumItem[]
+  activities       Activity[]
+  experiences      Experience[]
+  conversations    AIConversation[]
+  evidence         EvidenceObject[]
+  signals          Signal[]
+  inferences       Inference[]
+  evaluations      Evaluation[]
+  interventions    Intervention[]
+  snapshots        DevelopmentSnapshot[]
+  suggestedActions SuggestedAction[]
+  feedback         Feedback[]
+  runs             InterpretationRun[]
+  aiUsageEvents    AIUsageEvent[]
+  productEvents    ProductEvent[]
+
+  @@index([teacherId])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  REMOVED
+}
+
+model Enrollment {
+  id        String           @id @default(cuid())
+  courseId  String
+  course    Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId String
+  student   StudentProfile   @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  status    EnrollmentStatus @default(ACTIVE)
+  joinedAt  DateTime         @default(now())
+
+  @@unique([courseId, studentId])
+  @@index([studentId])
+}
+
+/// Invitación por email: el estudiante la acepta explícitamente (consentimiento).
+model CourseInvite {
+  id         String    @id @default(cuid())
+  courseId   String
+  course     Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  email      String
+  createdAt  DateTime  @default(now())
+  acceptedAt DateTime?
+
+  @@unique([courseId, email])
+  @@index([email])
+}
+
+/// LearningObjective, Competency, conceptos y criterios se modelan como tipos de CurriculumItem.
+enum CurriculumKind {
+  CONCEPT
+  OBJECTIVE
+  COMPETENCY
+  CRITERION
+}
+
+enum CurriculumOrigin {
+  AI_PROPOSED
+  TEACHER
+}
+
+enum CurriculumItemStatus {
+  PROPOSED
+  ACCEPTED
+  ARCHIVED
+}
+
+model CurriculumItem {
+  id            String               @id @default(cuid())
+  courseId      String
+  course        Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  kind          CurriculumKind
+  title         String
+  description   String?
+  parentId      String?
+  parent        CurriculumItem?      @relation("CurriculumTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children      CurriculumItem[]     @relation("CurriculumTree")
+  origin        CurriculumOrigin
+  status        CurriculumItemStatus @default(PROPOSED)
+  /// Fragmento del programa del que salió (provenance de la extracción).
+  sourceExcerpt String?
+  position      Int                  @default(0)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  activityLinks    ActivityCurriculumItem[]
+  evidenceLinks    EvidenceCurriculumItem[]
+  signals          Signal[]
+  inferences       Inference[]
+  evaluations      Evaluation[]
+  interventions    Intervention[]
+  suggestedActions SuggestedAction[]
+  focusedChats     AIConversation[]
+
+  @@index([courseId, status])
+}
+
+// ───────────────────────────── Experiencias ─────────────────────────────
+
+enum ExperienceType {
+  AI_CONVERSATION
+  CHALLENGE
+}
+
+model Experience {
+  id          String         @id @default(cuid())
+  courseId    String
+  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  type        ExperienceType
+  title       String
+  activityId  String?
+  activity    Activity?      @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  startedAt   DateTime       @default(now())
+  completedAt DateTime?
+
+  conversation AIConversation?
+  submission   Submission?
+  evidence     EvidenceObject[]
+  runs         InterpretationRun[]
+  feedback     Feedback[]
+
+  @@index([studentId, courseId])
+}
+
+enum ConversationStatus {
+  ACTIVE
+  CLOSED
+}
+
+model AIConversation {
+  id                String             @id @default(cuid())
+  experienceId      String             @unique
+  experience        Experience         @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  courseId          String
+  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId         String
+  student           StudentProfile     @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  activityId        String?
+  activity          Activity?          @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  focusItemId       String?
+  focusItem         CurriculumItem?    @relation(fields: [focusItemId], references: [id], onDelete: SetNull)
+  suggestedActionId String?
+  title             String
+  status            ConversationStatus @default(ACTIVE)
+  createdAt         DateTime           @default(now())
+  closedAt          DateTime?
+  messages          Message[]
+
+  @@index([studentId, courseId])
+}
+
+enum MessageRole {
+  STUDENT
+  TUTOR
+}
+
+model Message {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+enum ActivityKind {
+  BASELINE
+  CHALLENGE
+  PRACTICE
+}
+
+enum ActivityStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+model Activity {
+  id           String         @id @default(cuid())
+  courseId     String
+  course       Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title        String
+  kind         ActivityKind
+  /// Situación o caso sobre el que se trabaja.
+  scenario     String
+  instructions String
+  /// [{ key, label, help }] — validado con Zod (src/domain/activity.ts).
+  prompts      Json
+  status       ActivityStatus @default(DRAFT)
+  publishedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  curriculumLinks  ActivityCurriculumItem[]
+  experiences      Experience[]
+  conversations    AIConversation[]
+  submissions      Submission[]
+  interventions    Intervention[]
+  suggestedActions SuggestedAction[]
+
+  @@index([courseId, status])
+}
+
+/// Incluye conceptos/objetivos/competencias trabajados y criterios (CRITERION) de evaluación.
+model ActivityCurriculumItem {
+  activityId       String
+  activity         Activity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  curriculumItemId String
+  curriculumItem   CurriculumItem @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, curriculumItemId])
+}
+
+enum DeclaredAssistance {
+  NONE
+  TUTOR_ONLY
+  EXTERNAL_AI_PARTIAL
+  EXTERNAL_AI_EXTENSIVE
+  PEER_OR_OTHER
+}
+
+enum Confidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SubmissionStatus {
+  DRAFT
+  SUBMITTED
+}
+
+model Submission {
+  id                 String              @id @default(cuid())
+  activityId         String
+  activity           Activity            @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  studentId          String
+  student            StudentProfile      @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  experienceId       String              @unique
+  experience         Experience          @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  attempt            Int                 @default(1)
+  /// { [promptKey]: string } — producción original, inmutable una vez entregada.
+  answers            Json
+  declaredAssistance DeclaredAssistance?
+  assistanceNote     String?
+  confidence         Confidence?
+  status             SubmissionStatus    @default(DRAFT)
+  submittedAt        DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  evaluations        Evaluation[]
+
+  @@unique([activityId, studentId, attempt])
+}
+
+// ───────────────────────────── Interpretation Engine ─────────────────────────────
+
+enum EvidenceSource {
+  AI_CONVERSATION
+  CHALLENGE_SUBMISSION
+}
+
+enum RunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  INSUFFICIENT
+  FAILED
+  SKIPPED
+}
+
+model InterpretationRun {
+  id            String         @id @default(cuid())
+  courseId      String
+  course        Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  experienceId  String
+  experience    Experience     @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  source        EvidenceSource
+  status        RunStatus      @default(QUEUED)
+  /// [{ step, status, at, note }]
+  steps         Json           @default("[]")
+  /// Áreas trabajadas sin evidencia suficiente: [{ curriculumItemId, dimension, note }]
+  insufficient  Json           @default("[]")
+  statusNote    String?
+  error         String?
+  promptVersion String
+  /// "engine" en producción; "seed" en datos de demostración.
+  origin        String         @default("engine")
+  createdAt     DateTime       @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  evidence         EvidenceObject[]
+  signals          Signal[]
+  inferences       Inference[]
+  evaluations      Evaluation[]
+  snapshots        DevelopmentSnapshot[]
+  suggestedActions SuggestedAction[]
+  feedback         Feedback?
+  aiUsageEvents    AIUsageEvent[]
+
+  @@index([studentId, courseId, createdAt])
+}
+
+enum EvidenceKind {
+  QUESTION
+  EXPLANATION
+  ATTEMPT
+  ERROR
+  DECISION
+  JUSTIFICATION
+  HYPOTHESIS
+  ANALYSIS
+  REFLECTION
+  ANSWER
+}
+
+enum AssistanceLevel {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  UNKNOWN
+}
+
+enum AssistanceSource {
+  OBSERVED
+  DECLARED
+  UNKNOWN
+}
+
+model EvidenceObject {
+  id               String             @id @default(cuid())
+  courseId         String
+  course           Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId        String
+  student          StudentProfile     @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  experienceId     String
+  experience       Experience         @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  runId            String?
+  run              InterpretationRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  source           EvidenceSource
+  kind             EvidenceKind
+  /// Qué ocurrió, descrito sin interpretar.
+  observation      String
+  /// Fragmento textual producido por el estudiante (verificado contra la fuente).
+  content          String
+  /// Condiciones en las que ocurrió (actividad, ayuda recibida, momento).
+  context          String?
+  assistanceLevel  AssistanceLevel    @default(UNKNOWN)
+  assistanceSource AssistanceSource   @default(UNKNOWN)
+  assistanceNote   String?
+  occurredAt       DateTime
+  /// { origin, runId, model, promptVersion, messageIds, submissionId, promptKeys, excerptVerified }
+  provenance       Json
+  createdAt        DateTime           @default(now())
+
+  curriculumLinks EvidenceCurriculumItem[]
+  signals         Signal[]
+  supports        InferenceSupport[]
+  evaluationLinks EvaluationEvidence[]
+
+  @@index([studentId, courseId, occurredAt])
+}
+
+model EvidenceCurriculumItem {
+  evidenceId       String
+  evidence         EvidenceObject @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  curriculumItemId String
+  curriculumItem   CurriculumItem @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+
+  @@id([evidenceId, curriculumItemId])
+}
+
+enum Dimension {
+  COMPREHENSION
+  APPLICATION
+  TRANSFER
+  AUTONOMY
+}
+
+enum Polarity {
+  STRENGTH
+  DIFFICULTY
+  MIXED
+}
+
+model Signal {
+  id               String             @id @default(cuid())
+  evidenceId       String
+  evidence         EvidenceObject     @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  courseId         String
+  course           Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId        String
+  student          StudentProfile     @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  runId            String?
+  run              InterpretationRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  dimension        Dimension
+  polarity         Polarity
+  description      String
+  rationale        String?
+  curriculumItemId String?
+  curriculumItem   CurriculumItem?    @relation(fields: [curriculumItemId], references: [id], onDelete: SetNull)
+  createdAt        DateTime           @default(now())
+  supports         InferenceSupport[]
+
+  @@index([studentId, courseId])
+  @@index([courseId, curriculumItemId])
+}
+
+enum SupportStatus {
+  CONSISTENT
+  PARTIAL
+  INSUFFICIENT
+  CONTRADICTORY
+}
+
+enum ReviewStatus {
+  PENDING
+  CONFIRMED
+  PARTIALLY_CORRECT
+  INCORRECT
+  NEEDS_CONTEXT
+}
+
+enum InferenceState {
+  ACTIVE
+  SUPERSEDED
+  RETRACTED
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Inference {
+  id                    String             @id @default(cuid())
+  courseId              String
+  course                Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId             String
+  student               StudentProfile     @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  runId                 String?
+  run                   InterpretationRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  /// Redacción para el docente (lenguaje tentativo).
+  statement             String
+  /// Redacción para el estudiante (segunda persona, sin etiquetas).
+  studentStatement      String
+  dimension             Dimension
+  polarity              Polarity
+  curriculumItemId      String?
+  curriculumItem        CurriculumItem?    @relation(fields: [curriculumItemId], references: [id], onDelete: SetNull)
+  /// Estado final tras aplicar la política de respaldo (src/domain/support-policy.ts).
+  supportStatus         SupportStatus
+  /// Estado propuesto por el modelo antes de la política.
+  proposedSupportStatus SupportStatus
+  supportRationale      String
+  /// Ajustes aplicados por la política (string[]).
+  policyNotes           Json               @default("[]")
+  contradictionNote     String?
+  requiresReview        Boolean            @default(true)
+  reviewStatus          ReviewStatus       @default(PENDING)
+  priority              Priority           @default(MEDIUM)
+  state                 InferenceState     @default(ACTIVE)
+  supersedesId          String?            @unique
+  supersedes            Inference?         @relation("InferenceHistory", fields: [supersedesId], references: [id], onDelete: SetNull)
+  supersededBy          Inference?         @relation("InferenceHistory")
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  supports         InferenceSupport[]
+  reviews          TeacherReview[]
+  studentResponses StudentResponse[]
+  suggestedActions SuggestedAction[]
+  interventions    Intervention[]
+
+  @@index([courseId, state, reviewStatus])
+  @@index([studentId, courseId])
+}
+
+enum SupportRelation {
+  SUPPORTS
+  CONTRADICTS
+}
+
+/// Traza inferencia → señal → Evidence Object.
+model InferenceSupport {
+  id          String          @id @default(cuid())
+  inferenceId String
+  inference   Inference       @relation(fields: [inferenceId], references: [id], onDelete: Cascade)
+  signalId    String
+  signal      Signal          @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  evidenceId  String
+  evidence    EvidenceObject  @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  relation    SupportRelation
+
+  @@unique([inferenceId, signalId])
+  @@index([evidenceId])
+}
+
+enum EvaluationResult {
+  MEETS
+  PARTIALLY_MEETS
+  DOES_NOT_MEET
+  INSUFFICIENT_EVIDENCE
+}
+
+model Evaluation {
+  id           String               @id @default(cuid())
+  courseId     String
+  course       Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      StudentProfile       @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  submissionId String
+  submission   Submission           @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  criterionId  String
+  criterion    CurriculumItem       @relation(fields: [criterionId], references: [id], onDelete: Cascade)
+  runId        String?
+  run          InterpretationRun?   @relation(fields: [runId], references: [id], onDelete: Cascade)
+  result       EvaluationResult
+  rationale    String
+  createdAt    DateTime             @default(now())
+  evidence     EvaluationEvidence[]
+}
+
+model EvaluationEvidence {
+  evaluationId String
+  evaluation   Evaluation     @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evidenceId   String
+  evidence     EvidenceObject @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@id([evaluationId, evidenceId])
+}
+
+// ───────────────────────────── Human-in-the-loop ─────────────────────────────
+
+enum ReviewVerdict {
+  CONFIRMED
+  PARTIALLY_CORRECT
+  INCORRECT
+  NEEDS_CONTEXT
+}
+
+model TeacherReview {
+  id          String         @id @default(cuid())
+  inferenceId String
+  inference   Inference      @relation(fields: [inferenceId], references: [id], onDelete: Cascade)
+  teacherId   String
+  teacher     TeacherProfile @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  verdict     ReviewVerdict
+  comment     String?
+  createdAt   DateTime       @default(now())
+
+  @@index([inferenceId])
+}
+
+enum StudentStance {
+  AGREE
+  DISAGREE
+  MISSING_CONTEXT
+}
+
+/// El estudiante puede cuestionar o contextualizar una inferencia (agencia del estudiante).
+model StudentResponse {
+  id          String         @id @default(cuid())
+  inferenceId String
+  inference   Inference      @relation(fields: [inferenceId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  stance      StudentStance
+  note        String?
+  createdAt   DateTime       @default(now())
+
+  @@index([inferenceId])
+}
+
+enum InterventionType {
+  EXPLAIN
+  ASK
+  REGROUP
+  PRACTICE
+  FEEDBACK
+  NEW_CHALLENGE
+  OTHER
+}
+
+model Intervention {
+  id                 String               @id @default(cuid())
+  courseId           String
+  course             Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacherId          String
+  teacher            TeacherProfile       @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  type               InterventionType
+  description        String
+  messageToStudents  String?
+  activityId         String?
+  activity           Activity?            @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  inferenceId        String?
+  inference          Inference?           @relation(fields: [inferenceId], references: [id], onDelete: SetNull)
+  curriculumItemId   String?
+  curriculumItem     CurriculumItem?      @relation(fields: [curriculumItemId], references: [id], onDelete: SetNull)
+  /// Insight de curso que la originó (p. ej. "pattern:<itemId>:GAP").
+  insightKey         String?
+  occurredAt         DateTime             @default(now())
+  /// Primera evidencia relacionada posterior a la intervención (cierre del loop).
+  followUpEvidenceAt DateTime?
+  createdAt          DateTime             @default(now())
+  targets            InterventionTarget[]
+  suggestedActions   SuggestedAction[]
+
+  @@index([courseId, occurredAt])
+}
+
+model InterventionTarget {
+  interventionId String
+  intervention   Intervention   @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+
+  @@id([interventionId, studentId])
+}
+
+// ───────────────────────────── Development & Action ─────────────────────────────
+
+/// Snapshot inmutable: cada interpretación agrega uno nuevo (historial longitudinal).
+model DevelopmentSnapshot {
+  id              String                 @id @default(cuid())
+  courseId        String
+  course          Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId       String
+  student         StudentProfile         @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  runId           String?
+  run             InterpretationRun?     @relation(fields: [runId], references: [id], onDelete: SetNull)
+  evidenceCount   Int
+  experienceCount Int
+  createdAt       DateTime               @default(now())
+  dimensions      DevelopmentDimension[]
+
+  @@index([studentId, courseId, createdAt])
+}
+
+enum SnapshotDimension {
+  COMPREHENSION
+  APPLICATION
+  TRANSFER
+  AUTONOMY
+  CONSISTENCY
+  EVOLUTION
+}
+
+model DevelopmentDimension {
+  id          String              @id @default(cuid())
+  snapshotId  String
+  snapshot    DevelopmentSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  dimension   SnapshotDimension
+  status      SupportStatus
+  summary     String
+  /// Detalle por ítem curricular — ver src/domain/snapshot.ts (DimensionDetails).
+  details     Json
+  signalIds   String[]
+  evidenceIds String[]
+
+  @@unique([snapshotId, dimension])
+}
+
+enum ActionAudience {
+  STUDENT
+  TEACHER
+}
+
+enum ActionSource {
+  ENGINE
+  TEACHER
+}
+
+enum ActionType {
+  REVIEW_CONCEPT
+  PRACTICE_WITH_TUTOR
+  TRY_ACTIVITY
+  REFLECT
+  TEACHER_MESSAGE
+  EXPLAIN_IN_CLASS
+  ASK_STUDENT
+  REGROUP
+  ASSIGN_PRACTICE
+  GIVE_FEEDBACK
+  PROPOSE_CHALLENGE
+}
+
+enum ActionStatus {
+  OPEN
+  DONE
+  DISMISSED
+}
+
+model SuggestedAction {
+  id               String             @id @default(cuid())
+  courseId         String
+  course           Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId        String?
+  student          StudentProfile?    @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  audience         ActionAudience
+  source           ActionSource
+  type             ActionType
+  title            String
+  description      String
+  curriculumItemId String?
+  curriculumItem   CurriculumItem?    @relation(fields: [curriculumItemId], references: [id], onDelete: SetNull)
+  activityId       String?
+  activity         Activity?          @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  inferenceId      String?
+  inference        Inference?         @relation(fields: [inferenceId], references: [id], onDelete: Cascade)
+  interventionId   String?
+  intervention     Intervention?      @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+  runId            String?
+  run              InterpretationRun? @relation(fields: [runId], references: [id], onDelete: Cascade)
+  status           ActionStatus       @default(OPEN)
+  completedAt      DateTime?
+  createdAt        DateTime           @default(now())
+
+  @@index([studentId, courseId, status])
+  @@index([courseId, audience, status])
+}
+
+/// Feedback al estudiante producido por una interpretación, anclado a evidencia e inferencias.
+model Feedback {
+  id                   String            @id @default(cuid())
+  courseId             String
+  course               Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  studentId            String
+  student              StudentProfile    @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  runId                String            @unique
+  run                  InterpretationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  experienceId         String
+  experience           Experience        @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  summary              String
+  contrastWithDeclared String?
+  inferenceIds         String[]
+  evidenceIds          String[]
+  viewedAt             DateTime?
+  createdAt            DateTime          @default(now())
+
+  @@index([studentId, courseId, createdAt])
+}
+
+// ───────────────────────────── Instrumentación ─────────────────────────────
+
+model AIUsageEvent {
+  id               String             @id @default(cuid())
+  actorUserId      String?
+  actor            User?              @relation("AIUsageActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  studentId        String?
+  student          StudentProfile?    @relation("AIUsageStudent", fields: [studentId], references: [userId], onDelete: SetNull)
+  courseId         String?
+  course           Course?            @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  runId            String?
+  run              InterpretationRun? @relation(fields: [runId], references: [id], onDelete: SetNull)
+  operation        String
+  provider         String
+  model            String
+  inputTokens      Int                @default(0)
+  outputTokens     Int                @default(0)
+  cacheReadTokens  Int                @default(0)
+  cacheWriteTokens Int                @default(0)
+  /// USD. Null si el modelo no tiene precio conocido.
+  estimatedCostUsd Decimal?           @db.Decimal(12, 6)
+  latencyMs        Int
+  success          Boolean
+  errorType        String?
+  createdAt        DateTime           @default(now())
+
+  @@index([createdAt])
+  @@index([studentId, createdAt])
+}
+
+model ProductEvent {
+  id         String   @id @default(cuid())
+  name       String
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  courseId   String?
+  course     Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  studentId  String?
+  /// Evita duplicados para eventos "primera vez" o diarios.
+  dedupeKey  String?  @unique
+  properties Json?
+  createdAt  DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([courseId, name])
+}

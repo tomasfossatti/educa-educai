@@ -1,0 +1,15 @@
+# Base de datos local para desarrollo: docker compose up -d
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: educai
+      POSTGRES_PASSWORD: educai
+      POSTGRES_DB: educai
+    ports:
+      - "5432:5432"
+    volumes:
+      - educai-pg:/var/lib/postgresql/data
+      - ./scripts/create-test-db.sql:/docker-entrypoint-initdb.d/create-test-db.sql:ro
+volumes:
+  educai-pg:

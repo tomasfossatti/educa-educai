@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/*
+ * Educai — sistema visual deliberadamente austero.
+ * Un solo color primario para acciones; grises para todo lo demás.
+ * "attention" se reserva para señales contradictorias y lo que requiere atención.
+ */
+@theme {
+  --color-canvas: #fafafa;
+  --color-surface: #ffffff;
+  --color-ink: #18181b;
+  --color-ink-2: #3f3f46;
+  --color-muted: #71717a;
+  --color-faint: #a1a1aa;
+  --color-line: #e4e4e7;
+  --color-line-strong: #d4d4d8;
+  --color-subtle: #f4f4f5;
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-soft: #eff6ff;
+  --color-attention: #b45309;
+  --color-attention-soft: #fffbeb;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-success: #15803d;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #dbeafe;
+}
+
+/* Texto de usuario o IA: respeta saltos de línea sin romper el layout. */
+.prose-plain {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
