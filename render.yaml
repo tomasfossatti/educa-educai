@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: educai-v2
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma migrate deploy && npm run db:seed && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
