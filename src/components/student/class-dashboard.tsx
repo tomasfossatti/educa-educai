@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
@@ -51,33 +51,17 @@ export function ClassDashboard({
   const [attached, setAttached] = useState(false);
   const [isAttaching, setIsAttaching] = useState(false);
 
-  // 1. Efecto Gradiente de Meta (Goal-Gradient Effect)
+  // Avance de la materia
   const courseProgressPercent = Math.round((currentClassNumber / totalClasses) * 100);
-  const courseProgressHeadline =
-    courseProgressPercent === 50
-      ? "¡Medio camino completado! Vas a excelente ritmo."
-      : courseProgressPercent > 50
-      ? `¡Ya completaste el ${courseProgressPercent}% de la materia! Estás a paso firme de la meta.`
-      : `¡Ya avanzaste el ${courseProgressPercent}% de la materia! Vas a excelente ritmo.`;
 
-  // 2. Efecto de Progreso Otorgado (Endowed Progress Effect)
-  // El estudiante no arranca de cero: cuenta con un 10% otorgado por iniciar sesión y encuadre
-  const endowedBonus = 10;
-  const block1Percent = Math.min(
-    100,
-    Math.round(endowedBonus + (Math.min(classElapsedMinutes, 60) / 60) * (100 - endowedBonus))
-  );
-  const isBlock1Done = classElapsedMinutes >= 60;
-
+  // Cálculos de bloques
+  const block1Percent = Math.min(100, Math.round((Math.min(classElapsedMinutes, 60) / 60) * 100));
   const hasBlock2Started = classElapsedMinutes > 60;
   const block2Percent = hasBlock2Started
-    ? Math.min(
-        100,
-        Math.round(endowedBonus + ((classElapsedMinutes - 60) / 60) * (100 - endowedBonus))
-      )
+    ? Math.min(100, Math.round(((classElapsedMinutes - 60) / 60) * 100))
     : 0;
 
-  // 3. Reencuadre Cognitivo del Tiempo y Pausas (Reframing)
+  // Tiempo y recreo
   const minutesToBreak = Math.max(0, breakMinute - classElapsedMinutes);
   const minutesToEnd = Math.max(0, totalClassMinutes - classElapsedMinutes);
 
@@ -91,102 +75,84 @@ export function ClassDashboard({
 
   return (
     <div className="space-y-7 pb-24">
-      {/* ──────────────── 1. BARRA SUTIL DE AVANCE + MICRO-HITOS (Goal-Gradient Effect) ──────────────── */}
-      <div className="space-y-2 opacity-90 hover:opacity-100 transition-opacity">
-        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="flex items-center gap-1.5 text-muted">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+      {/* ──────────────── 1. SECCIÓN DE AVANCE DE LA MATERIA (Hover para ver hitos) ──────────────── */}
+      <div className="group relative space-y-2">
+        <div className="flex items-center justify-between text-xs text-muted">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary/70"></span>
             <span>Avance general de la materia</span>
           </span>
-          <span className="font-semibold text-emerald-400">
-            Clase {currentClassNumber} de {totalClasses} · {courseProgressHeadline}
+          <span className="font-mono font-medium text-ink-2">
+            Clase {currentClassNumber} de {totalClasses}
           </span>
         </div>
 
         {/* Barra sutil y discreta */}
-        <div className="h-1.5 w-full rounded-full bg-surface-2 border border-line/40 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-surface-2 border border-line/40 overflow-hidden cursor-pointer transition-all duration-200 group-hover:h-2">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-primary/60 via-primary to-emerald-400 transition-all duration-500 ease-out"
+            className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-500 ease-out"
             style={{ width: `${courseProgressPercent}%` }}
           />
         </div>
 
-        {/* Micro-hitos (Logros alcanzados que generan picos de dopamina) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-          <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px] text-emerald-300">
-            <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="truncate">Hito 1 superado: Segmentación</span>
-          </div>
+        {/* Micro-hitos: ocultos por defecto, visibles únicamente al posar el cursor sobre la barra */}
+        <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-out group-hover:max-h-24 group-hover:opacity-100 group-hover:pt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px] text-emerald-300">
+              <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="truncate">Hito 1 superado: Segmentación</span>
+            </div>
 
-          <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px] text-emerald-300">
-            <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="truncate">Hito 2 superado: Propuesta</span>
-          </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px] text-emerald-300">
+              <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="truncate">Hito 2 superado: Propuesta</span>
+            </div>
 
-          <div className="flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-[11px] text-primary-soft font-semibold">
-            <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-pulse"></span>
-            <span className="truncate">Hito 3: En curso hoy</span>
-          </div>
+            <div className="flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-[11px] text-primary-soft font-semibold">
+              <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-pulse"></span>
+              <span className="truncate">Hito 3: En curso hoy</span>
+            </div>
 
-          <div className="flex items-center gap-1.5 rounded-lg border border-line/50 bg-surface-2/40 px-2.5 py-1.5 text-[11px] text-muted">
-            <span className="w-2 h-2 rounded-full bg-muted/40 shrink-0"></span>
-            <span className="truncate">Hito 4: Validación (Próximo)</span>
+            <div className="flex items-center gap-1.5 rounded-lg border border-line/50 bg-surface-2/40 px-2.5 py-1.5 text-[11px] text-muted">
+              <span className="w-2 h-2 rounded-full bg-muted/40 shrink-0"></span>
+              <span className="truncate">Hito 4: Validación (Próximo)</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ──────────────── 2. BARRA VISIBLE CON COLOR FUERTE (Tiempo, Recreo ganado y Progreso otorgado) ──────────────── */}
+      {/* ──────────────── 2. SECCIÓN "CLASE EN CURSO" ──────────────── */}
       <div className="rounded-2xl border border-primary/25 bg-gradient-to-b from-surface-2/90 to-surface/80 p-4.5 shadow-lg backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
               Clase en curso
             </span>
-            {/* Feedback visual directo de progreso otorgado */}
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-              <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
-              Paso inicial completado (+10%)
-            </span>
           </div>
 
-          {/* Reencuadre cognitivo del descanso como recompensa ganada */}
-          <div className="text-xs">
+          <div className="text-xs font-medium">
             {minutesToBreak > 0 ? (
               <span className="text-white font-semibold">
-                Tu descanso ganado en {minutesToBreak} min
+                recreo en {minutesToBreak} min
               </span>
             ) : (
               <span className="text-white font-semibold">
-                Segunda parte · Meta de clase en {minutesToEnd} min de foco
+                segunda parte · termina en {minutesToEnd} min
               </span>
             )}
           </div>
         </div>
 
-        {/* Dos bloques con lenguaje de avance y no de vacío */}
+        {/* Dos bloques limpios y sobrios */}
         <div className="grid grid-cols-2 gap-3">
-          {/* Bloque 1 */}
+          {/* Bloque 1: solo identificador del bloque */}
           <div className="space-y-1.5">
-            <div className="flex justify-between items-center text-[11px]">
-              <span className="text-muted flex items-center gap-1">
-                {isBlock1Done ? (
-                  <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                    <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Bloque 1 superado
-                  </span>
-                ) : (
-                  <span>Bloque 1 · ¡Gran avance!</span>
-                )}
-              </span>
-              <span className="font-mono text-emerald-400 font-medium">{block1Percent}%</span>
+            <div className="text-[11px] text-muted font-medium">
+              <span>Bloque 1</span>
             </div>
             <div className="h-3 w-full rounded-full bg-surface-3/80 border border-line/60 overflow-hidden p-0.5">
               <div
@@ -196,19 +162,14 @@ export function ClassDashboard({
             </div>
           </div>
 
-          {/* Bloque 2: Redacción positiva (Tu siguiente logro / Listo para comenzar) */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center text-[11px]">
-              <span className="text-muted">
-                {hasBlock2Started ? (
-                  block2Percent >= 100 ? "¡Bloque 2 superado!" : "Bloque 2 en desarrollo"
-                ) : (
-                  <span className="text-ink-2 font-medium">Bloque 2: Tu siguiente logro</span>
-                )}
-              </span>
-              <span className="font-mono text-ink-2">
-                {hasBlock2Started ? `${block2Percent}%` : "Listo para comenzar"}
-              </span>
+          {/* Bloque 2: estado bloqueado/desactivado mientras el Bloque 1 esté en progreso */}
+          <div
+            className={`space-y-1.5 transition-opacity duration-300 ${
+              !hasBlock2Started ? "opacity-40 select-none pointer-events-none" : ""
+            }`}
+          >
+            <div className="text-[11px] text-muted font-medium">
+              <span>Bloque 2</span>
             </div>
             <div className="h-3 w-full rounded-full bg-surface-3/80 border border-line/60 overflow-hidden p-0.5">
               <div
@@ -220,11 +181,11 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 3. TÍTULO GRANDE GENERAL: HOY LOGRARÁS DOMINAR CÓMO... (Autoeficacia) ──────────────── */}
+      {/* ──────────────── 3. SECCIÓN DE OBJETIVO ──────────────── */}
       <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1/95 via-surface-2/80 to-surface-3/60 p-7 sm:p-9 shadow-xl backdrop-blur-xl space-y-4">
         <div className="space-y-2">
-          <span className="inline-block text-xs font-bold uppercase tracking-widest text-primary-hover">
-            Objetivo central de la clase de hoy
+          <span className="inline-block text-xs font-semibold tracking-wider text-primary-hover">
+            Objetivo de esta clase
           </span>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
             Hoy lograrás dominar cómo:{" "}
@@ -248,35 +209,6 @@ export function ClassDashboard({
             <p className="text-sm sm:text-base text-ink font-medium leading-relaxed">
               Al terminar esta clase, tendrás la herramienta exacta para {personalizedApplication}
             </p>
-          </div>
-        </div>
-
-        {/* ──────────────── Feedback visual de sub-tareas completadas (Endowed Progress) ──────────────── */}
-        <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          <div className="flex items-center gap-2 rounded-xl bg-surface-2/60 border border-emerald-500/20 px-3 py-2 text-xs text-ink">
-            <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-            <div>
-              <p className="font-semibold text-emerald-300">¡Gran avance! Encuadre listo</p>
-              <p className="text-[10px] text-muted">Sesión iniciada (+10% otorgado)</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-xl bg-surface-2/60 border border-primary/25 px-3 py-2 text-xs text-ink">
-            <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-ping"></span>
-            <div>
-              <p className="font-semibold text-white">Comprensión en acción</p>
-              <p className="text-[10px] text-muted">Explorando hipótesis y métricas</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-xl bg-surface-2/60 border border-line px-3 py-2 text-xs text-muted">
-            <span className="w-2 h-2 rounded-full bg-muted/40 shrink-0"></span>
-            <div>
-              <p className="font-semibold text-ink-2">Validación práctica</p>
-              <p className="text-[10px] text-muted">Evidencia lista para adjuntar</p>
-            </div>
           </div>
         </div>
       </div>
@@ -347,7 +279,7 @@ export function ClassDashboard({
         )}
       </div>
 
-      {/* ──────────────── 6. RECTÁNGULO: ADJUNTAR CONVERSACIÓN CON LA IA (Feedback directo) ──────────────── */}
+      {/* ──────────────── 6. RECTÁNGULO: ADJUNTAR CONVERSACIÓN CON LA IA ──────────────── */}
       <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-surface-1 via-surface-2 to-surface-1 p-6 shadow-lg backdrop-blur-md">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
