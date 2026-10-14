@@ -56,6 +56,12 @@ export function FloatingTutor({
   }, [hasInteracted]);
 
   useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener("open-tutor", handleOpen);
+    return () => window.removeEventListener("open-tutor", handleOpen);
+  }, []);
+
+  useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
@@ -136,7 +142,7 @@ export function FloatingTutor({
         >
           {hasInteracted ? (
             <div className="flex items-center gap-2">
-              <span>Continuar conversación</span>
+              <span>Conversá</span>
               <span aria-hidden="true">→</span>
             </div>
           ) : (

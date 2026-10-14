@@ -74,7 +74,9 @@ export function ClassDashboard({
   const effectiveOrg = userOrganization || "tu restaurante en el centro de Rosario";
   const effectiveDescription =
     conceptDescription ||
-    (learningGoal && learningGoal.includes(":") ? learningGoal.split(":").slice(1).join(":").trim() : "");
+    (learningGoal && learningGoal.includes(":")
+      ? learningGoal.split(":").slice(1).join(":").trim()
+      : "Hipótesis que pueden resultar falsas: definen métrica, umbral y plazo.");
 
   const handleAttach = async () => {
     if (!activeConversation) return;
@@ -84,9 +86,13 @@ export function ClassDashboard({
     setIsAttaching(false);
   };
 
+  const handleOpenChat = () => {
+    window.dispatchEvent(new CustomEvent("open-tutor"));
+  };
+
   return (
     <div className="space-y-7 pb-24">
-      {/* ──────────────── 1. SECCIÓN DE AVANCE DE LA MATERIA (Hover para ver hitos) ──────────────── */}
+      {/* ──────────────── 0. SECCIÓN DE AVANCE DE LA MATERIA (Hover para ver hitos) ──────────────── */}
       <div className="group relative space-y-2">
         <div className="flex items-center justify-between text-xs text-muted">
           <span className="flex items-center gap-1.5">
@@ -140,7 +146,7 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 2. SECCIÓN "CLASE EN CURSO" ──────────────── */}
+      {/* ──────────────── 0. SECCIÓN "CLASE EN CURSO" ──────────────── */}
       <div className="rounded-2xl border border-primary/25 bg-gradient-to-b from-surface-2/90 to-surface/80 p-4.5 shadow-lg backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
@@ -196,7 +202,7 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 3. TÍTULO PRINCIPAL PERSONALIZADO AL CONTEXTO ONBOARDING ──────────────── */}
+      {/* ──────────────── 1) TITULO Y DESCRIPCIÓN ──────────────── */}
       <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-7 sm:p-9 shadow-xl backdrop-blur-xl space-y-3">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
           Hoy vas a aplicar{" "}
@@ -215,7 +221,37 @@ export function ClassDashboard({
         )}
       </div>
 
-      {/* ──────────────── 4. SECCIÓN ACTIVIDAD DE CLASE ──────────────── */}
+      {/* ──────────────── 2) BOTONES: "Adjuntá" - "Conversá" (Lado a lado con separación) ──────────────── */}
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-1">
+        {attached ? (
+          <div className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 px-7 py-3.5 text-base font-bold text-emerald-400 shadow-lg">
+            <svg className="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Adjuntado</span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleAttach}
+            disabled={isAttaching}
+            className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-primary/50 bg-surface-2 hover:bg-surface-3 px-8 py-3.5 text-base font-bold text-white shadow-xl hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] transition-all active:scale-[0.98] disabled:opacity-50"
+          >
+            {isAttaching ? "Adjuntando…" : "Adjuntá"}
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={handleOpenChat}
+          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-500 px-8 py-3.5 text-base font-bold text-white shadow-xl hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98]"
+        >
+          <span>Conversá</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      {/* ──────────────── 3) ACTIVIDAD EN ESPERA / ACTIVIDAD ACTIVA ──────────────── */}
       <div className="space-y-2">
         <div className="flex justify-end">
           {/* Botón de control docente para simular desbloqueo en la demo */}
@@ -229,7 +265,7 @@ export function ClassDashboard({
         </div>
 
         {!isUnlocked ? (
-          /* Estado Bloqueado */
+          /* Estado Bloqueado: Actividad en espera */
           <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2/40 p-8 text-center space-y-3">
             <div className="w-12 h-12 mx-auto rounded-full bg-surface-3 flex items-center justify-center text-muted border border-line">
               <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -249,7 +285,7 @@ export function ClassDashboard({
             </span>
           </div>
         ) : (
-          /* Estado Desbloqueado: Actividad activa en blanco, botón "Abrir" a la derecha */
+          /* Estado Desbloqueado: Actividad activa */
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-1.5">
               <span className="text-sm font-semibold text-white">
@@ -271,27 +307,6 @@ export function ClassDashboard({
               </Link>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* ──────────────── 5. BOTÓN: ADJUNTÁ CONVERSACIÓN (Sin textos extra) ──────────────── */}
-      <div className="flex justify-center pt-2">
-        {attached ? (
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 px-8 py-3.5 text-base font-bold text-emerald-400 shadow-lg">
-            <svg className="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Conversación adjuntada</span>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleAttach}
-            disabled={isAttaching}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-primary/50 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 hover:from-primary/40 hover:to-primary/40 px-8 py-3.5 text-base font-bold text-white shadow-xl hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98] disabled:opacity-50"
-          >
-            {isAttaching ? "Adjuntando conversación…" : "Adjuntá conversación"}
-          </button>
         )}
       </div>
     </div>
