@@ -133,28 +133,23 @@ export function FloatingTutor({
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
-        /* Botón Flotante Cerrado */
+        /* Botón Flotante Cerrado: más chico y con ícono de bot de chat */
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group flex items-center gap-3 rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(120,150,238,0.4)] active:scale-95 border border-white/15 max-w-sm sm:max-w-md text-left"
+          className="flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-indigo-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-[0_0_20px_rgba(120,150,238,0.4)] active:scale-95 border border-white/20"
           aria-label="Abrir tutor de la materia"
         >
-          {hasInteracted ? (
-            <div className="flex items-center gap-2">
-              <span>Conversá</span>
-              <span aria-hidden="true">→</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2.5">
-              <span className="text-xs uppercase tracking-wider text-primary-soft/80 font-bold shrink-0">
-                Pregunta:
-              </span>
-              <span className="truncate text-xs sm:text-sm text-white/95 transition-opacity duration-300">
-                {currentQuestion}
-              </span>
-            </div>
-          )}
+          {/* Ícono de bot de chat */}
+          <svg className="w-4 h-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.8}
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+            />
+          </svg>
+          <span>Conversá</span>
         </button>
       ) : (
         /* Ventana Flotante Abierta */

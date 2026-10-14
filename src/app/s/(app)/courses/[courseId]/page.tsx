@@ -75,10 +75,19 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
             ? {
                 id: activity.id,
                 title: activity.title,
-                description: activity.scenario || activity.instructions || "Actividad práctica de aplicación de clase.",
+                description:
+                  activity.scenario ||
+                  activity.instructions ||
+                  "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio.",
                 isUnlocked: false,
               }
-            : null
+            : {
+                id: "practice-logistics",
+                title: "Práctica: hipótesis falsables en logística de última milla",
+                description:
+                  "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio.",
+                isUnlocked: false,
+              }
         }
         activeConversation={
           activeConversation

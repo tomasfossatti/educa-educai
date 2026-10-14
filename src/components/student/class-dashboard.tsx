@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 interface ClassDashboardProps {
@@ -28,6 +28,15 @@ interface ClassDashboardProps {
   onAttachConversation?: (conversationId: string) => void;
 }
 
+const CLASS_QUESTIONS = [
+  "¿Cómo sé si mi hipótesis se puede refutar o es solo un deseo?",
+  "¿Qué métrica de validación elijo para medir la demanda real?",
+  "¿Cómo defino el umbral de éxito antes de realizar la prueba?",
+  "¿Qué diferencia existe entre un problema real y la solución imaginada?",
+  "¿Qué experimento simple y de bajo costo puedo probar esta semana?",
+  "¿En qué plazo exacto conviene medir los resultados del experimento?",
+];
+
 export function ClassDashboard({
   courseId,
   courseName,
@@ -39,9 +48,10 @@ export function ClassDashboard({
   userOrganization = "tu restaurante en el centro de Rosario",
   learningGoal,
   activity = {
-    id: "challenge-1",
-    title: "Challenge de clase: Validación de viandas saludables",
-    description: "Definí el segmento objetivo y formulá una hipótesis falsable con métrica, umbral y plazo.",
+    id: "practice-logistics",
+    title: "Práctica: hipótesis falsables en logística de última milla",
+    description:
+      "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio.",
     isUnlocked: false,
   },
   activeConversation,
@@ -54,6 +64,16 @@ export function ClassDashboard({
   const [isUnlocked, setIsUnlocked] = useState(activity?.isUnlocked ?? false);
   const [attached, setAttached] = useState(false);
   const [isAttaching, setIsAttaching] = useState(false);
+
+  // Preguntas rotativas al lado del título (cambian cada 30 segundos)
+  const [questionIndex, setQuestionIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setQuestionIndex((prev) => (prev + 1) % CLASS_QUESTIONS.length);
+    }, 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Avance de la materia
   const courseProgressPercent = Math.round((currentClassNumber / totalClasses) * 100);
@@ -202,23 +222,58 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 1) TITULO Y DESCRIPCIÓN ──────────────── */}
-      <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-7 sm:p-9 shadow-xl backdrop-blur-xl space-y-3">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
-          Hoy vas a aplicar{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-white to-pink-200">
-            {effectiveConcept.toLowerCase()}
-          </span>{" "}
-          en{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
-            {effectiveOrg}
-          </span>
-        </h1>
-        {effectiveDescription && (
-          <p className="text-sm sm:text-base text-muted leading-relaxed max-w-3xl">
-            {effectiveDescription}
-          </p>
-        )}
+      {/* ──────────────── 1) TITULO Y DESCRIPCIÓN + BOTÓN PREGUNTAS GUÍA IA (Espacio al lado del título) ──────────────── */}
+      <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-6 sm:p-8 lg:p-9 shadow-xl backdrop-blur-xl">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          {/* Lado izquierdo: Título principal personalizado y descripción */}
+          <div className="space-y-3 flex-1 max-w-2xl">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
+              Hoy vas a aplicar{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-white to-pink-200">
+                {effectiveConcept.toLowerCase()}
+              </span>{" "}
+              en{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
+                {effectiveOrg}
+              </span>
+            </h1>
+            {effectiveDescription && (
+              <p className="text-sm sm:text-base text-muted leading-relaxed">
+                {effectiveDescription}
+              </p>
+            )}
+          </div>
+
+          {/* Lado derecho: Botón interactivo que rota preguntas cada 30 segundos */}
+          <div className="shrink-0 w-full lg:w-72 xl:w-80">
+            <button
+              type="button"
+              onClick={handleOpenChat}
+              className="w-full text-left group relative flex flex-col justify-between gap-2.5 rounded-2xl border border-primary/30 bg-surface-2/90 hover:bg-surface-3/90 p-4 shadow-md transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_25px_rgba(120,150,238,0.25)] hover:scale-[1.01] active:scale-[0.99]"
+              aria-label="Abrir tutor de la materia con esta pregunta"
+            >
+              <div className="flex items-center justify-between text-xs w-full">
+                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[11px] text-primary">
+                  <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.8}
+                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                    />
+                  </svg>
+                  Pregunta de clase
+                </span>
+                <span className="text-[11px] font-semibold text-primary-soft group-hover:text-white transition-colors flex items-center gap-1">
+                  Preguntale a la IA <span aria-hidden="true">→</span>
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm font-medium text-white/95 leading-relaxed min-h-[42px] transition-opacity duration-300">
+                «{CLASS_QUESTIONS[questionIndex]}»
+              </p>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ──────────────── 2) BOTONES: "Adjuntá" - "Conversá" (Lado a lado con separación) ──────────────── */}
@@ -251,7 +306,7 @@ export function ClassDashboard({
         </button>
       </div>
 
-      {/* ──────────────── 3) ACTIVIDAD EN ESPERA / ACTIVIDAD ACTIVA ──────────────── */}
+      {/* ──────────────── 3) ACTIVIDAD EN ESPERA / ACTIVIDAD ACTIVA (Mismo tamaño y estructura) ──────────────── */}
       <div className="space-y-2">
         <div className="flex justify-end">
           {/* Botón de control docente para simular desbloqueo en la demo */}
@@ -264,50 +319,50 @@ export function ClassDashboard({
           </button>
         </div>
 
-        {!isUnlocked ? (
-          /* Estado Bloqueado: Actividad en espera */
-          <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2/40 p-8 text-center space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-full bg-surface-3 flex items-center justify-center text-muted border border-line">
-              <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <div className="space-y-1 max-w-md mx-auto">
-              <p className="font-semibold text-ink text-sm sm:text-base">
-                Actividad en espera
-              </p>
-              <p className="text-xs sm:text-sm text-muted">
-                {teacherName} activará esta dinámica práctica en el momento exacto de la clase.
-              </p>
-            </div>
-            <span className="inline-block rounded-full bg-surface-2 border border-line px-3 py-1 text-[11px] font-mono text-muted">
-              En espera de la consigna docente
+        {/* Tarjeta con dimensiones, padding y estructura exactamente idénticas en ambos estados */}
+        <div
+          className={`rounded-2xl p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 transition-colors duration-300 ${
+            isUnlocked
+              ? "border border-emerald-500/30 bg-emerald-950/20"
+              : "border border-line bg-surface-2/40"
+          }`}
+        >
+          <div className="space-y-1.5 flex-1">
+            <span
+              className={`text-sm font-semibold transition-colors ${
+                isUnlocked ? "text-white" : "text-muted"
+              }`}
+            >
+              {isUnlocked ? "Actividad activa" : "Actividad en espera"}
             </span>
+            <h3 className="text-base sm:text-lg font-bold text-ink">
+              {activity?.title || "Práctica: hipótesis falsables en logística de última milla"}
+            </h3>
+            <p className="text-sm text-muted max-w-2xl leading-relaxed">
+              {activity?.description ||
+                "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio."}
+            </p>
           </div>
-        ) : (
-          /* Estado Desbloqueado: Actividad activa */
-          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="space-y-1.5">
-              <span className="text-sm font-semibold text-white">
-                Actividad activa
-              </span>
-              <h3 className="text-base sm:text-lg font-bold text-ink">
-                {activity?.title || "Actividad de clase"}
-              </h3>
-              <p className="text-sm text-muted max-w-2xl">
-                {activity?.description || "Consigna práctica de aplicación."}
-              </p>
-            </div>
-            <div className="shrink-0 sm:ml-auto">
+
+          <div className="shrink-0 sm:ml-auto">
+            {isUnlocked ? (
               <Link
                 href={`/s/courses/${courseId}/activities`}
-                className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-primary-hover transition-colors"
+                className="w-full sm:w-28 inline-flex items-center justify-center rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-primary-hover transition-colors"
               >
                 Abrir
               </Link>
-            </div>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="w-full sm:w-28 inline-flex items-center justify-center rounded-xl bg-surface-3 border border-line/60 px-6 py-2.5 text-sm font-bold text-muted cursor-not-allowed select-none"
+              >
+                Abrir
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
