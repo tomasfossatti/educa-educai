@@ -14,6 +14,27 @@ interface SidebarProps {
   roleLabel: string;
 }
 
+const AI_RESOURCES = [
+  {
+    name: "DeepStudent (README_CN)",
+    url: "https://github.com/helixnow/deep-student/blob/main/README_CN.md",
+    badge: "Docs CN",
+    repo: "helixnow/deep-student",
+  },
+  {
+    name: "PageLM",
+    url: "https://github.com/CaviraOSS/pagelm",
+    badge: "CaviraOSS",
+    repo: "CaviraOSS/pagelm",
+  },
+  {
+    name: "DeepStudent",
+    url: "https://github.com/helixnow/deep-student",
+    badge: "GitHub",
+    repo: "helixnow/deep-student",
+  },
+];
+
 export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarProps) {
   const pathname = usePathname();
 
@@ -85,6 +106,44 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
 
         {/* Contenido con navegación */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+          {/* ──────────────── LOS 3 NOMBRES UNO ABAJO DEL OTRO ──────────────── */}
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2">
+              Proyectos & Herramientas
+            </span>
+            <div className="space-y-1.5">
+              {AI_RESOURCES.map((item) => (
+                <a
+                  key={item.url}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center justify-between rounded-xl border border-line bg-surface-2/70 hover:bg-surface-3 p-3 transition-all hover:border-primary/50 shadow-sm"
+                >
+                  <div className="space-y-0.5 min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-white group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
+                      <span className="truncate">{item.name}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-3 border border-line/60 text-muted group-hover:text-ink shrink-0">
+                        {item.badge}
+                      </span>
+                    </p>
+                    <p className="text-[11px] text-muted truncate">
+                      {item.repo}
+                    </p>
+                  </div>
+                  <svg
+                    className="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0 ml-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </div>
+
           {/* Si está en un curso de estudiante */}
           {!isTeacher && studentCourseId && (
             <div className="space-y-2">
