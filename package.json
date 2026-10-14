@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push --accept-data-loss",
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "tsx --conditions=react-server --tsconfig tsconfig.json prisma/seed/index.ts",
     "db:reset": "prisma migrate reset --force --skip-seed && npm run db:seed",
