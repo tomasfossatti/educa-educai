@@ -8,7 +8,16 @@ import { expireStaleRuns } from "@/server/engine/trigger";
 export const getStudentCourses = cache(async (studentId: string) => {
   return db.enrollment.findMany({
     where: { studentId, status: "ACTIVE" },
-    include: { course: { select: { id: true, name: true } } },
+    include: {
+      course: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          teacher: { include: { user: { select: { name: true } } } },
+        },
+      },
+    },
     orderBy: { joinedAt: "asc" },
   });
 });
