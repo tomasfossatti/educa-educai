@@ -26,7 +26,7 @@ export function AppShell({
         <div className="border-b border-warning/30 bg-surface-2 px-4 py-1.5 text-center text-xs text-warning" role="status">
           {mode === "scripted"
             ? "Modo de prueba: la IA está simulada (AI_PROVIDER=scripted). Las salidas son deterministas y no interpretan realmente."
-            : "IA no configurada: se guardan conversaciones y entregas, pero no se generan respuestas del tutor ni análisis. Configurá ANTHROPIC_API_KEY."}
+            : "IA no configurada: se guardan conversaciones y entregas, pero no se generan respuestas del tutor ni análisis. Configurá GEMINI_API_KEY en Render."}
         </div>
       )}
       <header className="topbar sticky top-0 z-40 border-b border-line bg-surface/80 backdrop-blur-md">

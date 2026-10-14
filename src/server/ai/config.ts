@@ -1,6 +1,15 @@
 import type { AIOperation, Effort } from "./types";
 
-export const DEFAULT_MODEL = "claude-opus-5-5";
+export function defaultModel(): string {
+  if (process.env.AI_MODEL?.trim()) return process.env.AI_MODEL.trim();
+  const provider = (process.env.AI_PROVIDER || "").toLowerCase();
+  if (provider === "google" || provider === "gemini" || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+    return "gemini-2.5-flash";
+  }
+  return "claude-opus-5-5";
+}
+
+export const DEFAULT_MODEL = "gemini-2.5-flash";
 
 /**
  * Configuración por operación. Cada responsabilidad del motor tiene su propio
@@ -22,7 +31,7 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
  */
 export function modelFor(operation: AIOperation): string {
   const specific = process.env[`AI_MODEL_${operation.replace(/\W/g, "_").toUpperCase()}`]?.trim();
-  return specific || process.env.AI_MODEL?.trim() || DEFAULT_MODEL;
+  return specific || defaultModel();
 }
 
 export function dailyTutorMessageLimit(): number {

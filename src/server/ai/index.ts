@@ -2,6 +2,7 @@ import "server-only";
 import type { z } from "zod";
 import { db } from "@/server/db";
 import { AnthropicProvider } from "./anthropic";
+import { GoogleProvider } from "./google";
 import { OPERATION_CONFIG, modelFor } from "./config";
 import { estimateCostUsd } from "./pricing";
 import { ScriptedProvider } from "./scripted";
@@ -22,19 +23,30 @@ export type { AIOperation, UsageContext } from "./types";
 let provider: LLMProvider | null = null;
 
 function createProvider(): LLMProvider {
-  const name = (process.env.AI_PROVIDER ?? "anthropic").toLowerCase();
-  switch (name) {
-    case "anthropic":
-      return new AnthropicProvider();
-    case "scripted":
-      // Proveedor determinista para desarrollo y tests: nunca en producción.
-      if (process.env.NODE_ENV === "production" && process.env.ALLOW_SCRIPTED_AI !== "true") {
-        throw new AIError("not_configured", "AI_PROVIDER=scripted no está permitido en producción.");
-      }
-      return new ScriptedProvider();
-    default:
-      throw new AIError("not_configured", `Proveedor de IA desconocido: ${name}`);
+  const explicit = process.env.AI_PROVIDER?.toLowerCase();
+  if (explicit === "google" || explicit === "gemini") {
+    return new GoogleProvider();
   }
+  if (explicit === "anthropic") {
+    return new AnthropicProvider();
+  }
+  if (explicit === "scripted") {
+    // Proveedor determinista para desarrollo y tests: nunca en producción.
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_SCRIPTED_AI !== "true") {
+      throw new AIError("not_configured", "AI_PROVIDER=scripted no está permitido en producción.");
+    }
+    return new ScriptedProvider();
+  }
+
+  // Auto-detección: si hay clave de Gemini/Google configurada, usar Google
+  if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+    return new GoogleProvider();
+  }
+  if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) {
+    return new AnthropicProvider();
+  }
+
+  return new GoogleProvider();
 }
 
 export function getProvider(): LLMProvider {
