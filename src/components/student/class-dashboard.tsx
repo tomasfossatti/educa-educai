@@ -228,14 +228,7 @@ export function ClassDashboard({
           {/* Lado izquierdo: Título principal personalizado y descripción */}
           <div className="space-y-3 flex-1 max-w-2xl">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Hoy vas a aplicar{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-white to-pink-200">
-                {effectiveConcept.toLowerCase()}
-              </span>{" "}
-              en{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
-                {effectiveOrg}
-              </span>
+              Hoy vas a aplicar {effectiveConcept.toLowerCase()} en {effectiveOrg}
             </h1>
             {effectiveDescription && (
               <p className="text-sm sm:text-base text-muted leading-relaxed">
