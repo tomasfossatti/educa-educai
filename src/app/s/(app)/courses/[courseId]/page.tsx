@@ -39,17 +39,17 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     ? `${currentConcept.title}: ${currentConcept.description}`
     : "Formular hipótesis de negocio falsables (métrica, umbral y plazo) para no perder tiempo ni plata en ideas que no funcionan.";
 
-  // Personalización basada en el perfil declarado del estudiante
-  let personalizedApplication = "aplicar hipótesis falsables a tus decisiones profesionales y proyectos personales.";
+  // Personalización basada en el perfil declarado del estudiante (Refuerzo positivo y Autoeficacia)
+  let personalizedApplication = "dominar hipótesis falsables y validar decisiones estratégicas en tus proyectos profesionales y personales.";
   if (profile?.declaredCurrentContext) {
     if (profile.declaredCurrentContext.toLowerCase().includes("restaurante")) {
-      personalizedApplication = "formular hipótesis falsables para validar promociones, combos y el nuevo menú semanal en tu restaurante en Rosario.";
+      personalizedApplication = "validar las promociones, combos y el nuevo menú semanal en tu restaurante en Rosario.";
     } else if (profile.declaredCurrentContext.toLowerCase().includes("diseño") || profile.declaredCurrentContext.toLowerCase().includes("interfaces")) {
-      personalizedApplication = "definir métricas de usabilidad y testear hipótesis de comportamiento antes de diseñar interfaces completas.";
+      personalizedApplication = "descubrir métricas de usabilidad y testear hipótesis de comportamiento antes de diseñar interfaces completas.";
     } else if (profile.declaredCurrentContext.toLowerCase().includes("logística") || profile.declaredCurrentContext.toLowerCase().includes("commerce")) {
-      personalizedApplication = "medir hipótesis de entrega y satisfacción de clientes antes de modificar los flujos logísticos del e-commerce.";
+      personalizedApplication = "conectar hipótesis de entrega y satisfacción de clientes antes de modificar los flujos logísticos del e-commerce.";
     } else {
-      personalizedApplication = `aplicar experimentos simples y supuestos falsables en: ${profile.declaredCurrentContext.slice(0, 120)}.`;
+      personalizedApplication = `dominar experimentos simples y supuestos falsables en: ${profile.declaredCurrentContext.slice(0, 120)}.`;
     }
   }
 

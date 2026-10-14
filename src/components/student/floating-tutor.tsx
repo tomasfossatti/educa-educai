@@ -166,10 +166,12 @@ export function FloatingTutor({
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-surface-3 transition-colors text-xs font-bold"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-surface-3 transition-colors"
               aria-label="Cerrar ventana"
             >
-              ✕
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 

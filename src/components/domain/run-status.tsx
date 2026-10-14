@@ -40,8 +40,11 @@ export function RunStatusPanel({ run, canRetry }: { run: RunLike | null; canRetr
           {steps.length > 0 && (
             <ol className="mt-2 space-y-0.5 text-xs text-muted">
               {steps.map((s, i) => (
-                <li key={i}>
-                  ✓ {STEP_LABEL[s.step] ?? s.step}
+                <li key={i} className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{STEP_LABEL[s.step] ?? s.step}</span>
                   {s.note ? ` — ${s.note}` : ""}
                 </li>
               ))}
