@@ -110,6 +110,14 @@ export function ClassDashboard({
     window.dispatchEvent(new CustomEvent("open-tutor"));
   };
 
+  const handleAskQuestion = (question: string) => {
+    window.dispatchEvent(
+      new CustomEvent("ask-tutor", {
+        detail: { question },
+      })
+    );
+  };
+
   return (
     <div className="space-y-7 pb-24">
       {/* ──────────────── 0. SECCIÓN DE AVANCE DE LA MATERIA (Hover para ver hitos) ──────────────── */}
@@ -238,32 +246,25 @@ export function ClassDashboard({
           </div>
 
           {/* Lado derecho: Botón interactivo que rota preguntas cada 30 segundos */}
-          <div className="shrink-0 w-full lg:w-72 xl:w-80">
+          <div className="shrink-0 w-full lg:w-80 xl:w-96">
             <button
               type="button"
-              onClick={handleOpenChat}
-              className="w-full text-left group relative flex flex-col justify-between gap-2.5 rounded-2xl border border-primary/30 bg-surface-2/90 hover:bg-surface-3/90 p-4 shadow-md transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_25px_rgba(120,150,238,0.25)] hover:scale-[1.01] active:scale-[0.99]"
-              aria-label="Abrir tutor de la materia con esta pregunta"
+              onClick={() => handleAskQuestion(CLASS_QUESTIONS[questionIndex])}
+              className="w-full text-left group relative flex flex-col justify-between gap-3.5 rounded-2xl border border-primary/30 bg-surface-2/90 hover:bg-surface-3/90 p-5 shadow-md transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_25px_rgba(120,150,238,0.25)] hover:scale-[1.01] active:scale-[0.99]"
+              aria-label="Preguntarle a la IA esta consulta"
             >
-              <div className="flex items-center justify-between text-xs w-full">
-                <span className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[11px] text-primary">
-                  <svg className="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.8}
-                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                    />
-                  </svg>
-                  Pregunta de clase
-                </span>
-                <span className="text-[11px] font-semibold text-primary-soft group-hover:text-white transition-colors flex items-center gap-1">
-                  Preguntale a la IA <span aria-hidden="true">→</span>
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm font-medium text-white/95 leading-relaxed min-h-[42px] transition-opacity duration-300">
+              {/* Pregunta más grande */}
+              <p className="text-sm sm:text-base font-semibold text-white leading-snug min-h-[48px] transition-opacity duration-300">
                 «{CLASS_QUESTIONS[questionIndex]}»
               </p>
+
+              {/* Abajo a la derecha: Preguntale a la IA */}
+              <div className="flex justify-end items-center w-full pt-1">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary group-hover:text-primary-hover transition-colors">
+                  <span>Preguntale a la IA</span>
+                  <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+                </span>
+              </div>
             </button>
           </div>
         </div>

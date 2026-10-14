@@ -15,15 +15,6 @@ interface FloatingTutorProps {
   initialMessageCount?: number;
 }
 
-const ROTATING_QUESTIONS = [
-  "¿Cómo sabés si tu hipótesis se puede refutar?",
-  "¿Qué métrica concreta vas a medir en esta clase?",
-  "¿Qué necesidad real tienen tus primeros clientes?",
-  "¿Qué experimento simple y barato podés probar?",
-  "¿En qué se diferencia el problema de la solución?",
-  "¿Qué supuesto riesgoso estás dando por hecho?",
-];
-
 export function FloatingTutor({
   courseId,
   courseName,
@@ -34,7 +25,6 @@ export function FloatingTutor({
   const [isOpen, setIsOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null);
   const [hasInteracted, setHasInteracted] = useState<boolean>(Boolean(initialConversationId && initialMessageCount > 0));
-  const [questionIndex, setQuestionIndex] = useState(0);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -46,20 +36,10 @@ export function FloatingTutor({
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Rotar pregunta cada 15 segundos si aún no interactuó
-  useEffect(() => {
-    if (hasInteracted) return;
-    const interval = setInterval(() => {
-      setQuestionIndex((prev) => (prev + 1) % ROTATING_QUESTIONS.length);
-    }, 15000);
-    return () => clearInterval(interval);
-  }, [hasInteracted]);
-
-  useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
-    window.addEventListener("open-tutor", handleOpen);
-    return () => window.removeEventListener("open-tutor", handleOpen);
-  }, []);
+  const conversationIdRef = useRef(conversationId);
+  conversationIdRef.current = conversationId;
+  const isLoadingRef = useRef(isLoading);
+  isLoadingRef.current = isLoading;
 
   useEffect(() => {
     if (isOpen) {
@@ -67,11 +47,11 @@ export function FloatingTutor({
     }
   }, [messages, isLoading, isOpen]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = input.trim();
-    if (!trimmed || isLoading) return;
+  const sendQuestion = async (textToSend: string) => {
+    const trimmed = textToSend.trim();
+    if (!trimmed || isLoadingRef.current) return;
 
+    setIsOpen(true);
     const userMessage: Message = { role: "user", content: trimmed };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -79,8 +59,9 @@ export function FloatingTutor({
     setHasInteracted(true);
 
     try {
-      if (conversationId) {
-        const res = await fetch(`/api/tutor/${conversationId}`, {
+      const activeId = conversationIdRef.current;
+      if (activeId) {
+        const res = await fetch(`/api/tutor/${activeId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: trimmed }),
@@ -128,20 +109,42 @@ export function FloatingTutor({
     }
   };
 
-  const currentQuestion = ROTATING_QUESTIONS[questionIndex];
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    const handleAsk = (e: Event) => {
+      const customEvent = e as CustomEvent<{ question?: string }>;
+      if (customEvent.detail?.question) {
+        void sendQuestion(customEvent.detail.question);
+      } else {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener("open-tutor", handleOpen);
+    window.addEventListener("ask-tutor", handleAsk);
+    return () => {
+      window.removeEventListener("open-tutor", handleOpen);
+      window.removeEventListener("ask-tutor", handleAsk);
+    };
+  }, []);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendQuestion(input);
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
-        /* Botón Flotante Cerrado: más chico y con ícono de bot de chat */
+        /* Botón Flotante Cerrado: únicamente símbolo de mensaje bot */
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-indigo-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-[0_0_20px_rgba(120,150,238,0.4)] active:scale-95 border border-white/20"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-primary to-indigo-600 text-white shadow-xl transition-all duration-200 hover:scale-110 hover:shadow-[0_0_25px_rgba(120,150,238,0.45)] active:scale-95 border border-white/20"
           aria-label="Abrir tutor de la materia"
         >
           {/* Ícono de bot de chat */}
-          <svg className="w-4 h-4 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -149,7 +152,6 @@ export function FloatingTutor({
               d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
             />
           </svg>
-          <span>Conversá</span>
         </button>
       ) : (
         /* Ventana Flotante Abierta */
