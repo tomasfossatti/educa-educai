@@ -59,7 +59,7 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   }
 
   return (
-    <div className="relative">
+    <div className="relative w-full flex-1 flex flex-col justify-center">
       {/* ──────────────── 1. DASHBOARD DE CLASE PRINCIPAL ──────────────── */}
       <ClassDashboard
         courseId={courseId}
