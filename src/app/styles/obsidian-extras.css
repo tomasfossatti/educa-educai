@@ -1,0 +1,225 @@
+html,
+body {
+  color-scheme: dark !important;
+}
+
+.role-explainer {
+  margin-top: .7rem;
+  padding: .75rem .85rem;
+  border: 1px solid rgba(154, 177, 255, .12);
+  border-radius: 14px;
+  background: rgba(255,255,255,.025);
+  color: #9eabc2;
+  font-size: .84rem;
+  line-height: 1.45;
+}
+
+.field-action {
+  min-height: 42px;
+  padding: 0 .85rem;
+  border: 1px solid rgba(169,190,255,.14) !important;
+  border-radius: 10px !important;
+  background: rgba(255,255,255,.055) !important;
+  color: #a9bdff !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.04) !important;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.field-action:hover,
+.field-action:focus-visible {
+  background: rgba(104,136,255,.12) !important;
+  border-color: rgba(126,161,255,.3) !important;
+  color: #dce5ff !important;
+  outline: none;
+}
+
+.course-code {
+  background: rgba(7,10,18,.76) !important;
+  border: 1px solid rgba(165,185,255,.17) !important;
+  color: #eef3ff !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.18) !important;
+}
+.course-code code {
+  background: transparent !important;
+  color: #f5f7ff !important;
+}
+.course-code .small {
+  color: #8f9db8 !important;
+}
+.course-code .btn.ghost {
+  background: rgba(255,255,255,.045) !important;
+  border-color: rgba(169,190,255,.13) !important;
+  color: #b7c8ff !important;
+}
+.course-code .btn.ghost:hover,
+.course-code .btn.ghost:focus-visible {
+  background: rgba(104,136,255,.12) !important;
+  border-color: rgba(126,161,255,.28) !important;
+  color: #e5ecff !important;
+}
+
+/* Teacher hierarchy: legacy selectors in globals.css had greater specificity than the Obsidian theme. */
+.course-card h3,
+.card h2,
+.card h3,
+.surface-section h2,
+.surface-section h3,
+.section-title h2,
+.section-subhead h3,
+.list-row h3,
+.row-title h3,
+.workspace-section h2,
+.workspace-section h3 {
+  color: var(--obsidian-text) !important;
+}
+
+/* Give text real breathing room inside framed surfaces. */
+.card,
+.surface-section {
+  padding: clamp(22px, 2vw, 28px) !important;
+}
+.course-header {
+  padding: clamp(26px, 3vw, 34px) !important;
+  margin-bottom: 28px !important;
+  border-radius: 24px !important;
+}
+.workspace-section > .section-title:first-child {
+  margin-top: 4px;
+  margin-bottom: 22px;
+}
+
+/* Course status should remain readable instead of collapsing into a narrow pill. */
+.course-card > .spread {
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.course-card > .spread > div:first-child {
+  min-width: min(100%, 260px);
+  flex: 1 1 280px;
+}
+.course-card .badge {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  max-width: 100%;
+  padding-inline: 12px !important;
+}
+
+/* Remove the remaining light surfaces from the previous Educai theme. */
+.item-card,
+.decision-sequence > div,
+.session-intervention,
+.feedback-summary-row > div,
+.feedback-comment,
+.ai-reading,
+.suggestion-block,
+.evidence,
+.activity-brief,
+.chat-window,
+.composer,
+.rating-option {
+  background: rgba(12,17,29,.76) !important;
+  border-color: rgba(163,184,255,.14) !important;
+  color: #dfe6f6 !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035) !important;
+}
+.item-title,
+.activity-brief summary,
+.consent-box strong,
+.rating-option > span:last-child,
+.empty strong {
+  color: #f3f6ff !important;
+}
+.item-meta,
+.activity-brief p,
+.empty,
+.empty span,
+.feedback-comment,
+.ai-reading p,
+.evidence {
+  color: #9da9c1 !important;
+}
+.empty {
+  background: rgba(12,17,29,.58) !important;
+  border-color: rgba(163,184,255,.16) !important;
+}
+.chat-window {
+  background: rgba(5,8,15,.48) !important;
+  border-color: rgba(163,184,255,.12) !important;
+}
+.message {
+  border: 1px solid rgba(163,184,255,.12) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.2) !important;
+}
+.message.student {
+  background: linear-gradient(145deg, #486be2, #3455c7) !important;
+  border-color: rgba(149,174,255,.28) !important;
+  color: #fff !important;
+}
+.message.assistant {
+  background: linear-gradient(145deg, rgba(25,32,52,.98), rgba(13,18,31,.98)) !important;
+  border-color: rgba(166,187,255,.16) !important;
+  color: #e9eefb !important;
+}
+.composer-wrap {
+  background: linear-gradient(rgba(7,9,16,0), rgba(7,9,16,.94) 24%) !important;
+}
+.composer {
+  background: linear-gradient(145deg, rgba(18,24,40,.98), rgba(9,13,23,.98)) !important;
+  border-color: rgba(163,184,255,.17) !important;
+  box-shadow: 0 -18px 55px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.04) !important;
+}
+.consent-box {
+  background: rgba(91,124,250,.07) !important;
+  border-color: rgba(132,160,255,.17) !important;
+  color: #a9b5cc !important;
+}
+.feedback-comment,
+.ai-reading,
+.evidence {
+  border-left-color: rgba(125,158,255,.58) !important;
+}
+.suggestion-block {
+  background: linear-gradient(145deg, rgba(91,124,250,.1), rgba(18,24,40,.78)) !important;
+}
+.rating-option:has(input:checked) {
+  background: rgba(91,124,250,.14) !important;
+  border-color: rgba(127,160,255,.56) !important;
+}
+
+input[type="file"]::file-selector-button {
+  margin-right: .8rem;
+  padding: .55rem .8rem;
+  border: 1px solid rgba(169,190,255,.14);
+  border-radius: 9px;
+  background: rgba(255,255,255,.06);
+  color: #c8d4ef;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover {
+  background: rgba(104,136,255,.12);
+  border-color: rgba(126,161,255,.3);
+  color: #eef3ff;
+}
+
+.ai-state-wrap { display: flex; align-items: center; gap: .55rem; min-width: 0; }
+.obsidian-loading { text-align: center; align-items: center; }
+.obsidian-loading .eyebrow,.obsidian-loading h2,.obsidian-loading p { text-align: center; }
+
+@media (max-width: 860px) {
+  .course-header {
+    padding: 24px 20px !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .card,
+  .surface-section {
+    padding: 20px !important;
+  }
+  .composer-actions { align-items: stretch !important; }
+  .ai-state-wrap { align-items: center; }
+  .composer-actions .obsidian-arrow-fill-btn { width: 100%; }
+}

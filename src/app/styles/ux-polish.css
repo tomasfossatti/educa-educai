@@ -1,0 +1,83 @@
+/* Final disclosure polish: use only Educai's own labels/icons, never browser or legacy triangles. */
+.user-menu summary,
+.join-course-disclosure > summary,
+.row-menu > summary,
+.privacy-disclosure > summary,
+.objective-summary details > summary {
+  list-style: none !important;
+}
+
+.user-menu summary::marker,
+.join-course-disclosure > summary::marker,
+.row-menu > summary::marker,
+.privacy-disclosure > summary::marker,
+.objective-summary details > summary::marker {
+  content: "" !important;
+  display: none !important;
+}
+
+.user-menu summary::-webkit-details-marker,
+.join-course-disclosure > summary::-webkit-details-marker,
+.row-menu > summary::-webkit-details-marker,
+.privacy-disclosure > summary::-webkit-details-marker,
+.objective-summary details > summary::-webkit-details-marker {
+  display: none !important;
+}
+
+.user-menu summary::before,
+.user-menu summary::after,
+.join-course-disclosure > summary::before,
+.join-course-disclosure > summary::after,
+.row-menu > summary::before,
+.row-menu > summary::after,
+.privacy-disclosure > summary::before,
+.privacy-disclosure > summary::after,
+.objective-summary details > summary::before,
+.objective-summary details > summary::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Educai typographic wordmark in the topbar. */
+.brand {
+  gap: 0 !important;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 30px;
+  font-weight: 570;
+  line-height: 1;
+  letter-spacing: -0.065em;
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+}
+
+.brand-wordmark-base {
+  color: #f7f9ff;
+}
+
+.brand-wordmark-ai {
+  color: #ff2e74;
+  background: linear-gradient(135deg, #7c4dff 0%, #d327a8 47%, #ff315d 76%, #ff4a3d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand:hover .brand-wordmark-base,
+.brand:focus-visible .brand-wordmark-base {
+  color: #ffffff;
+}
+
+@media (max-width: 620px) {
+  .brand-wordmark {
+    font-size: 27px;
+  }
+}
