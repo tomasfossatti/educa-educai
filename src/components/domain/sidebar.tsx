@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { logoutAction } from "@/server/actions/auth";
 import { cn } from "@/lib/cn";
 
@@ -37,6 +37,7 @@ const AI_RESOURCES = [
 
 export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarProps) {
   const pathname = usePathname();
+  const prevPathname = useRef(pathname);
 
   // Cerrar con tecla Escape
   useEffect(() => {
@@ -48,9 +49,12 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Cerrar al cambiar de ruta
+  // Cerrar únicamente cuando la ruta cambie de verdad
   useEffect(() => {
-    onClose();
+    if (prevPathname.current !== pathname) {
+      prevPathname.current = pathname;
+      onClose();
+    }
   }, [pathname, onClose]);
 
   const studentMatch = pathname.match(/^\/s\/courses\/([^/]+)/);
@@ -65,7 +69,7 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
       {/* Backdrop con blur */}
       <div
         className={cn(
-          "fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
+          "fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300",
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
         )}
         onClick={onClose}
@@ -76,7 +80,7 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-72 sm:w-80 flex flex-col border-r border-line shadow-2xl transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          isOpen ? "translate-x-0 pointer-events-auto" : "-translate-x-full pointer-events-none",
         )}
         style={{ backgroundColor: "#0c1017" }}
         role="dialog"

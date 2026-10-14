@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { UserMenu } from "@/components/domain/user-menu";
 import { Sidebar } from "@/components/domain/sidebar";
 
@@ -15,6 +15,14 @@ interface ShellHeaderProps {
 
 export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: ShellHeaderProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleOpenSidebar = useCallback(() => {
+    setIsSidebarOpen(true);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
 
   return (
     <>
@@ -32,8 +40,8 @@ export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: Shell
             {/* Símbolo para desplegar el menú lateral */}
             <button
               type="button"
-              onClick={() => setIsSidebarOpen(true)}
-              className="flex items-center justify-center p-1.5 rounded-lg text-muted hover:text-white hover:bg-surface-2 border border-line/60 hover:border-line-strong transition-all active:scale-95 shadow-sm"
+              onClick={handleOpenSidebar}
+              className="flex items-center justify-center p-1.5 rounded-lg text-muted hover:text-white hover:bg-surface-2 border border-line/60 hover:border-line-strong transition-all active:scale-95 shadow-sm cursor-pointer"
               title="Abrir menú lateral"
               aria-label="Abrir menú lateral"
             >
@@ -64,7 +72,7 @@ export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: Shell
       {/* Menú lateral */}
       <Sidebar
         isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
+        onClose={handleCloseSidebar}
         home={home}
         userName={userName}
         roleLabel={roleLabel}
