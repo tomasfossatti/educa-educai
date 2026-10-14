@@ -12,29 +12,54 @@ interface FloatingTutorProps {
   courseName: string;
   topicTitle?: string;
   initialConversationId?: string | null;
+  initialMessageCount?: number;
 }
+
+const ROTATING_QUESTIONS = [
+  "¿Cómo sabés si tu hipótesis se puede refutar?",
+  "¿Qué métrica concreta vas a medir en esta clase?",
+  "¿Qué necesidad real tienen tus primeros clientes?",
+  "¿Qué experimento simple y barato podés probar?",
+  "¿En qué se diferencia el problema de la solución?",
+  "¿Qué supuesto riesgoso estás dando por hecho?",
+];
 
 export function FloatingTutor({
   courseId,
   courseName,
   topicTitle = "Hipótesis de negocio falsables",
   initialConversationId,
+  initialMessageCount = 0,
 }: FloatingTutorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null);
+  const [hasInteracted, setHasInteracted] = useState<boolean>(Boolean(initialConversationId && initialMessageCount > 0));
+  const [questionIndex, setQuestionIndex] = useState(0);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `¡Hola! Soy tu tutor socrático para la clase de hoy en **${courseName}**.\n\nNo te voy a dar respuestas directas para copiar, sino que te voy a guiar con preguntas para que construyas tu propio razonamiento sobre **${topicTitle}**.\n\n¿Qué parte del tema o qué duda te gustaría pensar juntos?`,
+      content: `Hola. Soy tu tutor para la clase de hoy en **${courseName}**.\n\nNo te daré respuestas directas para copiar, sino preguntas para ayudarte a construir tu propio razonamiento sobre **${topicTitle}**.\n\n¿Qué parte del tema o qué duda te gustaría pensar juntos?`,
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Rotar pregunta cada 15 segundos si aún no interactuó
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+    if (hasInteracted) return;
+    const interval = setInterval(() => {
+      setQuestionIndex((prev) => (prev + 1) % ROTATING_QUESTIONS.length);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [hasInteracted]);
+
+  useEffect(() => {
+    if (isOpen) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isLoading, isOpen]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +70,10 @@ export function FloatingTutor({
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+    setHasInteracted(true);
 
     try {
       if (conversationId) {
-        // Enviar al endpoint real en streaming
         const res = await fetch(`/api/tutor/${conversationId}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -77,15 +102,14 @@ export function FloatingTutor({
         }
       }
 
-      // Si no hay id activo o fallo temporal, respuesta socrática de fallback contextual
-      await new Promise((r) => setTimeout(r, 900));
+      await new Promise((r) => setTimeout(r, 800));
       let response = "";
       if (trimmed.toLowerCase().includes("hipotesis") || trimmed.toLowerCase().includes("hipótesis")) {
-        response = `Interesante punto. Para que esa hipótesis sea verdaderamente **falsable**, ¿cuál es la métrica exacta que vas a medir y qué número concreto demostraría que tu supuesto era incorrecto?`;
+        response = `Para que esa hipótesis sea verdaderamente **falsable**, ¿cuál es la métrica exacta que vas a medir y qué número concreto demostraría que tu supuesto era incorrecto?`;
       } else if (trimmed.toLowerCase().includes("segmento") || trimmed.toLowerCase().includes("cliente")) {
-        response = `Bien. ¿Ese segmento lo estás definiendo solo por datos demográficos (edad, lugar) o por una **necesidad concreta** o comportamiento que tienen en común?`;
+        response = `¿Ese segmento lo estás definiendo solo por datos demográficos o por una **necesidad concreta** que tienen en común?`;
       } else {
-        response = `¿Qué evidencia concreta te llevó a pensar eso y cómo podríamos diseñar un experimento simple y barato para comprobarlo antes de invertir?`;
+        response = `¿Qué evidencia concreta te llevó a pensar eso y cómo podríamos diseñar un experimento simple para comprobarlo antes de invertir?`;
       }
       setMessages((prev) => [...prev, { role: "assistant", content: response }]);
     } catch {
@@ -98,6 +122,8 @@ export function FloatingTutor({
     }
   };
 
+  const currentQuestion = ROTATING_QUESTIONS[questionIndex];
+
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
@@ -105,33 +131,37 @@ export function FloatingTutor({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group flex items-center gap-2.5 rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_25px_rgba(120,150,238,0.5)] active:scale-95 border border-white/20"
-          aria-label="Abrir tutor socrático"
+          className="group flex items-center gap-3 rounded-full bg-gradient-to-r from-primary to-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_25px_rgba(120,150,238,0.4)] active:scale-95 border border-white/15 max-w-sm sm:max-w-md text-left"
+          aria-label="Abrir tutor de la materia"
         >
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-80"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-          </span>
-          <span className="text-base">✨</span>
-          <span>Tutor Socrático</span>
+          {hasInteracted ? (
+            <div className="flex items-center gap-2">
+              <span>Continuar conversación</span>
+              <span aria-hidden="true">→</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <span className="text-xs uppercase tracking-wider text-primary-soft/80 font-bold shrink-0">
+                Pregunta:
+              </span>
+              <span className="truncate text-xs sm:text-sm text-white/95 transition-opacity duration-300">
+                {currentQuestion}
+              </span>
+            </div>
+          )}
         </button>
       ) : (
         /* Ventana Flotante Abierta */
-        <div className="flex flex-col w-[380px] sm:w-[420px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-3xl border border-primary/30 bg-surface-1/95 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="flex flex-col w-[380px] sm:w-[430px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-3xl border border-line bg-surface-1/95 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header de la ventana */}
           <div className="flex items-center justify-between border-b border-line bg-surface-2/80 px-4 py-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-sm">
-                ✨
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-ink leading-tight">
-                  Tutor Socrático
-                </h3>
-                <p className="text-[11px] text-muted">
-                  {courseName} · Método dialéctico
-                </p>
-              </div>
+            <div>
+              <h3 className="text-sm font-bold text-ink leading-tight">
+                Tutor de la materia
+              </h3>
+              <p className="text-[11px] text-muted">
+                {courseName} · Método socrático
+              </p>
             </div>
             <button
               type="button"

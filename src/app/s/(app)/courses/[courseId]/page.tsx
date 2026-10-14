@@ -1,14 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { SubmitButton } from "@/components/ui/client";
-import { Field, Select } from "@/components/ui/field";
-import { EmptyState, List, ListItem, Section } from "@/components/ui/layout";
 import { ClassDashboard } from "@/components/student/class-dashboard";
 import { FloatingTutor } from "@/components/student/floating-tutor";
-import { curriculumKindPlural, runStatusLabel } from "@/domain/labels";
-import { formatDate } from "@/lib/format";
-import { startConversationAction } from "@/server/actions/student";
 import { requireEnrolledStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 
@@ -99,84 +91,8 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         courseName={course.name}
         topicTitle={currentConcept?.title || "Hipótesis falsables"}
         initialConversationId={activeConversation?.id}
+        initialMessageCount={activeConversation?._count.messages ?? 0}
       />
-
-      {/* ──────────────── 3. SECCIÓN COMPLEMENTARIA: HISTORIAL Y CURRÍCULA ──────────────── */}
-      <div className="space-y-10 border-t border-line/60 pt-10">
-        <Section
-          title="Historial de sesiones con el tutor"
-          description="Sesiones de diálogo guiado. El tutor formula preguntas para profundizar tu razonamiento."
-        >
-          <form action={startConversationAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <input type="hidden" name="courseId" value={courseId} />
-            <div className="sm:w-80">
-              <Field label="Tema específico (opcional)" htmlFor="focusItemId">
-                <Select id="focusItemId" name="focusItemId" defaultValue="">
-                  <option value="">Tema libre de la materia</option>
-                  {concepts.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.title}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            </div>
-            <SubmitButton pendingText="Abriendo…">Nueva sesión de estudio</SubmitButton>
-          </form>
-
-          {conversations.length > 0 && (
-            <List>
-              {conversations.map((c) => {
-                const run = c.experience.runs[0];
-                return (
-                  <ListItem key={c.id} className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <Link href={`/s/courses/${courseId}/tutor/${c.id}`} className="text-sm font-semibold text-ink hover:text-primary">
-                        {c.title}
-                      </Link>
-                      <p className="text-xs text-muted">
-                        {formatDate(c.createdAt)} · {c._count.messages} mensajes
-                        {c.experience._count.evidence > 0 ? ` · ${c.experience._count.evidence} evidencias registradas` : ""}
-                      </p>
-                    </div>
-                    {c.status === "ACTIVE" ? (
-                      <Badge tone="primary">En curso</Badge>
-                    ) : (
-                      <Badge tone={run?.status === "FAILED" ? "danger" : "muted"}>{run ? runStatusLabel[run.status] : "Cerrada"}</Badge>
-                    )}
-                  </ListItem>
-                );
-              })}
-            </List>
-          )}
-        </Section>
-
-        <Section title="Programa confirmado de la materia" description="Los contenidos, objetivos y competencias que estructuran el curso.">
-          {items.length === 0 ? (
-            <EmptyState title="Tu docente todavía no confirmó la currícula">Igual podés conversar con el tutor sobre la materia.</EmptyState>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
-              {(["CONCEPT", "OBJECTIVE", "COMPETENCY"] as const).map((kind) => {
-                const list = items.filter((i) => i.kind === kind);
-                if (list.length === 0) return null;
-                return (
-                  <div key={kind} className="rounded-2xl border border-line bg-surface/80 p-5 backdrop-blur-sm">
-                    <h3 className="mb-2 text-sm font-bold text-ink uppercase tracking-wide">{curriculumKindPlural[kind]}</h3>
-                    <ul className="space-y-2 text-sm text-ink-2">
-                      {list.map((i) => (
-                        <li key={i.id} className="border-b border-line/40 pb-1.5 last:border-0">
-                          <span className="font-semibold text-ink">{i.title}</span>
-                          {i.description && <p className="text-xs text-muted mt-0.5">{i.description}</p>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Section>
-      </div>
     </div>
   );
 }

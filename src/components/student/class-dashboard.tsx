@@ -42,7 +42,7 @@ export function ClassDashboard({
   },
   activeConversation,
 }: ClassDashboardProps) {
-  // Timer de clase: 8:30 a 10:30 (ejemplo de 2 horas con recreo intermedio)
+  // Timer de clase
   const [classElapsedMinutes, setClassElapsedMinutes] = useState(38);
   const totalClassMinutes = 120; // 2 horas
   const breakMinute = 60; // Recreo a la 1 hora
@@ -66,7 +66,6 @@ export function ClassDashboard({
   const handleAttach = async () => {
     if (!activeConversation) return;
     setIsAttaching(true);
-    // Simular o ejecutar adjuntar
     await new Promise((r) => setTimeout(r, 600));
     setAttached(true);
     setIsAttaching(false);
@@ -98,21 +97,17 @@ export function ClassDashboard({
       <div className="rounded-2xl border border-primary/25 bg-gradient-to-b from-surface-2/90 to-surface/80 p-4.5 shadow-lg backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-              Clase en curso (8:30 a 10:30)
+              Clase en curso
             </span>
           </div>
-          <div className="text-xs font-medium text-ink-2">
+          <div className="text-xs font-medium">
             {minutesToBreak > 0 ? (
-              <span className="text-amber-300 font-semibold">
-                ☕ Recreo en {minutesToBreak} min
+              <span className="text-white font-semibold">
+                Recreo en {minutesToBreak} min
               </span>
             ) : (
-              <span className="text-emerald-300">
+              <span className="text-white font-semibold">
                 Segunda parte · Termina en {minutesToEnd} min
               </span>
             )}
@@ -121,10 +116,10 @@ export function ClassDashboard({
 
         {/* Dos barras de 1 hora cada una */}
         <div className="grid grid-cols-2 gap-3">
-          {/* Bloque 1: Primera Hora (8:30 a 9:30) */}
+          {/* Bloque 1 */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-[11px] text-muted">
-              <span>Bloque 1 (1ra hora)</span>
+              <span>Bloque 1</span>
               <span className="font-mono text-ink-2">{block1Percent}%</span>
             </div>
             <div className="h-3 w-full rounded-full bg-surface-3/80 border border-line/60 overflow-hidden p-0.5">
@@ -135,10 +130,10 @@ export function ClassDashboard({
             </div>
           </div>
 
-          {/* Bloque 2: Segunda Hora (9:30 a 10:30) */}
+          {/* Bloque 2 */}
           <div className="space-y-1.5">
             <div className="flex justify-between text-[11px] text-muted">
-              <span>Bloque 2 (2da hora)</span>
+              <span>Bloque 2</span>
               <span className="font-mono text-ink-2">{block2Percent}%</span>
             </div>
             <div className="h-3 w-full rounded-full bg-surface-3/80 border border-line/60 overflow-hidden p-0.5">
@@ -155,7 +150,7 @@ export function ClassDashboard({
       <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1/95 via-surface-2/80 to-surface-3/60 p-7 sm:p-9 shadow-xl backdrop-blur-xl space-y-4">
         <div className="space-y-2">
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-primary-hover">
-            🎯 Objetivo central de la clase de hoy
+            Objetivo central de la clase de hoy
           </span>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
             Hoy vas a entender cómo:{" "}
@@ -167,16 +162,13 @@ export function ClassDashboard({
 
         {/* ──────────────── 4. PARTE PERSONALIZADA (TU TRABAJO / NEGOCIO) ──────────────── */}
         <div className="rounded-2xl border border-primary/20 bg-primary-soft/40 p-4 sm:p-5 backdrop-blur-md">
-          <div className="flex items-start gap-3">
-            <span className="text-xl sm:text-2xl mt-0.5">💡</span>
-            <div className="space-y-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                Aplicación personalizada a tu perfil
-              </span>
-              <p className="text-sm sm:text-base text-ink font-medium leading-relaxed">
-                Vas a poder {personalizedApplication}
-              </p>
-            </div>
+          <div className="space-y-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              Aplicación personalizada a tu perfil
+            </span>
+            <p className="text-sm sm:text-base text-ink font-medium leading-relaxed">
+              Vas a poder {personalizedApplication}
+            </p>
           </div>
         </div>
       </div>
@@ -185,8 +177,8 @@ export function ClassDashboard({
       <div className="rounded-2xl border border-line bg-surface/90 p-6 shadow-md backdrop-blur-md space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line/60 pb-3">
           <div>
-            <h2 className="text-lg font-bold text-ink flex items-center gap-2">
-              🛠️ Herramientas y actividades de clase
+            <h2 className="text-lg font-bold text-ink">
+              Herramientas y actividades de clase
             </h2>
             <p className="text-xs text-muted">
               Dinámicas guiadas preparadas por Educai para que la docente active durante la sesión.
@@ -206,7 +198,7 @@ export function ClassDashboard({
           /* Estado Bloqueado */
           <div className="rounded-xl border border-dashed border-line-strong bg-surface-2/40 p-8 text-center space-y-3">
             <div className="w-12 h-12 mx-auto rounded-full bg-surface-3 flex items-center justify-center text-muted border border-line">
-              <svg className="w-6 h-6 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
@@ -219,7 +211,7 @@ export function ClassDashboard({
               </p>
             </div>
             <span className="inline-block rounded-full bg-surface-2 border border-line px-3 py-1 text-[11px] font-mono text-muted">
-              🔒 Bloqueado por la docente
+              Bloqueado por la docente
             </span>
           </div>
         ) : (
@@ -227,7 +219,7 @@ export function ClassDashboard({
           <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-5 space-y-3">
             <div className="flex items-center justify-between">
               <Badge tone="success">
-                🟢 Desbloqueado para la clase de hoy
+                Desbloqueado para la clase de hoy
               </Badge>
               <span className="text-xs text-emerald-400 font-medium">Actividad activa</span>
             </div>
@@ -251,14 +243,11 @@ export function ClassDashboard({
       <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-surface-1 via-surface-2 to-surface-1 p-6 shadow-lg backdrop-blur-md">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📎</span>
-              <h3 className="text-base font-bold text-ink">
-                Adjuntar conversación con la IA como evidencia
-              </h3>
-            </div>
+            <h3 className="text-base font-bold text-ink">
+              Adjuntar conversación con la IA como evidencia
+            </h3>
             <p className="text-xs sm:text-sm text-muted max-w-xl">
-              Al adjuntar tu sesión de diálogo socrático, Educai analiza tu razonamiento y le comparte a tu docente evidencia de tu progreso sin exponer tus mensajes privados.
+              Al adjuntar tu sesión de diálogo, Educai analiza tu razonamiento y le comparte a tu docente evidencia de tu progreso sin exponer tus mensajes privados.
             </p>
             {activeConversation && (
               <p className="text-xs font-mono text-primary pt-1">
@@ -270,7 +259,7 @@ export function ClassDashboard({
           <div className="shrink-0">
             {attached ? (
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-4 py-2.5 text-xs font-bold text-emerald-400 shadow">
-                ✓ Conversación adjuntada con éxito
+                Conversación adjuntada con éxito
               </span>
             ) : (
               <button
