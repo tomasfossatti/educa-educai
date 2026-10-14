@@ -17,21 +17,21 @@ interface SidebarProps {
 const AI_RESOURCES = [
   {
     name: "DeepStudent (README_CN)",
-    url: "https://github.com/helixnow/deep-student/blob/main/README_CN.md",
+    href: "/s/deep-student/docs",
     badge: "Docs CN",
-    repo: "helixnow/deep-student",
+    description: "Guía de arquitectura y agentes",
   },
   {
     name: "PageLM",
-    url: "https://github.com/CaviraOSS/pagelm",
-    badge: "CaviraOSS",
-    repo: "CaviraOSS/pagelm",
+    href: "/s/pagelm",
+    badge: "Studio",
+    description: "NotebookLM, quizzes, flashcards y podcast",
   },
   {
     name: "DeepStudent",
-    url: "https://github.com/helixnow/deep-student",
-    badge: "GitHub",
-    repo: "helixnow/deep-student",
+    href: "/s/deep-student",
+    badge: "Workbench",
+    description: "Agente de estudio autónomo paso a paso",
   },
 ];
 
@@ -117,12 +117,16 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
             </span>
             <div className="space-y-1.5">
               {AI_RESOURCES.map((item) => (
-                <a
-                  key={item.url}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between rounded-xl border border-line bg-surface-2/70 hover:bg-surface-3 p-3 transition-all hover:border-primary/50 shadow-sm"
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className={cn(
+                    "group flex items-center justify-between rounded-xl border p-3 transition-all shadow-sm",
+                    pathname === item.href
+                      ? "border-primary bg-primary/20 text-white font-semibold"
+                      : "border-line bg-surface-2/70 hover:bg-surface-3 hover:border-primary/50",
+                  )}
                 >
                   <div className="space-y-0.5 min-w-0">
                     <p className="text-xs sm:text-sm font-bold text-white group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
@@ -132,18 +136,18 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
                       </span>
                     </p>
                     <p className="text-[11px] text-muted truncate">
-                      {item.repo}
+                      {item.description}
                     </p>
                   </div>
                   <svg
-                    className="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0 ml-2"
+                    className="w-4 h-4 text-muted group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 ml-2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
