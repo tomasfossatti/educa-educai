@@ -23,6 +23,12 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "interpret.evaluate": { effort: "medium", maxTokens: 12000 },
   "interpret.infer": { effort: "medium", maxTokens: 16000 },
   "interpret.feedback": { effort: "low", maxTokens: 8000 },
+  "pagelm.chat": { effort: "low", maxTokens: 4000 },
+  "pagelm.quiz": { effort: "medium", maxTokens: 8000 },
+  "pagelm.flashcards": { effort: "medium", maxTokens: 8000 },
+  "pagelm.notes": { effort: "medium", maxTokens: 8000 },
+  "pagelm.podcast": { effort: "medium", maxTokens: 8000 },
+  "deepstudent.agent": { effort: "medium", maxTokens: 8000 },
 };
 
 /**

@@ -1,8 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import {
+  askChatAction,
+  generateFlashcardsAction,
+  generateNotesAction,
+  generatePodcastAction,
+  generateQuizAction,
+  type SourceInput,
+} from "@/server/actions/pagelm";
 
 export type StudioTab = "chat" | "quiz" | "flashcards" | "notes" | "podcast" | "planner";
 
@@ -12,6 +20,31 @@ interface SourceItem {
   type: "text" | "note" | "curriculum";
   content: string;
   active: boolean;
+}
+
+interface QuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+
+interface Flashcard {
+  id: string;
+  front: string;
+  back: string;
+}
+
+interface SmartNotesData {
+  title: string;
+  sections: Array<{ heading: string; body: string }>;
+}
+
+interface PodcastDialogue {
+  episodeTitle: string;
+  estimatedDuration: string;
+  lines: Array<{ speaker: "Alex" | "Sam"; text: string }>;
 }
 
 const DEFAULT_SOURCES: SourceItem[] = [
@@ -33,7 +66,7 @@ const DEFAULT_SOURCES: SourceItem[] = [
   },
 ];
 
-const INITIAL_QUIZ = [
+const INITIAL_QUIZ: QuizQuestion[] = [
   {
     id: "q1",
     question: "¿Qué elemento distingue fundamentalmente a una hipótesis falsable de una mera opinión?",
@@ -75,7 +108,7 @@ const INITIAL_QUIZ = [
   },
 ];
 
-const INITIAL_FLASHCARDS = [
+const INITIAL_FLASHCARDS: Flashcard[] = [
   {
     id: "fc1",
     front: "Hipótesis Falsable",
@@ -98,6 +131,47 @@ const INITIAL_FLASHCARDS = [
   },
 ];
 
+const INITIAL_NOTES: SmartNotesData = {
+  title: "Smart Notes: Hipótesis Falsables y Validación Temprana",
+  sections: [
+    {
+      heading: "1. Núcleo Conceptual",
+      body: "Validar una idea de negocio no consiste en recopilar aplausos, sino en someter la propuesta a un experimento falsable. Un experimento efectivo define qué métrica se observará, qué valor mínimo se exige y en qué plazo exacto.",
+    },
+    {
+      heading: "2. Falsabilidad Práctica",
+      body: "Si no hay forma de que el resultado salga mal o negativo, la afirmación no es una hipótesis de negocio, sino un dogma o una expresión de deseo.",
+    },
+    {
+      heading: "3. Aplicación en Negocios Locales",
+      body: "Para un comercio o emprendimiento (como un restaurante gastronómico), antes de invertir en una plataforma digital o nueva línea, se puede realizar una prueba manual o preventa acotada durante 7 días para contrastar la demanda verídica.",
+    },
+  ],
+};
+
+const INITIAL_PODCAST: PodcastDialogue = {
+  episodeTitle: "Episodio: Dominando Hipótesis Falsables",
+  estimatedDuration: "2:50 min",
+  lines: [
+    {
+      speaker: "Alex",
+      text: "Bienvenidos. Hoy estamos revisando la clase sobre validación temprana. Sam, lo primero que me llamó la atención es por qué la gente insiste tanto en no ponerle un número al éxito antes de lanzar.",
+    },
+    {
+      speaker: "Sam",
+      text: "Exacto, Alex. Porque si no fijás el umbral de antemano, cuando conseguís solo dos clientes decís que al menos aprendiste. Pero si tu meta era diez para que los números cierren, dos significa que la hipótesis se cayó y hay que cambiar de dirección.",
+    },
+    {
+      speaker: "Alex",
+      text: "Claro, sin umbral previo cualquier resultado se disfraza de aprendizaje positivo.",
+    },
+    {
+      speaker: "Sam",
+      text: "Tal cual. Y lo segundo es aislar el problema real del usuario antes de ponerse a programar o comprar equipamiento.",
+    },
+  ],
+};
+
 export function PageLMStudio() {
   const [activeTab, setActiveTab] = useState<StudioTab>("chat");
   const [sources, setSources] = useState<SourceItem[]>(DEFAULT_SOURCES);
@@ -105,28 +179,75 @@ export function PageLMStudio() {
   const [newSourceTitle, setNewSourceTitle] = useState("");
   const [showAddSource, setShowAddSource] = useState(false);
 
+  // Estados de generación y carga de IA
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationNotice, setGenerationNotice] = useState<string | null>(null);
+
   // Chat state
   const [chatInput, setChatInput] = useState("");
+  const [isChatTyping, setIsChatTyping] = useState(false);
   const [chatMessages, setChatMessages] = useState<
     Array<{ sender: "user" | "pagelm"; text: string; sourceQuote?: string }>
   >([
     {
       sender: "pagelm",
-      text: "Hola. Cargué tus fuentes de estudio activas. Podés hacerme preguntas sobre el material, generar resúmenes, o cambiar a las solapas de Quiz, Flashcards y Podcast en la barra superior.",
+      text: "Hola. Cargué tus fuentes de estudio activas. Podés hacerme preguntas sobre el material, generar cuestionarios, flashcards, resúmenes o un podcast de audio interactivo con la IA.",
     },
   ]);
 
   // Quiz state
-  const [quizQuestions] = useState(INITIAL_QUIZ);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(INITIAL_QUIZ);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
 
   // Flashcards state
+  const [flashcards, setFlashcards] = useState<Flashcard[]>(INITIAL_FLASHCARDS);
   const [cardIndex, setCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownCards, setKnownCards] = useState<string[]>([]);
 
-  // Handlers
+  // Notes state
+  const [notesData, setNotesData] = useState<SmartNotesData>(INITIAL_NOTES);
+  const [notesCopied, setNotesCopied] = useState(false);
+
+  // Podcast / Audio player state
+  const [podcastData, setPodcastData] = useState<PodcastDialogue>(INITIAL_PODCAST);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [currentLineIndex, setCurrentLineIndex] = useState<number>(-1);
+  const [playbackRate, setPlaybackRate] = useState<number>(1.0);
+  const audioSpeechRef = useRef<{ cancel: () => void } | null>(null);
+
+  // Planner state
+  const [plannerMilestones, setPlannerMilestones] = useState([
+    { id: "m1", title: "Segmentación y Dolor", description: "Identificar el perfil de usuario que sufre el problema hoy.", done: true },
+    { id: "m2", title: "Hipótesis Falsable", description: "Redactar supuesto con métrica, umbral y plazo temporal.", done: true },
+    { id: "m3", title: "Diseño de Prueba de Bajo Costo", description: "Construir experimento piloto sin inversión de capital previo.", done: false },
+    { id: "m4", title: "Recolección y Contrastación", description: "Contrastar resultados empíricos con el umbral predeterminado.", done: false },
+  ]);
+
+  // Cargar persistencia local si existe
+  useEffect(() => {
+    try {
+      const savedSources = localStorage.getItem("pagelm_sources");
+      if (savedSources) setSources(JSON.parse(savedSources));
+    } catch {
+      // Ignorar errores de localStorage
+    }
+  }, []);
+
+  const saveSourcesToStorage = (updated: SourceItem[]) => {
+    setSources(updated);
+    try {
+      localStorage.setItem("pagelm_sources", JSON.stringify(updated));
+    } catch {
+      // Ignorar
+    }
+  };
+
+  const getActiveSourceInputs = (): SourceInput[] => {
+    return sources.filter((s) => s.active).map((s) => ({ title: s.title, content: s.content }));
+  };
+
   const handleAddSource = () => {
     if (!newSourceTitle.trim() || !newSourceText.trim()) return;
     const newSrc: SourceItem = {
@@ -136,39 +257,75 @@ export function PageLMStudio() {
       content: newSourceText.trim(),
       active: true,
     };
-    setSources((prev) => [...prev, newSrc]);
+    const next = [...sources, newSrc];
+    saveSourcesToStorage(next);
     setNewSourceTitle("");
     setNewSourceText("");
     setShowAddSource(false);
   };
 
-  const handleSendMessage = () => {
-    if (!chatInput.trim()) return;
+  const handleToggleSource = (id: string) => {
+    const next = sources.map((s) => (s.id === id ? { ...s, active: !s.active } : s));
+    saveSourcesToStorage(next);
+  };
+
+  const handleDeleteSource = (id: string) => {
+    const next = sources.filter((s) => s.id !== id);
+    saveSourcesToStorage(next);
+  };
+
+  /* ──────────────── ACCIÓN CHAT ──────────────── */
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || isChatTyping) return;
     const q = chatInput.trim();
     setChatInput("");
     setChatMessages((prev) => [...prev, { sender: "user", text: q }]);
+    setIsChatTyping(true);
 
-    setTimeout(() => {
-      let reply = "Según tus fuentes de la materia: ";
-      if (q.toLowerCase().includes("hipótesis") || q.toLowerCase().includes("falsable")) {
-        reply +=
-          "Una hipótesis falsable exige tres componentes indispensables: métrica medible, umbral de éxito y plazo acotado. Sin ellos, se convierte en un deseo no comprobable.";
-      } else if (q.toLowerCase().includes("resumen") || q.toLowerCase().includes("resumir")) {
-        reply +=
-          "Los 3 puntos centrales son: 1) Elegir un segmento con dolor real comprobable. 2) Formular la hipótesis con umbral explícito. 3) Ejecutar un experimento barato para validar antes de invertir recursos.";
-      } else {
-        reply +=
-          "El objetivo principal es tomar decisiones con evidencia directa de tu contexto, identificando si los clientes están dispuestos a validar la propuesta de valor.";
-      }
+    try {
+      const activeInputs = getActiveSourceInputs();
+      const res = await askChatAction({
+        prompt: q,
+        sources: activeInputs,
+        history: chatMessages.slice(-4),
+      });
+
       setChatMessages((prev) => [
         ...prev,
         {
           sender: "pagelm",
-          text: reply,
-          sourceQuote: "Fuente: Clase 4 · Hipótesis Falsables",
+          text: res.reply,
+          sourceQuote: res.sourceQuote,
         },
       ]);
-    }, 400);
+    } catch {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          sender: "pagelm",
+          text: "No se pudo procesar la respuesta en este momento. Verificá tus fuentes de estudio.",
+        },
+      ]);
+    } finally {
+      setIsChatTyping(false);
+    }
+  };
+
+  /* ──────────────── ACCIÓN GENERAR QUIZ ──────────────── */
+  const handleGenerateQuiz = async () => {
+    setIsGenerating(true);
+    setGenerationNotice("Generando cuestionario con IA a partir de las fuentes activas…");
+    try {
+      const res = await generateQuizAction(getActiveSourceInputs());
+      if (res.success && res.questions?.length) {
+        setQuizQuestions(res.questions);
+        setQuizAnswers({});
+        setQuizSubmitted(false);
+      }
+    } finally {
+      setIsGenerating(false);
+      setGenerationNotice(null);
+    }
   };
 
   const handleSelectQuizOption = (qIdx: number, optIdx: number) => {
@@ -184,20 +341,162 @@ export function PageLMStudio() {
     return score;
   };
 
+  /* ──────────────── ACCIÓN GENERAR FLASHCARDS ──────────────── */
+  const handleGenerateFlashcards = async () => {
+    setIsGenerating(true);
+    setGenerationNotice("Sintetizando tarjetas conceptuales con IA…");
+    try {
+      const res = await generateFlashcardsAction(getActiveSourceInputs());
+      if (res.success && res.cards?.length) {
+        setFlashcards(res.cards);
+        setCardIndex(0);
+        setIsFlipped(false);
+        setKnownCards([]);
+      }
+    } finally {
+      setIsGenerating(false);
+      setGenerationNotice(null);
+    }
+  };
+
   const handleMarkCard = (known: boolean) => {
-    const card = INITIAL_FLASHCARDS[cardIndex];
-    if (known && !knownCards.includes(card.id)) {
-      setKnownCards((prev) => [...prev, card.id]);
-    } else if (!known && knownCards.includes(card.id)) {
-      setKnownCards((prev) => prev.filter((id) => id !== card.id));
+    const card = flashcards[cardIndex];
+    if (card) {
+      if (known && !knownCards.includes(card.id)) {
+        setKnownCards((prev) => [...prev, card.id]);
+      } else if (!known && knownCards.includes(card.id)) {
+        setKnownCards((prev) => prev.filter((id) => id !== card.id));
+      }
     }
     setIsFlipped(false);
-    if (cardIndex < INITIAL_FLASHCARDS.length - 1) {
+    if (cardIndex < flashcards.length - 1) {
       setCardIndex((prev) => prev + 1);
     } else {
       setCardIndex(0);
     }
   };
+
+  /* ──────────────── ACCIÓN GENERAR SMART NOTES ──────────────── */
+  const handleGenerateNotes = async () => {
+    setIsGenerating(true);
+    setGenerationNotice("Construyendo Smart Notes analíticas con IA…");
+    try {
+      const res = await generateNotesAction(getActiveSourceInputs());
+      if (res.success && res.notes) {
+        setNotesData(res.notes);
+      }
+    } finally {
+      setIsGenerating(false);
+      setGenerationNotice(null);
+    }
+  };
+
+  const handleCopyNotes = () => {
+    const text = `${notesData.title}\n\n` + notesData.sections.map((s) => `${s.heading}\n${s.body}`).join("\n\n");
+    navigator.clipboard.writeText(text);
+    setNotesCopied(true);
+    setTimeout(() => setNotesCopied(false), 2000);
+  };
+
+  /* ──────────────── ACCIÓN GENERAR PODCAST ──────────────── */
+  const handleGeneratePodcast = async () => {
+    handleStopAudio();
+    setIsGenerating(true);
+    setGenerationNotice("Creando guion de diálogo para audio con IA…");
+    try {
+      const res = await generatePodcastAction(getActiveSourceInputs());
+      if (res.success && res.podcast) {
+        setPodcastData(res.podcast);
+        setCurrentLineIndex(-1);
+      }
+    } finally {
+      setIsGenerating(false);
+      setGenerationNotice(null);
+    }
+  };
+
+  /* ──────────────── REPRODUCTOR DE AUDIO REAL (Web Speech API) ──────────────── */
+  const handlePlayAudio = () => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      alert("Tu navegador no soporta síntesis de audio directa.");
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    setIsPlayingAudio(true);
+
+    let lineIdx = currentLineIndex >= 0 && currentLineIndex < podcastData.lines.length ? currentLineIndex : 0;
+    setCurrentLineIndex(lineIdx);
+
+    const speakNextLine = () => {
+      if (lineIdx >= podcastData.lines.length) {
+        setIsPlayingAudio(false);
+        setCurrentLineIndex(-1);
+        return;
+      }
+
+      const item = podcastData.lines[lineIdx];
+      setCurrentLineIndex(lineIdx);
+
+      const utterance = new SpeechSynthesisUtterance(item.text);
+      utterance.lang = "es-ES";
+      utterance.rate = playbackRate;
+      utterance.pitch = item.speaker === "Alex" ? 1.05 : 0.88;
+
+      utterance.onend = () => {
+        lineIdx += 1;
+        speakNextLine();
+      };
+
+      utterance.onerror = () => {
+        lineIdx += 1;
+        speakNextLine();
+      };
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    speakNextLine();
+
+    audioSpeechRef.current = {
+      cancel: () => {
+        window.speechSynthesis.cancel();
+      },
+    };
+  };
+
+  const handlePauseAudio = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.pause();
+      setIsPlayingAudio(false);
+    }
+  };
+
+  const handleResumeAudio = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.resume();
+      setIsPlayingAudio(true);
+    }
+  };
+
+  const handleStopAudio = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsPlayingAudio(false);
+    setCurrentLineIndex(-1);
+  };
+
+  // Limpiar síntesis al desmontar
+  useEffect(() => {
+    return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const activeSourcesCount = sources.filter((s) => s.active).length;
 
   return (
     <div className="w-full flex-1 flex flex-col space-y-5 py-2">
@@ -213,7 +512,7 @@ export function PageLMStudio() {
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-muted max-w-xl">
-            Transformá tus apuntes y materiales de la cursada en conversaciones, cuestionarios, flashcards y guiones de audio interactivos.
+            Transformá tus apuntes y materiales de la cursada en conversaciones, cuestionarios, flashcards y guiones de audio interactivos generados con IA.
           </p>
         </div>
 
@@ -226,6 +525,17 @@ export function PageLMStudio() {
           </Link>
         </div>
       </div>
+
+      {/* ──────────────── AVISO DE GENERACIÓN EN CURSO ──────────────── */}
+      {isGenerating && (
+        <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 flex items-center justify-between text-xs text-primary animate-pulse">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+            <span>{generationNotice || "Procesando solicitud con IA…"}</span>
+          </div>
+          <span className="font-mono text-[11px] opacity-80">Gemini / Educai AI</span>
+        </div>
+      )}
 
       {/* ──────────────── BARRA DE SOLAPAS / HERRAMIENTAS ──────────────── */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-line/60">
@@ -261,7 +571,9 @@ export function PageLMStudio() {
         {/* PANEL IZQUIERDO: FUENTES / MATERIALES */}
         <div className="lg:col-span-1 rounded-2xl border border-line bg-surface-1/90 p-4 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Fuentes ({sources.length})</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-muted">
+              Fuentes ({activeSourcesCount}/{sources.length})
+            </span>
             <button
               type="button"
               onClick={() => setShowAddSource(!showAddSource)}
@@ -282,7 +594,7 @@ export function PageLMStudio() {
               />
               <textarea
                 rows={3}
-                placeholder="Pegá texto, resumen o enlace..."
+                placeholder="Pegá texto, resumen o transcripción…"
                 value={newSourceText}
                 onChange={(e) => setNewSourceText(e.target.value)}
                 className="w-full rounded-lg border border-line bg-surface-3 px-2.5 py-1.5 text-white placeholder-muted focus:outline-none focus:border-primary resize-none"
@@ -297,24 +609,50 @@ export function PageLMStudio() {
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
             {sources.map((src) => (
               <div
                 key={src.id}
-                className="rounded-xl border border-line/60 bg-surface-2/60 p-2.5 text-xs space-y-1 hover:border-line transition-colors"
+                className={cn(
+                  "rounded-xl border p-2.5 text-xs space-y-1.5 transition-colors",
+                  src.active
+                    ? "border-line/70 bg-surface-2/70"
+                    : "border-line/30 bg-surface-2/30 opacity-60",
+                )}
               >
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-white truncate">{src.title}</p>
-                  <span className="text-[10px] font-mono text-muted uppercase">{src.type}</span>
+                <div className="flex items-center justify-between gap-1.5">
+                  <div className="flex items-center gap-2 truncate">
+                    <input
+                      type="checkbox"
+                      checked={src.active}
+                      onChange={() => handleToggleSource(src.id)}
+                      className="rounded border-line bg-surface-3 text-primary focus:ring-0 cursor-pointer"
+                    />
+                    <p className="font-semibold text-white truncate text-[11px]">{src.title}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteSource(src.id)}
+                    className="text-muted hover:text-rose-400 text-xs px-1"
+                    title="Eliminar fuente"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <p className="text-[11px] text-muted line-clamp-2 leading-relaxed">{src.content}</p>
+                <p className="text-[10px] text-muted line-clamp-2 leading-relaxed pl-5">{src.content}</p>
               </div>
             ))}
+          </div>
+
+          <div className="pt-2 border-t border-line/40">
+            <p className="text-[10px] text-muted text-center">
+              Las herramientas activas consumen solo las fuentes marcadas.
+            </p>
           </div>
         </div>
 
         {/* PANEL DERECHO: HERRAMIENTA ACTIVA */}
-        <div className="lg:col-span-3 rounded-2xl border border-line bg-surface-1/90 p-5 shadow-sm min-h-[460px] flex flex-col">
+        <div className="lg:col-span-3 rounded-2xl border border-line bg-surface-1/90 p-5 shadow-sm min-h-[480px] flex flex-col">
           {/* 1. MODO CHAT CON FUENTES */}
           {activeTab === "chat" && (
             <div className="flex-1 flex flex-col justify-between space-y-4">
@@ -337,40 +675,56 @@ export function PageLMStudio() {
                     )}
                   </div>
                 ))}
+
+                {isChatTyping && (
+                  <div className="mr-auto bg-surface-2 text-muted border border-line/60 rounded-2xl p-3 text-xs italic flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span>PageLM está razonando con tus fuentes…</span>
+                  </div>
+                )}
               </div>
 
               {/* Sugerencias rápidas */}
               <div className="flex flex-wrap gap-2 pt-2 border-t border-line/40">
-                {["¿Qué es una hipótesis falsable?", "Resumir en 3 puntos clave", "¿Cómo validar con bajo costo?"].map(
-                  (suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => {
-                        setChatInput(suggestion);
-                      }}
-                      className="rounded-full border border-line bg-surface-2 px-3 py-1 text-[11px] text-muted hover:text-white hover:border-primary/50 transition-colors"
-                    >
-                      {suggestion}
-                    </button>
-                  ),
-                )}
+                {[
+                  "¿Cómo defino el umbral de éxito?",
+                  "Resumí en 3 puntos clave",
+                  "¿Cómo evito el sesgo de confirmación?",
+                  "¿Qué experimento de bajo costo sugieren?",
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => {
+                      setChatInput(suggestion);
+                    }}
+                    className="rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-[11px] text-muted hover:text-white hover:border-primary/50 transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
               </div>
 
-              {/* Input bar */}
-              <div className="flex items-center gap-2 pt-2">
+              {/* Entrada de texto */}
+              <div className="flex items-center gap-2 pt-1">
                 <input
                   type="text"
-                  placeholder="Hacé una pregunta sobre tus materiales..."
+                  placeholder="Hacé una pregunta sobre tus materiales…"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  className="flex-1 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-xs sm:text-sm text-white placeholder-muted focus:outline-none focus:border-primary transition-colors"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  className="flex-1 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-xs sm:text-sm text-white placeholder-muted focus:outline-none focus:border-primary"
                 />
                 <button
                   type="button"
                   onClick={handleSendMessage}
-                  className="rounded-xl bg-primary px-5 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-primary-hover shadow-md transition-colors"
+                  disabled={!chatInput.trim() || isChatTyping}
+                  className="rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-hover shadow-md transition-colors disabled:opacity-40"
                 >
                   Enviar
                 </button>
@@ -382,16 +736,26 @@ export function PageLMStudio() {
           {activeTab === "quiz" && (
             <div className="space-y-6 flex-1 flex flex-col justify-between">
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-line/60 pb-3">
+                <div className="flex items-center justify-between border-b border-line/60 pb-3 flex-wrap gap-3">
                   <div>
                     <h2 className="text-base font-bold text-white">Cuestionario de Validación de Conceptos</h2>
-                    <p className="text-xs text-muted">Poné a prueba tu comprensión de hipótesis falsables y experimentos.</p>
+                    <p className="text-xs text-muted">Preguntas generadas dinámicamente sobre tus fuentes activas.</p>
                   </div>
-                  {quizSubmitted && (
-                    <span className="px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/40 bg-emerald-950/40 text-emerald-400">
-                      Puntaje: {calculateScore()} / {quizQuestions.length}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2.5">
+                    {quizSubmitted && (
+                      <span className="px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/40 bg-emerald-950/40 text-emerald-400">
+                        Puntaje: {calculateScore()} / {quizQuestions.length}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleGenerateQuiz}
+                      disabled={isGenerating}
+                      className="rounded-xl border border-primary/40 bg-primary/10 px-3.5 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-colors flex items-center gap-1.5"
+                    >
+                      <span>Generar nuevo Quiz con IA</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-5">
@@ -468,13 +832,23 @@ export function PageLMStudio() {
           {/* 3. MODO FLASHCARDS */}
           {activeTab === "flashcards" && (
             <div className="space-y-6 flex-1 flex flex-col justify-between items-center text-center">
-              <div className="w-full flex items-center justify-between border-b border-line/60 pb-3">
+              <div className="w-full flex items-center justify-between border-b border-line/60 pb-3 flex-wrap gap-2">
                 <span className="text-xs text-muted">
-                  Tarjeta {cardIndex + 1} de {INITIAL_FLASHCARDS.length}
+                  Tarjeta {cardIndex + 1} de {flashcards.length}
                 </span>
-                <span className="text-xs font-semibold text-emerald-400">
-                  Dominadas: {knownCards.length} / {INITIAL_FLASHCARDS.length}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-emerald-400">
+                    Dominadas: {knownCards.length} / {flashcards.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleGenerateFlashcards}
+                    disabled={isGenerating}
+                    className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    Generar Flashcards con IA
+                  </button>
+                </div>
               </div>
 
               {/* Tarjeta volteable */}
@@ -483,10 +857,10 @@ export function PageLMStudio() {
                 className="w-full max-w-md h-64 rounded-3xl border-2 border-primary/30 bg-gradient-to-br from-surface-2 via-surface-3 to-surface-1 p-8 shadow-xl flex flex-col items-center justify-center cursor-pointer select-none transition-all duration-300 hover:border-primary/60 hover:scale-[1.01]"
               >
                 <span className="text-[10px] uppercase font-bold tracking-widest text-primary mb-3">
-                  {isFlipped ? "Respuesta / Explicación" : "Concepto clave (Hacé clic para voltear)"}
+                  {isFlipped ? "Definición / Explicación" : "Concepto clave (Hacé clic para voltear)"}
                 </span>
                 <p className="text-base sm:text-lg font-bold text-white leading-relaxed">
-                  {isFlipped ? INITIAL_FLASHCARDS[cardIndex].back : INITIAL_FLASHCARDS[cardIndex].front}
+                  {flashcards[cardIndex] ? (isFlipped ? flashcards[cardIndex].back : flashcards[cardIndex].front) : "Sin tarjetas"}
                 </p>
               </div>
 
@@ -513,72 +887,147 @@ export function PageLMStudio() {
           {/* 4. MODO SMART NOTES */}
           {activeTab === "notes" && (
             <div className="space-y-4 flex-1">
-              <div className="border-b border-line/60 pb-3">
-                <h2 className="text-base font-bold text-white">Smart Notes: Resumen Sintetizado</h2>
-                <p className="text-xs text-muted">Estructura automática generada a partir de las fuentes activas.</p>
+              <div className="border-b border-line/60 pb-3 flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <h2 className="text-base font-bold text-white">{notesData.title}</h2>
+                  <p className="text-xs text-muted">Estructura automática generada a partir de las fuentes activas.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyNotes}
+                    className="rounded-xl border border-line bg-surface-2 px-3 py-1.5 text-xs font-semibold text-muted hover:text-white transition-colors"
+                  >
+                    {notesCopied ? "Copiado ✓" : "Copiar apunte"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateNotes}
+                    disabled={isGenerating}
+                    className="rounded-xl border border-primary/40 bg-primary/10 px-3.5 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    Regenerar con IA
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-3 text-xs sm:text-sm text-ink-2 leading-relaxed bg-surface-2/60 p-4 rounded-xl border border-line/60">
-                <div>
-                  <h3 className="font-bold text-white text-sm mb-1">1. Núcleo Conceptual</h3>
-                  <p className="text-muted">
-                    Validar una idea de negocio no consiste en recopilar aplausos, sino en someter la propuesta a un experimento falsable. Un experimento efectivo define qué métrica se observará, qué valor mínimo se exige y en qué plazo exacto.
-                  </p>
-                </div>
-
-                <div className="border-t border-line/40 pt-2">
-                  <h3 className="font-bold text-white text-sm mb-1">2. Falsabilidad Práctica</h3>
-                  <p className="text-muted">
-                    Si no hay forma de que el resultado salga mal o negativo, la afirmación no es una hipótesis de negocio, sino un dogma o una expresión de deseo.
-                  </p>
-                </div>
-
-                <div className="border-t border-line/40 pt-2">
-                  <h3 className="font-bold text-white text-sm mb-1">3. Aplicación en Negocios Locales</h3>
-                  <p className="text-muted">
-                    Para un comercio o emprendimiento (como un restaurante gastronómico), antes de invertir en una plataforma digital o nueva línea, se puede realizar una prueba manual o preventa acotada durante 7 días para contrastar la demanda verídica.
-                  </p>
-                </div>
+                {notesData.sections.map((sec, idx) => (
+                  <div key={idx} className={idx > 0 ? "border-t border-line/40 pt-3" : ""}>
+                    <h3 className="font-bold text-white text-sm mb-1">{sec.heading}</h3>
+                    <p className="text-muted leading-relaxed">{sec.body}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {/* 5. MODO PODCAST / AUDIO OVERVIEW */}
           {activeTab === "podcast" && (
-            <div className="space-y-5 flex-1">
-              <div className="border-b border-line/60 pb-3">
-                <h2 className="text-base font-bold text-white">Podcast Overview (Estilo NotebookLM)</h2>
-                <p className="text-xs text-muted">Diálogo simulado entre dos especialistas analizando los materiales de estudio.</p>
-              </div>
-
-              <div className="rounded-2xl border border-primary/25 bg-gradient-to-br from-surface-2 to-surface-3 p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-sm border border-primary/30">
-                    ▶
-                  </div>
+            <div className="space-y-5 flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="border-b border-line/60 pb-3 flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <p className="text-xs font-bold text-white">Episodio: Dominando Hipótesis Falsables</p>
-                    <p className="text-[11px] text-muted">Voces: Alex y Sam · Duración estimada: 3:45 min</p>
+                    <h2 className="text-base font-bold text-white">Podcast Overview (Estilo NotebookLM)</h2>
+                    <p className="text-xs text-muted">Diálogo simulado y reproducido por síntesis de voz en el navegador.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGeneratePodcast}
+                    disabled={isGenerating}
+                    className="rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    Generar nuevo episodio con IA
+                  </button>
+                </div>
+
+                {/* Reproductor de audio */}
+                <div className="rounded-2xl border border-primary/25 bg-gradient-to-br from-surface-2 to-surface-3 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={isPlayingAudio ? handlePauseAudio : currentLineIndex >= 0 ? handleResumeAudio : handlePlayAudio}
+                      className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center font-bold text-base shadow-lg hover:bg-primary-hover transition-colors"
+                    >
+                      {isPlayingAudio ? "⏸" : "▶"}
+                    </button>
+                    {isPlayingAudio && (
+                      <button
+                        type="button"
+                        onClick={handleStopAudio}
+                        className="w-8 h-8 rounded-full border border-line bg-surface-3 text-muted hover:text-white flex items-center justify-center text-xs"
+                        title="Detener audio"
+                      >
+                        ⏹
+                      </button>
+                    )}
+                    <div>
+                      <p className="text-xs font-bold text-white">{podcastData.episodeTitle}</p>
+                      <p className="text-[11px] text-muted">
+                        Voces: Alex y Sam · Duración aprox: {podcastData.estimatedDuration}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 text-[11px] text-muted">
+                      <span>Vel:</span>
+                      {[1.0, 1.2, 1.5].map((rate) => (
+                        <button
+                          key={rate}
+                          type="button"
+                          onClick={() => setPlaybackRate(rate)}
+                          className={cn(
+                            "px-2 py-0.5 rounded border text-[10px] font-mono",
+                            playbackRate === rate
+                              ? "border-primary bg-primary/20 text-primary font-bold"
+                              : "border-line bg-surface-2 text-muted hover:text-white",
+                          )}
+                        >
+                          {rate}x
+                        </button>
+                      ))}
+                    </div>
+
+                    <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-surface-1 border border-line text-primary">
+                      {isPlayingAudio ? "Reproduciendo…" : "Audio Listo"}
+                    </span>
                   </div>
                 </div>
-                <span className="px-3 py-1 rounded-full text-[10px] font-mono bg-surface-1 border border-line text-primary">
-                  Audio Script Listo
-                </span>
-              </div>
 
-              <div className="space-y-3 text-xs leading-relaxed max-h-[260px] overflow-y-auto pr-2">
-                <div className="p-2.5 rounded-xl bg-surface-2/60 border border-line/40 space-y-1">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase">Alex (Anfitrión)</span>
-                  <p className="text-ink">
-                    «Bienvenidos. Hoy estamos revisando la clase sobre validación temprana. Sam, lo primero que me llamó la atención es por qué la gente insiste tanto en no ponerle un número al éxito antes de lanzar.»
-                  </p>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-surface-2/60 border border-line/40 space-y-1">
-                  <span className="text-[10px] font-bold text-cyan-400 uppercase">Sam (Especialista)</span>
-                  <p className="text-ink">
-                    «Exacto, Alex. Porque si no fijás el umbral de antemano, cuando conseguís solo dos clientes decís "bueno, al menos aprendimos". Pero si tu meta era diez para que los números cierren, dos significa que la hipótesis se cayó y hay que cambiar de dirección.»
-                  </p>
+                {/* Transcripción interactiva con resaltado activo */}
+                <div className="space-y-3 text-xs leading-relaxed max-h-[250px] overflow-y-auto pr-2">
+                  {podcastData.lines.map((item, idx) => {
+                    const isCurrent = currentLineIndex === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "p-3 rounded-xl border transition-all",
+                          isCurrent
+                            ? "bg-primary/10 border-primary shadow-md scale-[1.01]"
+                            : "bg-surface-2/60 border-line/40",
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold uppercase",
+                              item.speaker === "Alex" ? "text-emerald-400" : "text-cyan-400",
+                            )}
+                          >
+                            {item.speaker === "Alex" ? "Alex (Anfitrión)" : "Sam (Especialista)"}
+                          </span>
+                          {isCurrent && (
+                            <span className="text-[10px] font-mono text-primary font-bold animate-pulse">
+                              [En reproducción]
+                            </span>
+                          )}
+                        </div>
+                        <p className={isCurrent ? "text-white font-medium" : "text-ink"}>{item.text}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -592,24 +1041,39 @@ export function PageLMStudio() {
                 <p className="text-xs text-muted">Secuencia lógica recomendada para preparar la materia.</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-xl border border-line bg-surface-2 p-3 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Paso 1: Fundamentos</span>
-                  <h4 className="text-xs font-bold text-white">Segmentación y Dolor</h4>
-                  <p className="text-[11px] text-muted">Identificar el perfil de usuario que sufre el problema hoy.</p>
-                </div>
-
-                <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Paso 2: En curso</span>
-                  <h4 className="text-xs font-bold text-white">Hipótesis Falsable</h4>
-                  <p className="text-[11px] text-muted">Redactar supuesto con métrica, umbral y plazo temporal.</p>
-                </div>
-
-                <div className="rounded-xl border border-line/50 bg-surface-2/40 p-3 space-y-2 opacity-60">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Paso 3: Próximo</span>
-                  <h4 className="text-xs font-bold text-white">Experimento Piloto</h4>
-                  <p className="text-[11px] text-muted">Ejecución en campo y toma de decisión con evidencia.</p>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {plannerMilestones.map((m, idx) => (
+                  <div
+                    key={m.id}
+                    onClick={() => {
+                      setPlannerMilestones((prev) =>
+                        prev.map((item) => (item.id === m.id ? { ...item, done: !item.done } : item)),
+                      );
+                    }}
+                    className={cn(
+                      "rounded-xl border p-3.5 space-y-2 cursor-pointer transition-all",
+                      m.done
+                        ? "border-emerald-500/40 bg-emerald-950/20"
+                        : "border-line bg-surface-2 hover:border-line-strong",
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted">
+                        Paso {idx + 1}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-xs font-bold",
+                          m.done ? "text-emerald-400" : "text-muted",
+                        )}
+                      >
+                        {m.done ? "Completado ✓" : "Pendiente"}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-bold text-white">{m.title}</h4>
+                    <p className="text-[11px] text-muted">{m.description}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}

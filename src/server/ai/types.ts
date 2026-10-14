@@ -12,7 +12,13 @@ export type AIOperation =
   | "interpret.signals"
   | "interpret.evaluate"
   | "interpret.infer"
-  | "interpret.feedback";
+  | "interpret.feedback"
+  | "pagelm.chat"
+  | "pagelm.quiz"
+  | "pagelm.flashcards"
+  | "pagelm.notes"
+  | "pagelm.podcast"
+  | "deepstudent.agent";
 
 export type Effort = "low" | "medium" | "high";
 
