@@ -119,7 +119,7 @@ export function ClassDashboard({
   };
 
   return (
-    <div className="space-y-3 sm:space-y-3.5 w-full flex-1 flex flex-col justify-center">
+    <div className="w-full flex-1 flex flex-col justify-between gap-4 sm:gap-5 lg:gap-6 py-1">
       {/* ──────────────── 0. SECCIÓN DE AVANCE DE LA MATERIA (Hover para ver hitos) ──────────────── */}
       <div className="group relative space-y-1.5 shrink-0">
         <div className="flex items-center justify-between text-[11px] text-muted">
@@ -175,8 +175,8 @@ export function ClassDashboard({
       </div>
 
       {/* ──────────────── 0. SECCIÓN "CLASE EN CURSO" ──────────────── */}
-      <div className="rounded-2xl border border-primary/25 bg-gradient-to-b from-surface-2/90 to-surface/80 p-3 sm:p-3.5 shadow-md backdrop-blur-md shrink-0">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+      <div className="rounded-2xl border border-primary/25 bg-gradient-to-b from-surface-2/90 to-surface/80 p-3.5 sm:p-4 lg:p-4.5 shadow-md backdrop-blur-md shrink-0 space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
               Clase en curso
@@ -231,11 +231,11 @@ export function ClassDashboard({
       </div>
 
       {/* ──────────────── 1) TITULO Y DESCRIPCIÓN + BOTÓN PREGUNTAS GUÍA IA (Espacio al lado del título) ──────────────── */}
-      <div className="rounded-2xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-4 sm:p-5 shadow-lg backdrop-blur-xl shrink-0">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5">
+      <div className="rounded-2xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-5 sm:p-6 lg:p-7 shadow-lg backdrop-blur-xl shrink-0">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
           {/* Lado izquierdo: Título principal personalizado y descripción */}
           <div className="space-y-2 flex-1 max-w-2xl">
-            <h1 className="text-xl sm:text-2xl lg:text-[25px] font-extrabold tracking-tight text-white leading-snug">
+            <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight text-white leading-snug">
               Hoy vas a aplicar {effectiveConcept.toLowerCase()} en {effectiveOrg}
             </h1>
             {effectiveDescription && (
@@ -250,11 +250,11 @@ export function ClassDashboard({
             <button
               type="button"
               onClick={() => handleAskQuestion(CLASS_QUESTIONS[questionIndex])}
-              className="w-full text-left group relative flex flex-col justify-between gap-2.5 rounded-xl border border-primary/30 bg-surface-2/90 hover:bg-surface-3/90 p-3.5 sm:p-4 shadow-sm transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full text-left group relative flex flex-col justify-between gap-3 rounded-xl border border-primary/30 bg-surface-2/90 hover:bg-surface-3/90 p-4 sm:p-4.5 shadow-sm transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] hover:scale-[1.01] active:scale-[0.99]"
               aria-label="Preguntarle a la IA esta consulta"
             >
               {/* Pregunta */}
-              <p className="text-xs sm:text-sm font-semibold text-white leading-snug min-h-[38px] transition-opacity duration-300">
+              <p className="text-xs sm:text-sm font-semibold text-white leading-snug min-h-[42px] transition-opacity duration-300">
                 «{CLASS_QUESTIONS[questionIndex]}»
               </p>
 
@@ -271,10 +271,10 @@ export function ClassDashboard({
       </div>
 
       {/* ──────────────── 2) BOTONES: "Adjuntá" - "Conversá" (Lado a lado con separación) ──────────────── */}
-      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-0.5 shrink-0">
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-1 shrink-0">
         {attached ? (
-          <div className="min-w-[130px] inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-6 py-2.5 text-sm font-bold text-emerald-400 shadow-sm">
-            <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 px-7 py-3 text-sm sm:text-base font-bold text-emerald-400 shadow-sm">
+            <svg className="w-4.5 h-4.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
             <span>Adjuntado</span>
@@ -284,7 +284,7 @@ export function ClassDashboard({
             type="button"
             onClick={handleAttach}
             disabled={isAttaching}
-            className="min-w-[130px] inline-flex items-center justify-center gap-2 rounded-xl border border-primary/50 bg-surface-2 hover:bg-surface-3 px-6 py-2.5 text-sm font-bold text-white shadow hover:shadow-[0_0_15px_rgba(120,150,238,0.2)] transition-all active:scale-[0.98] disabled:opacity-50"
+            className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/50 bg-surface-2 hover:bg-surface-3 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] transition-all active:scale-[0.98] disabled:opacity-50"
           >
             {isAttaching ? "Adjuntando…" : "Adjuntá"}
           </button>
@@ -293,7 +293,7 @@ export function ClassDashboard({
         <button
           type="button"
           onClick={handleOpenChat}
-          className="min-w-[130px] inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-500 px-6 py-2.5 text-sm font-bold text-white shadow hover:shadow-[0_0_20px_rgba(120,150,238,0.3)] transition-all active:scale-[0.98]"
+          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-500 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98]"
         >
           <span>Conversá</span>
           <span aria-hidden="true">→</span>
@@ -301,7 +301,7 @@ export function ClassDashboard({
       </div>
 
       {/* ──────────────── 3) ACTIVIDAD EN ESPERA / ACTIVIDAD ACTIVA (Mismo tamaño y estructura) ──────────────── */}
-      <div className="space-y-1 shrink-0">
+      <div className="space-y-1.5 shrink-0">
         <div className="flex justify-end">
           {/* Botón de control docente para simular desbloqueo en la demo */}
           <button
@@ -315,13 +315,13 @@ export function ClassDashboard({
 
         {/* Tarjeta con dimensiones, padding y estructura exactamente idénticas en ambos estados */}
         <div
-          className={`rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 transition-colors duration-300 ${
+          className={`rounded-2xl p-4 sm:p-5 lg:p-5.5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 transition-colors duration-300 ${
             isUnlocked
               ? "border border-emerald-500/30 bg-emerald-950/20"
               : "border border-line bg-surface-2/40"
           }`}
         >
-          <div className="space-y-1 flex-1">
+          <div className="space-y-1.5 flex-1">
             <span
               className={`text-xs font-semibold transition-colors ${
                 isUnlocked ? "text-white" : "text-muted"
@@ -332,7 +332,7 @@ export function ClassDashboard({
             <h3 className="text-sm sm:text-base font-bold text-ink">
               {activity?.title || "Práctica: hipótesis falsables en logística de última milla"}
             </h3>
-            <p className="text-xs text-muted max-w-2xl leading-relaxed line-clamp-2">
+            <p className="text-xs sm:text-sm text-muted max-w-2xl leading-relaxed line-clamp-2">
               {activity?.description ||
                 "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio."}
             </p>
@@ -342,7 +342,7 @@ export function ClassDashboard({
             {isUnlocked ? (
               <Link
                 href={`/s/courses/${courseId}/activities`}
-                className="w-full sm:w-28 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2 text-xs sm:text-sm font-bold text-white shadow hover:bg-primary-hover transition-colors"
+                className="w-full sm:w-28 inline-flex items-center justify-center rounded-xl bg-primary px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow hover:bg-primary-hover transition-colors"
               >
                 Abrir
               </Link>
@@ -350,7 +350,7 @@ export function ClassDashboard({
               <button
                 type="button"
                 disabled
-                className="w-full sm:w-28 inline-flex items-center justify-center rounded-xl bg-surface-3 border border-line/60 px-5 py-2 text-xs sm:text-sm font-bold text-muted cursor-not-allowed select-none"
+                className="w-full sm:w-28 inline-flex items-center justify-center rounded-xl bg-surface-3 border border-line/60 px-6 py-2.5 text-xs sm:text-sm font-bold text-muted cursor-not-allowed select-none"
               >
                 Abrir
               </button>

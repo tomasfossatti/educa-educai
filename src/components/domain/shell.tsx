@@ -35,7 +35,7 @@ export function AppShell({
         nav={nav}
         userLinks={userLinks}
       />
-      <main id="main-content" className="app-main mx-auto max-w-5xl px-4 py-3 sm:py-4 flex-1 w-full flex flex-col justify-center">{children}</main>
+      <main id="main-content" className="app-main mx-auto max-w-5xl px-4 py-4 sm:py-6 lg:py-7 flex-1 w-full flex flex-col">{children}</main>
     </div>
   );
 }
