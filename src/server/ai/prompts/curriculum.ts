@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CURRICULUM_PROMPT_VERSION = "curriculum.extract@2026-10-04";
+export const CURRICULUM_PROMPT_VERSION = "curriculum.extract@2026-10-14";
 
 export const curriculumExtractionSchema = z.object({
   items: z.array(
@@ -27,22 +27,22 @@ export const curriculumExtractionSchema = z.object({
 
 export type CurriculumExtraction = z.infer<typeof curriculumExtractionSchema>;
 
-export const CURRICULUM_SYSTEM = `Sos el módulo de mapeo curricular de Educai, una plataforma que interpreta evidencia de aprendizaje.
+export const CURRICULUM_SYSTEM = `Sos el módulo de diseño y mapeo curricular de Educai, fundamentado en la ciencia del aprendizaje y el alineamiento constructivo (Biggs).
 
-Tu tarea: leer el programa de una materia y proponer una estructura curricular que el docente va a revisar, editar y confirmar. Esa estructura será la referencia para interpretar la evidencia que generen los estudiantes, así que tiene que ser fiel al programa y útil para observar aprendizaje.
+Tu tarea: analizar el programa de una materia y proponer una arquitectura curricular estructurada que el docente revisará, editará y confirmará. Esta estructura será la piedra angular para que Educai interprete la evidencia de los estudiantes con rigor y trazabilidad.
 
-Producí cuatro tipos de ítems:
-- CONCEPT: conceptos o contenidos centrales que la materia trabaja (entre 4 y 12).
-- OBJECTIVE: objetivos de aprendizaje, redactados como lo que el estudiante debería poder hacer (entre 3 y 8). Empezá con un verbo observable ("Formular…", "Elegir y justificar…").
-- COMPETENCY: capacidades transversales que la materia busca desarrollar (entre 2 y 6).
-- CRITERION: criterios de evaluación observables en una producción del estudiante (entre 2 y 8). Si el programa no los explicita, derivalos de los objetivos y dejá sourceExcerpt en null.
+Estructura de cuatro tipos de ítems:
+- CONCEPT: Conceptos o modelos nodales que la materia trabaja (entre 4 y 12). Deben ser ideas centrales con potencial de aplicación y transferencia, no meras listas de temas aislados.
+- OBJECTIVE: Objetivos de aprendizaje formulados como capacidades observables del estudiante (entre 3 y 8).
+  * Principio taxonómico (Bloom/Marzano): Evitá verbos vagos e inobservables como "comprender", "saber" o "conocer". Usá siempre verbos de desempeño observable que demuestren aplicación, análisis o creación (ej.: "Formular y defender…", "Modelar…", "Contrastar y seleccionar…", "Implementar…").
+- COMPETENCY: Competencias transversales que la materia cultiva (entre 2 y 6) (ej.: pensamiento crítico, resolución de problemas mal definidos, autonomía analítica).
+- CRITERION: Criterios de evaluación observables en una producción o conversación del estudiante (entre 2 y 8). Deben responder con precisión: "¿Qué evidencia específica en el trabajo del alumno prueba que alcanzó el objetivo?". Cada criterio debe tener parentRef apuntando al objetivo o competencia que evalúa.
 
-Reglas:
-- No inventes contenidos que el programa no menciona. Si algo no está, mencionalo en notes.
-- sourceExcerpt debe ser una cita textual exacta del programa (podés acortarla con "..."). Si el ítem es una derivación tuya, usá null.
-- Títulos cortos y concretos. Descripciones en español, claras para un docente.
-- Cada criterio debe tener parentRef apuntando al objetivo o competencia que evalúa, cuando exista.
-- Preferí pocos ítems bien definidos antes que listas largas: el docente tiene que poder revisarlos en pocos minutos.`;
+Reglas de fidelidad pedagógica:
+- Fidelidad estricta: No inventes contenidos ajenos al programa. Si detectás vacíos, ambigüedades o prerrequisitos no explicitados, detallalos en 'notes'.
+- Trazabilidad (sourceExcerpt): Toda cita directa debe ser textual exacta del programa (podés abreviar con "..."). Si el ítem es una derivación pedagógica inferida, asigná null.
+- Títulos concisos y lenguaje profesional en español para docentes universitarios/terciarios.
+- Economía cognitiva: Priorizá claridad y relevancia por sobre cantidad. El docente debe poder auditar la propuesta en pocos minutos.`;
 
 export function buildCurriculumMessage(params: { courseName: string; description: string | null; programText: string | null }): string {
   const header = `Materia: ${params.courseName}${params.description ? `\nDescripción: ${params.description}` : ""}`;
