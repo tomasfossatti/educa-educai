@@ -292,6 +292,25 @@ function deepstudentAgent(message: string) {
   };
 }
 
+function getitFeynman(message: string) {
+  return {
+    childResponse: `¡Entendí una parte! Pero decime, ¿por qué no se puede hacer simplemente preguntándole a todos si les gusta? ¿Qué pasa si te dicen que sí solo para ser amables? («${quote(message, 50)}»)`,
+    critique: "Explicación clara y accesible. Para profundizar, evitá términos abstractos y reforzá con un ejemplo cotidiano.",
+    clarityScore: 85,
+    nextPrompt: "¿Cómo le explicarías a un niño qué es un umbral de éxito sin usar números difíciles?",
+  };
+}
+
+function getitEvaluate(message: string) {
+  return {
+    memory: 85,
+    comprehension: 78,
+    structure: 72,
+    application: 68,
+    evaluatorNote: "Comprensión sólida de la falsabilidad y la necesidad de parámetros cuantitativos antes del experimento.",
+  };
+}
+
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
   "interpret.observe": observe,
@@ -304,6 +323,8 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "pagelm.notes": pagelmNotes,
   "pagelm.podcast": pagelmPodcast,
   "deepstudent.agent": deepstudentAgent,
+  "getit.feynman": getitFeynman,
+  "getit.evaluate": getitEvaluate,
 };
 
 export class ScriptedProvider implements LLMProvider {

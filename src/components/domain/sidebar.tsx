@@ -16,10 +16,10 @@ interface SidebarProps {
 
 const AI_RESOURCES = [
   {
-    name: "DeepStudent (README_CN)",
-    href: "/s/deep-student/docs",
-    badge: "Docs CN",
-    description: "Guía de arquitectura y agentes",
+    name: "Get It.",
+    href: "/s/get-it",
+    badge: "Read · See · Get",
+    description: "Mapa de dominio 4 ejes, Feynman y sandbox visual",
   },
   {
     name: "PageLM",
@@ -32,6 +32,12 @@ const AI_RESOURCES = [
     href: "/s/deep-student",
     badge: "Workbench",
     description: "Agente de estudio autónomo paso a paso",
+  },
+  {
+    name: "DeepStudent (README_CN)",
+    href: "/s/deep-student/docs",
+    badge: "Docs CN",
+    description: "Guía de arquitectura y agentes",
   },
 ];
 

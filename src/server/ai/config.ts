@@ -29,6 +29,8 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "pagelm.notes": { effort: "medium", maxTokens: 8000 },
   "pagelm.podcast": { effort: "medium", maxTokens: 8000 },
   "deepstudent.agent": { effort: "medium", maxTokens: 8000 },
+  "getit.feynman": { effort: "medium", maxTokens: 4000 },
+  "getit.evaluate": { effort: "medium", maxTokens: 4000 },
 };
 
 /**

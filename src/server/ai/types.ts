@@ -18,7 +18,9 @@ export type AIOperation =
   | "pagelm.flashcards"
   | "pagelm.notes"
   | "pagelm.podcast"
-  | "deepstudent.agent";
+  | "deepstudent.agent"
+  | "getit.feynman"
+  | "getit.evaluate";
 
 export type Effort = "low" | "medium" | "high";
 
