@@ -3,7 +3,7 @@ services:
     name: educai-v2
     runtime: node
     plan: free
-    buildCommand: npm install && npx prisma db push --accept-data-loss && npm run db:seed && npm run build
+    buildCommand: npm install && npx prisma db push --force-reset && npm run db:seed && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
