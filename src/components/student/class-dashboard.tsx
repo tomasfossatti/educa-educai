@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 
 interface ClassDashboardProps {
   courseId: string;
@@ -10,8 +9,11 @@ interface ClassDashboardProps {
   teacherName: string;
   totalClasses?: number;
   currentClassNumber?: number;
-  learningGoal: string;
-  personalizedApplication: string;
+  conceptTitle?: string;
+  conceptDescription?: string;
+  userOrganization?: string;
+  learningGoal?: string;
+  personalizedApplication?: string;
   activity?: {
     id: string;
     title: string;
@@ -32,8 +34,10 @@ export function ClassDashboard({
   teacherName,
   totalClasses = 8,
   currentClassNumber = 4,
+  conceptTitle = "hipótesis falsables",
+  conceptDescription,
+  userOrganization = "tu restaurante en el centro de Rosario",
   learningGoal,
-  personalizedApplication,
   activity = {
     id: "challenge-1",
     title: "Challenge de clase: Validación de viandas saludables",
@@ -64,6 +68,13 @@ export function ClassDashboard({
   // Tiempo y recreo
   const minutesToBreak = Math.max(0, breakMinute - classElapsedMinutes);
   const minutesToEnd = Math.max(0, totalClassMinutes - classElapsedMinutes);
+
+  // Concepto y organización efectivos para el titular
+  const effectiveConcept = conceptTitle || (learningGoal ? learningGoal.split(":")[0].trim() : "hipótesis falsables");
+  const effectiveOrg = userOrganization || "tu restaurante en el centro de Rosario";
+  const effectiveDescription =
+    conceptDescription ||
+    (learningGoal && learningGoal.includes(":") ? learningGoal.split(":").slice(1).join(":").trim() : "");
 
   const handleAttach = async () => {
     if (!activeConversation) return;
@@ -98,25 +109,29 @@ export function ClassDashboard({
         {/* Micro-hitos: ocultos por defecto, visibles únicamente al posar el cursor sobre la barra */}
         <div className="max-h-0 opacity-0 overflow-hidden transition-all duration-300 ease-out group-hover:max-h-24 group-hover:opacity-100 group-hover:pt-1">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px] text-emerald-300">
+            {/* Hito 1: texto en blanco, detalles sutilmente verdes */}
+            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px]">
               <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="truncate">Hito 1 superado: Segmentación</span>
+              <span className="truncate text-white font-medium">Hito 1 superado: Segmentación</span>
             </div>
 
-            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px] text-emerald-300">
+            {/* Hito 2: texto en blanco, detalles sutilmente verdes */}
+            <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-1.5 text-[11px]">
               <svg className="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="truncate">Hito 2 superado: Propuesta</span>
+              <span className="truncate text-white font-medium">Hito 2 superado: Propuesta</span>
             </div>
 
-            <div className="flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-[11px] text-primary-soft font-semibold">
+            {/* Hito 3: texto en blanco */}
+            <div className="flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-2.5 py-1.5 text-[11px]">
               <span className="w-2 h-2 rounded-full bg-primary shrink-0 animate-pulse"></span>
-              <span className="truncate">Hito 3: En curso hoy</span>
+              <span className="truncate text-white font-medium">Hito 3: En curso hoy</span>
             </div>
 
+            {/* Hito 4 */}
             <div className="flex items-center gap-1.5 rounded-lg border border-line/50 bg-surface-2/40 px-2.5 py-1.5 text-[11px] text-muted">
               <span className="w-2 h-2 rounded-full bg-muted/40 shrink-0"></span>
               <span className="truncate">Hito 4: Validación (Próximo)</span>
@@ -137,11 +152,11 @@ export function ClassDashboard({
           <div className="text-xs font-medium">
             {minutesToBreak > 0 ? (
               <span className="text-white font-semibold">
-                recreo en {minutesToBreak} min
+                Recreo en {minutesToBreak} min
               </span>
             ) : (
               <span className="text-white font-semibold">
-                segunda parte · termina en {minutesToEnd} min
+                Segunda parte · Termina en {minutesToEnd} min
               </span>
             )}
           </div>
@@ -181,49 +196,28 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 3. SECCIÓN DE OBJETIVO ──────────────── */}
-      <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1/95 via-surface-2/80 to-surface-3/60 p-7 sm:p-9 shadow-xl backdrop-blur-xl space-y-4">
-        <div className="space-y-2">
-          <span className="inline-block text-xs font-semibold tracking-wider text-primary-hover">
-            Objetivo de esta clase
+      {/* ──────────────── 3. TÍTULO PRINCIPAL PERSONALIZADO AL CONTEXTO ONBOARDING ──────────────── */}
+      <div className="rounded-3xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-7 sm:p-9 shadow-xl backdrop-blur-xl space-y-3">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
+          Hoy vas a aplicar{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-white to-pink-200">
+            {effectiveConcept.toLowerCase()}
+          </span>{" "}
+          en{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300">
+            {effectiveOrg}
           </span>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
-            Hoy lograrás dominar cómo:{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-white to-pink-200">
-              {learningGoal}
-            </span>
-          </h1>
-        </div>
-
-        {/* ──────────────── 4. PARTE PERSONALIZADA (Refuerzo Positivo y Capacitación) ──────────────── */}
-        <div className="rounded-2xl border border-primary/20 bg-primary-soft/40 p-4 sm:p-5 backdrop-blur-md">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">
-                Tu impacto directo y capacitación
-              </span>
-              <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                Personalizado a tu contexto
-              </span>
-            </div>
-            <p className="text-sm sm:text-base text-ink font-medium leading-relaxed">
-              Al terminar esta clase, tendrás la herramienta exacta para {personalizedApplication}
-            </p>
-          </div>
-        </div>
+        </h1>
+        {effectiveDescription && (
+          <p className="text-sm sm:text-base text-muted leading-relaxed max-w-3xl">
+            {effectiveDescription}
+          </p>
+        )}
       </div>
 
-      {/* ──────────────── 5. SECCIÓN HERRAMIENTAS (Bloqueada / Desbloqueada por la docente) ──────────────── */}
-      <div className="rounded-2xl border border-line bg-surface/90 p-6 shadow-md backdrop-blur-md space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line/60 pb-3">
-          <div>
-            <h2 className="text-lg font-bold text-ink">
-              Herramientas y actividades de clase
-            </h2>
-            <p className="text-xs text-muted">
-              Dinámicas guiadas preparadas por Educai para que la docente active durante la sesión.
-            </p>
-          </div>
+      {/* ──────────────── 4. SECCIÓN ACTIVIDAD DE CLASE ──────────────── */}
+      <div className="space-y-2">
+        <div className="flex justify-end">
           {/* Botón de control docente para simular desbloqueo en la demo */}
           <button
             type="button"
@@ -235,8 +229,8 @@ export function ClassDashboard({
         </div>
 
         {!isUnlocked ? (
-          /* Estado Bloqueado: Con lenguaje motivador y anticipatorio */
-          <div className="rounded-xl border border-dashed border-line-strong bg-surface-2/40 p-8 text-center space-y-3">
+          /* Estado Bloqueado */
+          <div className="rounded-2xl border border-dashed border-line-strong bg-surface-2/40 p-8 text-center space-y-3">
             <div className="w-12 h-12 mx-auto rounded-full bg-surface-3 flex items-center justify-center text-muted border border-line">
               <svg className="w-5 h-5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -244,10 +238,10 @@ export function ClassDashboard({
             </div>
             <div className="space-y-1 max-w-md mx-auto">
               <p className="font-semibold text-ink text-sm sm:text-base">
-                Herramienta lista para activar
+                Actividad en espera
               </p>
               <p className="text-xs sm:text-sm text-muted">
-                {teacherName} activará esta dinámica práctica en el momento exacto de la clase para que pongas a prueba lo aprendido.
+                {teacherName} activará esta dinámica práctica en el momento exacto de la clase.
               </p>
             </div>
             <span className="inline-block rounded-full bg-surface-2 border border-line px-3 py-1 text-[11px] font-mono text-muted">
@@ -255,67 +249,50 @@ export function ClassDashboard({
             </span>
           </div>
         ) : (
-          /* Estado Desbloqueado */
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <Badge tone="success">
-                Desbloqueado para la clase de hoy
-              </Badge>
-              <span className="text-xs text-emerald-400 font-medium">Actividad activa</span>
+          /* Estado Desbloqueado: Actividad activa en blanco, botón "Abrir" a la derecha */
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 sm:p-6 shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1.5">
+              <span className="text-sm font-semibold text-white">
+                Actividad activa
+              </span>
+              <h3 className="text-base sm:text-lg font-bold text-ink">
+                {activity?.title || "Actividad de clase"}
+              </h3>
+              <p className="text-sm text-muted max-w-2xl">
+                {activity?.description || "Consigna práctica de aplicación."}
+              </p>
             </div>
-            <div>
-              <h3 className="text-base font-bold text-ink">{activity?.title || "Actividad de clase"}</h3>
-              <p className="text-sm text-muted mt-1">{activity?.description || "Consigna práctica de aplicación."}</p>
-            </div>
-            <div className="pt-2">
+            <div className="shrink-0 sm:ml-auto">
               <Link
                 href={`/s/courses/${courseId}/activities`}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary-hover transition-colors"
+                className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-primary-hover transition-colors"
               >
-                Abrir herramienta de trabajo →
+                Abrir
               </Link>
             </div>
           </div>
         )}
       </div>
 
-      {/* ──────────────── 6. RECTÁNGULO: ADJUNTAR CONVERSACIÓN CON LA IA ──────────────── */}
-      <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-surface-1 via-surface-2 to-surface-1 p-6 shadow-lg backdrop-blur-md">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1">
-            <h3 className="text-base font-bold text-ink">
-              Adjuntar conversación con la IA como evidencia
-            </h3>
-            <p className="text-xs sm:text-sm text-muted max-w-xl">
-              Al adjuntar tu sesión de diálogo, Educai analiza tu razonamiento y le comparte a tu docente evidencia de tu progreso sin exponer tus mensajes privados.
-            </p>
-            {activeConversation && (
-              <p className="text-xs font-mono text-primary pt-1">
-                Sesión actual: «{activeConversation.title}» ({activeConversation.messageCount} mensajes)
-              </p>
-            )}
+      {/* ──────────────── 5. BOTÓN: ADJUNTÁ CONVERSACIÓN (Sin textos extra) ──────────────── */}
+      <div className="flex justify-center pt-2">
+        {attached ? (
+          <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 px-8 py-3.5 text-base font-bold text-emerald-400 shadow-lg">
+            <svg className="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Conversación adjuntada</span>
           </div>
-
-          <div className="shrink-0">
-            {attached ? (
-              <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-4 py-2.5 text-xs font-bold text-emerald-400 shadow">
-                <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>¡Gran avance! Evidencia registrada con éxito</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={handleAttach}
-                disabled={isAttaching}
-                className="inline-flex items-center gap-2 rounded-xl border border-primary bg-primary/20 hover:bg-primary/30 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all active:scale-95"
-              >
-                {isAttaching ? "Adjuntando evidencia…" : "Adjuntar conversación"}
-              </button>
-            )}
-          </div>
-        </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleAttach}
+            disabled={isAttaching}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-primary/50 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 hover:from-primary/40 hover:to-primary/40 px-8 py-3.5 text-base font-bold text-white shadow-xl hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98] disabled:opacity-50"
+          >
+            {isAttaching ? "Adjuntando conversación…" : "Adjuntá conversación"}
+          </button>
+        )}
       </div>
     </div>
   );

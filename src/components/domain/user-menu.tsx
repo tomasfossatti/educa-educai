@@ -54,9 +54,12 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
         </svg>
       </button>
 
-      {/* Menú flotante (dropdown) */}
+      {/* Menú flotante (dropdown) con fondo 100% opaco y sólido */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-line bg-surface-1/95 p-2 shadow-2xl backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div
+          className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-line p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+          style={{ backgroundColor: "#101726", opacity: 1 }}
+        >
           {/* Datos del usuario */}
           <div className="border-b border-line/60 px-3 py-2.5">
             <p className="truncate text-xs font-bold text-ink">{userName}</p>

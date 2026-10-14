@@ -33,23 +33,28 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
   const concepts = items.filter((i) => i.kind === "CONCEPT");
   const activeConversation = conversations.find((c) => c.status === "ACTIVE") || conversations[0];
 
-  // Objetivo general de la clase de hoy (extraído de la currícula)
+  // Concepto central de la clase de hoy (extraído de la currícula)
   const currentConcept = concepts.find((c) => c.title.toLowerCase().includes("hipótesis")) || concepts[0];
-  const learningGoal = currentConcept
-    ? `${currentConcept.title}: ${currentConcept.description}`
-    : "Formular hipótesis de negocio falsables (métrica, umbral y plazo) para no perder tiempo ni plata en ideas que no funcionan.";
+  const conceptTitle = currentConcept?.title || "hipótesis falsables";
+  const conceptDescription = currentConcept?.description || "Formular hipótesis de negocio falsables (métrica, umbral y plazo) para no perder tiempo ni plata en ideas que no funcionan.";
 
-  // Personalización basada en el perfil declarado del estudiante (Refuerzo positivo y Autoeficacia)
-  let personalizedApplication = "dominar hipótesis falsables y validar decisiones estratégicas en tus proyectos profesionales y personales.";
+  // Organización o contexto declarado en el onboarding
+  let userOrganization = "tu empresa o emprendimiento";
   if (profile?.declaredCurrentContext) {
-    if (profile.declaredCurrentContext.toLowerCase().includes("restaurante")) {
-      personalizedApplication = "validar las promociones, combos y el nuevo menú semanal en tu restaurante en Rosario.";
-    } else if (profile.declaredCurrentContext.toLowerCase().includes("diseño") || profile.declaredCurrentContext.toLowerCase().includes("interfaces")) {
-      personalizedApplication = "descubrir métricas de usabilidad y testear hipótesis de comportamiento antes de diseñar interfaces completas.";
-    } else if (profile.declaredCurrentContext.toLowerCase().includes("logística") || profile.declaredCurrentContext.toLowerCase().includes("commerce")) {
-      personalizedApplication = "conectar hipótesis de entrega y satisfacción de clientes antes de modificar los flujos logísticos del e-commerce.";
+    const raw = profile.declaredCurrentContext.trim();
+    if (raw.toLowerCase().includes("restaurante")) {
+      userOrganization = "tu restaurante en el centro de Rosario";
+    } else if (raw.toLowerCase().includes("diseño") || raw.toLowerCase().includes("interfaces")) {
+      userOrganization = "tus proyectos de diseño e interfaces";
+    } else if (raw.toLowerCase().includes("logística") || raw.toLowerCase().includes("commerce")) {
+      userOrganization = "tu e-commerce";
     } else {
-      personalizedApplication = `dominar experimentos simples y supuestos falsables en: ${profile.declaredCurrentContext.slice(0, 120)}.`;
+      const cleaned = raw
+        .replace(/^trabajo en (el área comercial de |la parte de )?/i, "")
+        .replace(/^trabajo en /i, "")
+        .replace(/^soy /i, "")
+        .replace(/\.$/, "");
+      userOrganization = cleaned.length > 55 ? cleaned.slice(0, 55) + "…" : cleaned;
     }
   }
 
@@ -62,8 +67,9 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
         teacherName={course.teacher.user.name}
         totalClasses={8}
         currentClassNumber={4}
-        learningGoal={learningGoal}
-        personalizedApplication={personalizedApplication}
+        conceptTitle={conceptTitle}
+        conceptDescription={conceptDescription}
+        userOrganization={userOrganization}
         activity={
           activity
             ? {
