@@ -255,14 +255,18 @@ export function ClassDashboard({
             >
               {/* Pregunta */}
               <p className="text-xs sm:text-sm font-semibold text-white leading-snug min-h-[42px] transition-opacity duration-300">
-                «{CLASS_QUESTIONS[questionIndex]}»
+                {CLASS_QUESTIONS[questionIndex]}
               </p>
 
-              {/* Abajo a la derecha: Preguntale a la IA */}
-              <div className="flex justify-end items-center w-full">
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary group-hover:text-primary-hover transition-colors">
-                  <span>Preguntale a la IA</span>
-                  <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">→</span>
+              {/* Abajo a la derecha: flecha siempre visible, texto "Preguntale a la IA" visible únicamente en hover */}
+              <div className="flex justify-end items-center w-full min-h-[20px]">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-primary group-hover:text-primary-hover transition-colors">
+                  <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap transition-all duration-200 ease-out group-hover:max-w-[140px] group-hover:opacity-100">
+                    Preguntale a la IA
+                  </span>
+                  <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5 text-xs">
+                    →
+                  </span>
                 </span>
               </div>
             </button>
