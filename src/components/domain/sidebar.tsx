@@ -88,13 +88,13 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
           "fixed inset-y-0 left-0 z-50 w-72 sm:w-80 flex flex-col border-r border-line shadow-2xl transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0 pointer-events-auto" : "-translate-x-full pointer-events-none",
         )}
-        style={{ backgroundColor: "#0c1017" }}
+        style={{ backgroundColor: "#0A0B0D" }}
         role="dialog"
         aria-modal="true"
         aria-label="Menú lateral"
       >
         {/* Cabecera del sidebar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-line/60">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
           <Link href={home} onClick={onClose} className="brand flex items-center gap-2 group">
             <span className="brand-wordmark text-lg">
               <span className="brand-wordmark-base">educ</span>
@@ -105,7 +105,7 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center justify-center p-1.5 rounded-lg text-muted hover:text-white hover:bg-surface-2 transition-colors"
+            className="flex items-center justify-center p-1.5 rounded-lg text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.06] transition-colors"
             aria-label="Cerrar menú"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,7 +118,7 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
           {/* ──────────────── LOS 3 NOMBRES UNO ABAJO DEL OTRO ──────────────── */}
           <div className="space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8A8F98] px-2">
               Proyectos & Herramientas
             </span>
             <div className="space-y-1.5">
@@ -128,20 +128,20 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "group flex items-center justify-between rounded-xl border p-3 transition-all shadow-sm",
+                    "group flex items-center justify-between rounded-xl border p-3 transition-all duration-150 shadow-sm",
                     pathname === item.href
-                      ? "border-primary bg-primary/20 text-white font-semibold"
-                      : "border-line bg-surface-2/70 hover:bg-surface-3 hover:border-primary/50",
+                      ? "border-primary bg-primary/15 text-white font-semibold shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
+                      : "border-white/[0.08] bg-[#0F1011] hover:bg-[#141517] hover:border-white/[0.18]",
                   )}
                 >
                   <div className="space-y-0.5 min-w-0">
-                    <p className="text-xs sm:text-sm font-bold text-white group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
+                    <p className="text-xs sm:text-sm font-semibold text-[#F7F8F8] group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
                       <span className="truncate">{item.name}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-3 border border-line/60 text-muted group-hover:text-ink shrink-0">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.08] text-[#8A8F98] group-hover:text-[#D0D6E0] shrink-0">
                         {item.badge}
                       </span>
                     </p>
-                    <p className="text-[11px] text-muted truncate">
+                    <p className="text-[11px] text-[#8A8F98] truncate">
                       {item.description}
                     </p>
                   </div>

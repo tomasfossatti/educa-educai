@@ -10,8 +10,10 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap",
-        active ? "bg-subtle font-medium text-ink" : "text-ink-2 hover:bg-subtle hover:text-ink",
+        "rounded-lg px-2.5 py-1 text-xs whitespace-nowrap transition-all duration-150 font-medium",
+        active
+          ? "bg-white/[0.08] border border-white/[0.12] text-[#F7F8F8] shadow-sm"
+          : "text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.04]",
       )}
     >
       {label}

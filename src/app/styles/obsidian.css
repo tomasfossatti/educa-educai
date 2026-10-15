@@ -1,21 +1,21 @@
 :root {
-  --obsidian-bg: #070910;
-  --obsidian-bg-2: #0b0f1a;
-  --obsidian-panel: rgba(15, 20, 34, .78);
-  --obsidian-panel-strong: rgba(19, 25, 42, .94);
-  --obsidian-border: rgba(163, 184, 255, .15);
-  --obsidian-border-strong: rgba(163, 184, 255, .28);
-  --obsidian-text: #f6f8ff;
-  --obsidian-muted: #99a4bd;
-  --obsidian-faint: #68748d;
-  --obsidian-primary: #5b7cfa;
-  --obsidian-primary-2: #7ba6ff;
+  --obsidian-bg: #08090A;
+  --obsidian-bg-2: #0B0C0E;
+  --obsidian-panel: rgba(15, 16, 17, 0.88);
+  --obsidian-panel-strong: rgba(18, 20, 20, 0.95);
+  --obsidian-border: rgba(255, 255, 255, 0.08);
+  --obsidian-border-strong: rgba(255, 255, 255, 0.16);
+  --obsidian-text: #F7F8F8;
+  --obsidian-muted: #D0D6E0;
+  --obsidian-faint: #8A8F98;
+  --obsidian-primary: #5E6AD2;
+  --obsidian-primary-2: #717DE3;
   --obsidian-cyan: #72dcff;
-  --obsidian-success: #58d8aa;
-  --obsidian-warning: #ffcb70;
-  --obsidian-danger: #ff7b91;
-  --obsidian-ring: #8eb6ff;
-  --obsidian-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+  --obsidian-success: #51C6A5;
+  --obsidian-warning: #E4B766;
+  --obsidian-danger: #E26D78;
+  --obsidian-ring: #717DE3;
+  --obsidian-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
 html { color-scheme: dark; background: var(--obsidian-bg); }

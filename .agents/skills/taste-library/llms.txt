@@ -1,0 +1,20 @@
+# Taste Library
+
+> Website design references from Cosign’s High Taste ranking, extracted with TasteLabs and organized for agents.
+
+Start with the compact catalog, read candidate profiles, then retrieve only relevant evidence sections. Entries retain capture dates and quality flags. Editorial recommendations are separate from extracted observations. These files describe observed web pages, not official brand manuals.
+
+## Entry points
+
+- [Agent guide](https://raw.githubusercontent.com/MartinPuli/taste-library/main/AGENTS.md): Selection workflow and evidence rules.
+- [Compact catalog](https://raw.githubusercontent.com/MartinPuli/taste-library/main/catalog/search.json): Candidate names, tags, and profile paths.
+- [Taxonomy](https://raw.githubusercontent.com/MartinPuli/taste-library/main/catalog/taxonomy.json): Supported project types, styles, and components.
+- [Reusable skill](https://raw.githubusercontent.com/MartinPuli/taste-library/main/skills/taste-library/SKILL.md): Portable reference-selection instructions.
+- [Agent access](https://raw.githubusercontent.com/MartinPuli/taste-library/main/guides/agent-access.md): Local and remote reading.
+
+## Optional
+
+- [Full catalog](https://raw.githubusercontent.com/MartinPuli/taste-library/main/catalog/index.json): Component evidence pointers and section paths.
+- [Worked examples](https://raw.githubusercontent.com/MartinPuli/taste-library/main/guides/worked-examples.md): Two briefs with cited choices.
+- [Packaging decisions](https://raw.githubusercontent.com/MartinPuli/taste-library/main/guides/agent-packaging.md): Standards consulted on October 14, 2026.
+- [Rights](https://raw.githubusercontent.com/MartinPuli/taste-library/main/RIGHTS.md): Third-party materials.

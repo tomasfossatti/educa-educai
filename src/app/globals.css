@@ -11,19 +11,20 @@
 @import "./styles/color-system.css";
 
 @theme {
-  --color-canvas: #070A12;
-  --color-surface: #101726;
-  --color-surface-2: #151E32;
-  --color-ink: #F1F4FB;
-  --color-ink-2: #A7B1C6;
-  --color-muted: #8E99B0;
-  --color-faint: #626D83;
-  --color-line: #202A3D;
-  --color-line-strong: #32446B;
-  --color-subtle: #151E32;
-  --color-primary: #7896EE;
-  --color-primary-hover: #8BA7F6;
-  --color-primary-soft: #17213B;
+  --color-canvas: #08090A;
+  --color-surface: #0F1011;
+  --color-surface-2: #121414;
+  --color-surface-3: #18191B;
+  --color-ink: #F7F8F8;
+  --color-ink-2: #D0D6E0;
+  --color-muted: #8A8F98;
+  --color-faint: #62666D;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-subtle: #121414;
+  --color-primary: #5E6AD2;
+  --color-primary-hover: #717DE3;
+  --color-primary-soft: rgba(94, 106, 210, 0.14);
   --color-attention: #E4B766;
   --color-attention-soft: #261f12;
   --color-danger: #E26D78;
@@ -36,15 +37,14 @@
 
 html {
   color-scheme: dark;
-  background: #070A12;
+  background: #08090A;
 }
 
 body {
   background:
-    radial-gradient(circle at 14% 0%, rgba(74, 103, 220, .18), transparent 33rem),
-    radial-gradient(circle at 88% 14%, rgba(36, 177, 222, .09), transparent 30rem),
-    linear-gradient(180deg, #090c15 0%, #06080e 58%, #080b13 100%) !important;
-  color: #F1F4FB !important;
+    radial-gradient(ellipse 65% 45% at 50% 0%, rgba(94, 106, 210, 0.09), transparent 70%),
+    linear-gradient(180deg, #08090A 0%, #060708 100%) !important;
+  color: #D0D6E0 !important;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;

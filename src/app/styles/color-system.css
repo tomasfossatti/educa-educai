@@ -1,25 +1,25 @@
 /* Educai chromatic system — single source of truth for dark surfaces and semantic color. */
 :root {
-  --bg-base: #070A12;
-  --bg-elevated: #0A0F1C;
+  --bg-base: #08090A;
+  --bg-elevated: #0B0C0E;
 
-  --surface-1: #101726;
-  --surface-2: #151E32;
-  --surface-3: #1A2540;
-  --surface-secondary: #0D1322;
+  --surface-1: #0F1011;
+  --surface-2: #121414;
+  --surface-3: #18191B;
+  --surface-secondary: #0D0E10;
 
-  --border-subtle: #202A3D;
-  --border-strong: #32446B;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
-  --text-primary: #F1F4FB;
-  --text-secondary: #A7B1C6;
-  --text-tertiary: #8E99B0;
-  --text-disabled: #626D83;
+  --text-primary: #F7F8F8;
+  --text-secondary: #D0D6E0;
+  --text-tertiary: #8A8F98;
+  --text-disabled: #62666D;
 
-  --primary: #7896EE;
-  --primary-hover: #8BA7F6;
-  --primary-muted: #17213B;
-  --primary-border: #34497D;
+  --primary: #5E6AD2;
+  --primary-hover: #717DE3;
+  --primary-muted: rgba(94, 106, 210, 0.14);
+  --primary-border: rgba(94, 106, 210, 0.35);
 
   --brand-pink: #EC2B91;
   --brand-pink-muted: #321426;

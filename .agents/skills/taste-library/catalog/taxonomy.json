@@ -1,0 +1,39 @@
+{
+  "use_cases": {
+    "hardware": "Device and physical-product presentation",
+    "developer-tools": "Developer tools and infrastructure",
+    "editorial-research": "Research, publications, and explaining ideas",
+    "creative-tools": "Tools for creating or editing content",
+    "media-discovery": "Catalogs, playback, and visual discovery",
+    "fintech": "Payments, banking, and financial management",
+    "hospitality": "Accommodation search and travel",
+    "productivity": "Work organization, search, and information capture",
+    "authentication": "User sign-in and registration"
+  },
+  "styles": {
+    "warm-editorial": "Warm backgrounds and editorial composition",
+    "dark-technical": "Dark surfaces with technical styling",
+    "monochrome": "Structure built around white, black, and gray",
+    "cinematic": "Large-scale photography or video",
+    "color-accent": "Color accents identifying actions or blocks",
+    "image-led": "Images as the main content",
+    "modular": "Blocks, cards, or grids that organize content",
+    "retro-digital": "Early computing references, pixels, or dithering"
+  },
+  "quality": {
+    "extracted_unverified": "Extracted values; see each review record for the specific checks performed. Not a fully verified design system.",
+    "limited": "Read the accompanying metadata before adopting values."
+  },
+  "components": [
+    "accordions",
+    "buttons",
+    "cards",
+    "carousels",
+    "charts",
+    "forms",
+    "logo-strips",
+    "navigation",
+    "tables",
+    "video"
+  ]
+}

@@ -214,7 +214,7 @@ export function GetItWorkbench() {
           [0, 4], [1, 5], [2, 6], [3, 7],
         ];
 
-        ctx.strokeStyle = "#5b66f1";
+        ctx.strokeStyle = "#5E6AD2";
         ctx.lineWidth = 1.8;
         edges.forEach(([i, j]) => {
           ctx.beginPath();
@@ -225,19 +225,19 @@ export function GetItWorkbench() {
 
         // Nodos del cubo
         projected.forEach(([x, y], idx) => {
-          ctx.fillStyle = idx === 6 ? "#10b981" : "#818cf8";
+          ctx.fillStyle = idx === 6 ? "#51C6A5" : "#717DE3";
           ctx.beginPath();
           ctx.arc(x, y, idx === 6 ? 5 : 3.5, 0, Math.PI * 2);
           ctx.fill();
         });
 
         // Etiqueta del nodo óptimo
-        ctx.fillStyle = "#94a3b8";
+        ctx.fillStyle = "#8A8F98";
         ctx.font = "10px monospace";
         ctx.fillText("Espacio de Falsabilidad (Métrica x Plazo)", cx - 110, canvas.height - 15);
       } else if (currentConcept.tagType === "formula") {
         // Renderizador de gráfico de umbral
-        ctx.strokeStyle = "#334155";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(30, canvas.height - 30);
@@ -248,7 +248,7 @@ export function GetItWorkbench() {
 
         // Línea de corte (umbral)
         ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = "#f43f5e";
+        ctx.strokeStyle = "#E26D78";
         ctx.beginPath();
         ctx.moveTo(30, cy);
         ctx.lineTo(canvas.width - 20, cy);
@@ -256,23 +256,23 @@ export function GetItWorkbench() {
         ctx.setLineDash([]);
 
         // Curva acumulada
-        ctx.strokeStyle = "#10b981";
+        ctx.strokeStyle = "#51C6A5";
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.moveTo(30, canvas.height - 30);
         ctx.quadraticCurveTo(cx, cy + 20, canvas.width - 40, 40);
         ctx.stroke();
 
-        ctx.fillStyle = "#f43f5e";
+        ctx.fillStyle = "#E26D78";
         ctx.font = "10px monospace";
         ctx.fillText("Umbral de éxito (20%)", canvas.width - 145, cy - 8);
 
-        ctx.fillStyle = "#10b981";
+        ctx.fillStyle = "#51C6A5";
         ctx.fillText("Pedidos confirmados", canvas.width - 135, 35);
       } else {
         // Gráfico de radar / distribución de sesgo
         const r = 60;
-        ctx.strokeStyle = "#6366f1";
+        ctx.strokeStyle = "#5E6AD2";
         ctx.lineWidth = 2;
         ctx.beginPath();
         for (let i = 0; i < 6; i++) {
@@ -284,11 +284,11 @@ export function GetItWorkbench() {
           else ctx.lineTo(px, py);
         }
         ctx.closePath();
-        ctx.fillStyle = "rgba(99, 102, 241, 0.15)";
+        ctx.fillStyle = "rgba(94, 106, 210, 0.15)";
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = "#cbd5e1";
+        ctx.fillStyle = "#D0D6E0";
         ctx.font = "10px sans-serif";
         ctx.fillText("Compromiso Real vs Cortesía", cx - 75, canvas.height - 15);
       }
