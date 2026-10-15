@@ -1,12 +1,12 @@
 .obsidian-arrow-fill-btn {
-  --btn-bg: #5b7cfa;
+  --btn-bg: #5E6AD2;
   --btn-text: #ffffff;
   --btn-fill-bg: #eef3ff;
   --btn-fill-text: #15224b;
   --btn-fill-bg-hover: #ffffff;
-  --btn-fill-text-hover: #111827;
+  --btn-fill-text-hover: #08090A;
   --btn-arrow: #15224b;
-  --btn-arrow-hover: #111827;
+  --btn-arrow-hover: #08090A;
   display: inline-flex;
   align-items: center;
   justify-content: center;

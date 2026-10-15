@@ -40,7 +40,7 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-2 text-ink-2 shadow-sm transition-all hover:border-line-strong hover:bg-surface-3 hover:text-ink focus:outline-none focus:ring-2 focus:ring-primary/40 active:scale-95"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] bg-[#121414] text-[#D0D6E0] shadow-sm transition-all hover:border-white/[0.16] hover:bg-[#18191B] hover:text-[#F7F8F8] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2]/50 active:scale-95"
         aria-label="Abrir menú de usuario"
         aria-expanded={isOpen}
       >
@@ -54,22 +54,21 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
         </svg>
       </button>
 
-      {/* Menú flotante (dropdown) con fondo 100% opaco y sólido */}
+      {/* Menú flotante (dropdown) con fondo sólido Linear */}
       {isOpen && (
         <div
-          className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-line p-2 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-          style={{ backgroundColor: "#101726", opacity: 1 }}
+          className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/[0.08] bg-[#171718] p-2 shadow-[0px_7px_32px_rgba(0,0,0,0.5)] z-50 animate-in fade-in slide-in-from-top-2 duration-150"
         >
           {/* Datos del usuario */}
-          <div className="border-b border-line/60 px-3 py-2.5">
-            <p className="truncate text-xs font-bold text-ink">{userName}</p>
-            <p className="truncate text-[11px] text-muted">{roleLabel}</p>
+          <div className="border-b border-white/[0.08] px-3 py-2.5">
+            <p className="truncate text-xs font-bold text-[#F7F8F8]">{userName}</p>
+            <p className="truncate text-[11px] text-[#8A8F98]">{roleLabel}</p>
           </div>
 
           {/* Enlaces de usuario si los hay (ej. Tu contexto) */}
           {userLinks && (
             <div
-              className="border-b border-line/60 px-1 py-1.5 text-xs text-ink-2 [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-lg [&_a]:px-2.5 [&_a]:py-1.5 [&_a]:transition-colors hover:[&_a]:bg-surface-2 hover:[&_a]:text-ink"
+              className="border-b border-white/[0.08] px-1 py-1.5 text-xs text-[#D0D6E0] [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-lg [&_a]:px-2.5 [&_a]:py-1.5 [&_a]:transition-colors hover:[&_a]:bg-white/[0.06] hover:[&_a]:text-[#F7F8F8]"
               onClick={() => setIsOpen(false)}
             >
               {userLinks}

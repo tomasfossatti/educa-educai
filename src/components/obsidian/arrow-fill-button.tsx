@@ -28,7 +28,7 @@ export function ArrowFillButton({
   className,
   onClick,
   ariaLabel,
-  bgColor = "#5b7cfa",
+  bgColor = "#5E6AD2",
   textColor = "#ffffff",
   fillBgColor = "#f4f7ff",
   fillTextColor = "#14214a",
@@ -39,9 +39,9 @@ export function ArrowFillButton({
     "--btn-fill-bg": fillBgColor,
     "--btn-fill-text": fillTextColor,
     "--btn-fill-bg-hover": "#ffffff",
-    "--btn-fill-text-hover": "#111827",
+    "--btn-fill-text-hover": "#08090A",
     "--btn-arrow": fillTextColor,
-    "--btn-arrow-hover": "#111827",
+    "--btn-arrow-hover": "#08090A",
   };
 
   const content = <>

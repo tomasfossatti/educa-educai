@@ -54,23 +54,41 @@ export function Section({
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("rounded-2xl border border-line bg-surface/80 p-5 shadow-sm backdrop-blur-sm", className)}>{children}</div>;
+  return (
+    <div
+      className={cn(
+        "relative rounded-2xl border border-white/[0.08] bg-[#0F1011] p-5 shadow-[0_2px_4px_rgba(0,0,0,0.1)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.1] before:to-transparent",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 /** Lista con separadores finos: la estructura por defecto en vez de muchas cards. */
 export function List({ children, className }: { children: ReactNode; className?: string }) {
-  return <ul className={cn("divide-y divide-line rounded-2xl border border-line bg-surface/80 shadow-sm backdrop-blur-sm overflow-hidden", className)}>{children}</ul>;
+  return (
+    <ul
+      className={cn(
+        "divide-y divide-white/[0.06] rounded-2xl border border-white/[0.08] bg-[#0F1011] shadow-[0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden",
+        className
+      )}
+    >
+      {children}
+    </ul>
+  );
 }
 
 export function ListItem({ children, className }: { children: ReactNode; className?: string }) {
-  return <li className={cn("px-4 py-3.5 transition-colors hover:bg-surface-2/50", className)}>{children}</li>;
+  return <li className={cn("px-4 py-3.5 transition-colors hover:bg-white/[0.03]", className)}>{children}</li>;
 }
 
 export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line-strong bg-surface/40 px-4 py-8 text-center text-sm backdrop-blur-sm">
-      <p className="font-semibold text-ink">{title}</p>
-      {children && <div className="mt-1 text-muted max-w-md mx-auto">{children}</div>}
+    <div className="rounded-2xl border border-dashed border-white/[0.12] bg-[#0F1011]/60 px-4 py-8 text-center text-sm backdrop-blur-sm">
+      <p className="font-semibold text-[#F7F8F8]">{title}</p>
+      {children && <div className="mt-1 text-[#8A8F98] max-w-md mx-auto">{children}</div>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );

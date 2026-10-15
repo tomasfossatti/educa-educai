@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 const control =
-  "w-full rounded-md border border-line-strong bg-surface px-3 text-sm text-ink placeholder:text-faint focus:border-primary focus:outline-none disabled:bg-subtle";
+  "w-full rounded-lg border border-white/[0.08] bg-[#0F1011] px-3 text-sm text-[#F7F8F8] placeholder:text-[#62666D] focus:border-[#5E6AD2] focus:ring-1 focus:ring-[#5E6AD2]/50 focus:outline-none transition-colors duration-150 disabled:bg-white/[0.02] disabled:cursor-not-allowed";
 
 export function Field({
   label,

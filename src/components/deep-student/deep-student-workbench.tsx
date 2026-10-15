@@ -201,7 +201,7 @@ export function DeepStudentWorkbench() {
                 key={idx}
                 type="button"
                 onClick={() => handleApplyPreset(p)}
-                className="rounded-lg border border-line bg-surface-2 px-2.5 py-1 text-[11px] text-muted hover:text-white hover:border-indigo-400/50 transition-colors"
+                className="rounded-lg border border-white/[0.08] bg-[#121414] px-2.5 py-1 text-[11px] font-mono text-[#8A8F98] hover:text-[#F7F8F8] hover:border-white/[0.18] transition-colors"
               >
                 {p.label}
               </button>
@@ -215,13 +215,13 @@ export function DeepStudentWorkbench() {
             value={topic}
             onChange={(e) => handleSaveToStorage(e.target.value, notes)}
             placeholder="Definí el tema o desafío a resolver con el agente…"
-            className="w-full sm:flex-1 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs sm:text-sm text-white placeholder-muted focus:outline-none focus:border-indigo-400 transition-colors"
+            className="w-full sm:flex-1 rounded-xl border border-white/[0.08] bg-[#121414] px-3.5 py-2 text-xs sm:text-sm text-[#F7F8F8] placeholder-[#62666D] focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-colors"
           />
           <button
             type="button"
             onClick={handleRunAgentReasoning}
             disabled={isRunning}
-            className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-indigo-500 to-primary px-4 py-2 text-xs font-bold text-white hover:opacity-90 shadow-md transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap"
+            className="w-full sm:w-auto rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.15)] hover:bg-primary-hover border border-primary-hover/40 transition-all active:scale-95 disabled:opacity-50 whitespace-nowrap"
           >
             {isRunning ? "Analizando con IA…" : "Ejecutar Razonamiento con IA"}
           </button>
@@ -231,16 +231,16 @@ export function DeepStudentWorkbench() {
       {/* ──────────────── CONTENIDO DEL WORKBENCH ──────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 flex-1 items-start">
         {/* COLUMNA 1 & 2: LÍNEA DE RAZONAMIENTO DEL AGENTE */}
-        <div className="lg:col-span-2 rounded-2xl border border-line bg-surface-1/90 p-5 space-y-5 shadow-sm">
-          <div className="flex items-center justify-between border-b border-line/60 pb-3 flex-wrap gap-3">
+        <div className="lg:col-span-2 rounded-2xl border border-white/[0.08] bg-[#0F1011] p-5 space-y-5 shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+          <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 flex-wrap gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm sm:text-base font-bold text-white">Línea de Razonamiento del Agente</h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono border border-indigo-400/30 bg-indigo-950/40 text-indigo-300">
+                <h2 className="text-sm sm:text-base font-bold text-[#F7F8F8]">Línea de Razonamiento del Agente</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono border border-primary/30 bg-primary/10 text-primary-light">
                   Progreso: {progressPercent}%
                 </span>
               </div>
-              <p className="text-xs text-muted">Descomposición y resolución guiada paso a paso.</p>
+              <p className="text-xs text-[#8A8F98]">Descomposición y resolución guiada paso a paso.</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export function DeepStudentWorkbench() {
                 onClick={handleExportProtocol}
                 className="rounded-xl border border-line bg-surface-2 px-3 py-1.5 text-xs font-semibold text-muted hover:text-white transition-colors"
               >
-                {copiedProtocol ? "Copiado ✓" : "Exportar protocolo"}
+                {copiedProtocol ? "Copiado" : "Exportar protocolo"}
               </button>
               <button
                 type="button"
@@ -257,7 +257,7 @@ export function DeepStudentWorkbench() {
                 disabled={completedCount === steps.length}
                 className="rounded-xl bg-primary px-3.5 py-1.5 text-xs font-bold text-white hover:bg-primary-hover shadow-md transition-all active:scale-95 disabled:opacity-40"
               >
-                Avanzar siguiente paso →
+                Avanzar siguiente paso
               </button>
             </div>
           </div>
@@ -287,7 +287,7 @@ export function DeepStudentWorkbench() {
                       step.status === "pending" && "text-muted bg-surface-3",
                     )}
                   >
-                    {step.status === "completed" ? "Completado ✓" : step.status === "active" ? "En curso" : "Pendiente"}
+                    {step.status === "completed" ? "Completado" : step.status === "active" ? "En curso" : "Pendiente"}
                   </span>
                 </div>
 

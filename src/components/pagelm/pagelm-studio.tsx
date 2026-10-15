@@ -478,10 +478,10 @@ export function PageLMStudio() {
   return (
     <div className="w-full flex-1 flex flex-col h-[calc(100vh-5.5rem)] text-ink overflow-hidden">
       {/* ──────────────── CABECERA ESTILO NOTEBOOKLM ──────────────── */}
-      <header className="flex items-center justify-between px-3 py-2 border-b border-line/60 bg-surface-base shrink-0">
+      <header className="flex items-center justify-between px-3 py-2 border-b border-white/[0.08] bg-[#08090A] shrink-0">
         <div className="flex items-center gap-3">
           {/* Logo circular de cuaderno */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-indigo-400 flex items-center justify-center text-white shadow-md shadow-primary/20">
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.15)] border border-primary-hover/40">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
@@ -496,16 +496,16 @@ export function PageLMStudio() {
               onBlur={() => setIsEditingTitle(false)}
               onChange={(e) => setNotebookTitle(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && setIsEditingTitle(false)}
-              className="rounded-lg bg-surface-2 border border-primary px-2.5 py-1 text-sm font-semibold text-white focus:outline-none"
+              className="rounded-lg bg-[#121414] border border-primary px-2.5 py-1 text-sm font-semibold text-[#F7F8F8] focus:outline-none focus:ring-1 focus:ring-primary/40"
             />
           ) : (
             <button
               type="button"
               onClick={() => setIsEditingTitle(true)}
-              className="text-sm font-semibold text-white hover:text-primary transition-colors flex items-center gap-2 group"
+              className="text-sm font-semibold text-[#F7F8F8] hover:text-primary transition-colors flex items-center gap-2 group"
             >
               <span>{notebookTitle}</span>
-              <svg className="w-3.5 h-3.5 text-muted opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5 text-[#8A8F98] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
             </button>
@@ -520,13 +520,13 @@ export function PageLMStudio() {
               setChatMessages([]);
               setActiveStudioView("grid");
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-line bg-surface-1 hover:bg-surface-2 text-xs font-semibold text-muted hover:text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-[#121414] hover:bg-[#18191B] text-xs font-semibold text-[#8A8F98] hover:text-[#F7F8F8] transition-colors"
           >
             <span>+ Crear cuaderno</span>
           </button>
           <Link
             href="/s"
-            className="px-3 py-1.5 rounded-xl border border-line bg-surface-1 hover:bg-surface-2 text-xs font-semibold text-muted hover:text-white transition-colors"
+            className="px-3 py-1.5 rounded-xl border border-white/[0.08] bg-[#121414] hover:bg-[#18191B] text-xs font-semibold text-[#8A8F98] hover:text-[#F7F8F8] transition-colors"
           >
             ← Volver al curso
           </Link>
@@ -647,7 +647,9 @@ export function PageLMStudio() {
                         className="text-muted hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
                         title="Eliminar fuente"
                       >
-                        ✕
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
                     <p className="text-[10px] text-muted line-clamp-2 leading-relaxed pl-5">{src.content}</p>
@@ -1013,16 +1015,28 @@ export function PageLMStudio() {
                         type="button"
                         onClick={isPlayingAudio ? handlePauseAudio : currentLineIndex >= 0 ? handleResumeAudio : handlePlayAudio}
                         className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs shadow-md hover:bg-primary-hover transition-colors"
+                        title={isPlayingAudio ? "Pausar" : "Reproducir"}
                       >
-                        {isPlayingAudio ? "⏸" : "▶"}
+                        {isPlayingAudio ? (
+                          <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        )}
                       </button>
                       {isPlayingAudio && (
                         <button
                           type="button"
                           onClick={handleStopAudio}
                           className="w-7 h-7 rounded-full border border-line bg-surface-3 text-muted hover:text-white flex items-center justify-center text-[10px]"
+                          title="Detener"
                         >
-                          ⏹
+                          <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
+                            <rect x="5" y="5" width="14" height="14" rx="2" />
+                          </svg>
                         </button>
                       )}
                       <div>
@@ -1240,7 +1254,7 @@ export function PageLMStudio() {
                       onClick={handleCopyNotes}
                       className="text-[11px] font-bold text-muted hover:text-white"
                     >
-                      {notesCopied ? "Copiado ✓" : "Copiar"}
+                      {notesCopied ? "Copiado" : "Copiar"}
                     </button>
                     <button
                       type="button"
@@ -1292,7 +1306,7 @@ export function PageLMStudio() {
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold text-muted uppercase">Paso {idx + 1}</span>
                         <span className={cn("text-[10px] font-bold", m.done ? "text-emerald-400" : "text-muted")}>
-                          {m.done ? "Completado ✓" : "Pendiente"}
+                          {m.done ? "Completado" : "Pendiente"}
                         </span>
                       </div>
                       <p className="font-bold text-white text-[11px]">{m.title}</p>

@@ -333,7 +333,7 @@ export function Sidebar({ isOpen, onClose, home, userName, roleLabel }: SidebarP
         </div>
 
         {/* Footer del sidebar con usuario y salida */}
-        <div className="border-t border-line/60 p-4 space-y-3 bg-[#0a0d14]">
+        <div className="border-t border-white/[0.08] p-4 space-y-3 bg-[#0A0B0D]">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-xs border border-primary/30">
               {userName.charAt(0).toUpperCase()}

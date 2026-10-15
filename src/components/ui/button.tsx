@@ -2,17 +2,21 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "invert";
 type Size = "sm" | "md";
 
 const base =
   "inline-flex items-center justify-center gap-1.5 font-medium transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap active:scale-[0.98]";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-primary text-white hover:bg-primary-hover shadow-sm font-semibold border border-primary-hover/40",
-  secondary: "border border-line bg-surface text-ink hover:bg-surface-2 hover:border-line-strong font-medium",
-  ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
-  danger: "border border-danger/30 bg-surface text-danger hover:bg-danger-soft",
+  primary:
+    "bg-primary text-white hover:bg-primary-hover shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.15)] font-semibold border border-primary-hover/40",
+  secondary:
+    "border border-white/[0.08] bg-[#18191B] text-[#D0D6E0] hover:bg-[#202225] hover:border-white/[0.16] hover:text-[#F7F8F8] font-medium shadow-sm",
+  ghost: "text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.06]",
+  danger: "border border-rose-500/30 bg-surface text-rose-400 hover:bg-rose-500/10",
+  invert:
+    "bg-[#E5E5E6] text-[#08090A] hover:bg-white hover:text-black font-semibold border border-transparent shadow-[0_1px_2px_rgba(0,0,0,0.2)]",
 };
 
 const sizes: Record<Size, string> = {
