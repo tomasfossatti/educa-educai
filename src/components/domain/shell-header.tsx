@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { UserMenu } from "@/components/domain/user-menu";
 import { Sidebar } from "@/components/domain/sidebar";
+import { OPEN_SIDEBAR_EVENT } from "@/lib/sidebar";
 
 interface ShellHeaderProps {
   home: string;
@@ -22,6 +23,16 @@ export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: Shell
 
   const handleCloseSidebar = useCallback(() => {
     setIsSidebarOpen(false);
+  }, []);
+
+  useEffect(() => {
+    function handleGlobalOpen() {
+      setIsSidebarOpen(true);
+    }
+    window.addEventListener(OPEN_SIDEBAR_EVENT, handleGlobalOpen);
+    return () => {
+      window.removeEventListener(OPEN_SIDEBAR_EVENT, handleGlobalOpen);
+    };
   }, []);
 
   return (

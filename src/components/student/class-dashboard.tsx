@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { triggerOpenSidebar } from "@/lib/sidebar";
 
 interface ClassDashboardProps {
   courseId: string;
@@ -264,9 +265,9 @@ export function ClassDashboard({
                   <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap transition-all duration-200 ease-out group-hover:max-w-[140px] group-hover:opacity-100">
                     Preguntale a la IA
                   </span>
-                  <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5 text-xs">
-                    →
-                  </span>
+                  <svg aria-hidden="true" className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
                 </span>
               </div>
             </button>
@@ -274,8 +275,22 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 2) BOTONES: "Adjuntá" - "Conversá" (Lado a lado con separación) ──────────────── */}
-      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-1 shrink-0">
+      {/* ──────────────── 2) BOTONES: "Generá" - "Adjuntá" - "Conversá" ──────────────── */}
+      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-1 shrink-0">
+        {/* Botón Generá: a la izquierda, abre el menú lateral */}
+        <button
+          type="button"
+          onClick={triggerOpenSidebar}
+          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.12] bg-[#121414] hover:bg-[#18191B] hover:border-white/[0.22] px-8 py-3 text-sm sm:text-base font-bold text-[#F7F8F8] shadow-sm hover:shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all active:scale-[0.98] cursor-pointer"
+          title="Abrir menú lateral de proyectos y herramientas"
+        >
+          <svg className="w-4.5 h-4.5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth={1.8} />
+            <path strokeLinecap="round" strokeWidth={1.8} d="M9 3v18" />
+          </svg>
+          <span>Generá</span>
+        </button>
+
         {attached ? (
           <div className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 px-7 py-3 text-sm sm:text-base font-bold text-emerald-400 shadow-sm">
             <svg className="w-4.5 h-4.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -288,7 +303,7 @@ export function ClassDashboard({
             type="button"
             onClick={handleAttach}
             disabled={isAttaching}
-            className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/50 bg-surface-2 hover:bg-surface-3 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] transition-all active:scale-[0.98] disabled:opacity-50"
+            className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/50 bg-surface-2 hover:bg-surface-3 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
           >
             {isAttaching ? "Adjuntando…" : "Adjuntá"}
           </button>
@@ -297,10 +312,12 @@ export function ClassDashboard({
         <button
           type="button"
           onClick={handleOpenChat}
-          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-500 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98]"
+          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-500 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98] cursor-pointer"
         >
           <span>Conversá</span>
-          <span aria-hidden="true">→</span>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
         </button>
       </div>
 
