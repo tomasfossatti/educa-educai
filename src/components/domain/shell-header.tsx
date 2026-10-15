@@ -23,6 +23,9 @@ export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: Shell
 
   const handleCloseSidebar = useCallback(() => {
     setIsSidebarOpen(false);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("educai:close-sidebar"));
+    }
   }, []);
 
   useEffect(() => {

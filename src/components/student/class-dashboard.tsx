@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 import { triggerOpenSidebar } from "@/lib/sidebar";
 
 interface ClassDashboardProps {
@@ -56,6 +57,7 @@ export function ClassDashboard({
     isUnlocked: false,
   },
   activeConversation,
+  onAttachConversation,
 }: ClassDashboardProps) {
   // Timer de clase
   const [classElapsedMinutes, setClassElapsedMinutes] = useState(38);
@@ -65,6 +67,33 @@ export function ClassDashboard({
   const [isUnlocked, setIsUnlocked] = useState(activity?.isUnlocked ?? false);
   const [attached, setAttached] = useState(false);
   const [isAttaching, setIsAttaching] = useState(false);
+  const [activeButton, setActiveButton] = useState<"genera" | "adjunta" | "conversa" | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  useEffect(() => {
+    const handleSidebarOpen = () => setIsSidebarOpen(true);
+    const handleSidebarClose = () => {
+      setIsSidebarOpen(false);
+      setActiveButton((prev) => (prev === "genera" ? null : prev));
+    };
+    const handleTutorOpen = () => setIsChatOpen(true);
+    const handleTutorClose = () => {
+      setIsChatOpen(false);
+      setActiveButton((prev) => (prev === "conversa" ? null : prev));
+    };
+
+    window.addEventListener("educai:open-sidebar", handleSidebarOpen);
+    window.addEventListener("educai:close-sidebar", handleSidebarClose);
+    window.addEventListener("open-tutor", handleTutorOpen);
+    window.addEventListener("close-tutor", handleTutorClose);
+    return () => {
+      window.removeEventListener("educai:open-sidebar", handleSidebarOpen);
+      window.removeEventListener("educai:close-sidebar", handleSidebarClose);
+      window.removeEventListener("open-tutor", handleTutorOpen);
+      window.removeEventListener("close-tutor", handleTutorClose);
+    };
+  }, []);
 
   // Preguntas rotativas al lado del título (cambian cada 30 segundos)
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -99,15 +128,25 @@ export function ClassDashboard({
       ? learningGoal.split(":").slice(1).join(":").trim()
       : "Hipótesis que pueden resultar falsas: definen métrica, umbral y plazo.");
 
-  const handleAttach = async () => {
-    if (!activeConversation) return;
-    setIsAttaching(true);
-    await new Promise((r) => setTimeout(r, 600));
-    setAttached(true);
-    setIsAttaching(false);
+  const handleGeneraClick = () => {
+    setActiveButton("genera");
+    triggerOpenSidebar();
   };
 
-  const handleOpenChat = () => {
+  const handleAttachClick = async () => {
+    setActiveButton("adjunta");
+    setIsAttaching(true);
+    await new Promise((r) => setTimeout(r, 400));
+    setAttached((prev) => !prev);
+    setIsAttaching(false);
+    if (activeConversation && onAttachConversation) {
+      onAttachConversation(activeConversation.id);
+    }
+  };
+
+  const handleConversaClick = () => {
+    setActiveButton("conversa");
+    setIsChatOpen(true);
     window.dispatchEvent(new CustomEvent("open-tutor"));
   };
 
@@ -275,51 +314,87 @@ export function ClassDashboard({
         </div>
       </div>
 
-      {/* ──────────────── 2) BOTONES: "Generá" - "Adjuntá" - "Conversá" ──────────────── */}
-      <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-1 shrink-0">
-        {/* Botón Generá: a la izquierda, abre el menú lateral */}
-        <button
-          type="button"
-          onClick={triggerOpenSidebar}
-          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-white/[0.12] bg-[#121414] hover:bg-[#18191B] hover:border-white/[0.22] px-8 py-3 text-sm sm:text-base font-bold text-[#F7F8F8] shadow-sm hover:shadow-[0_0_20px_rgba(255,255,255,0.06)] transition-all active:scale-[0.98] cursor-pointer"
-          title="Abrir menú lateral de proyectos y herramientas"
-        >
-          <svg className="w-4.5 h-4.5 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth={1.8} />
-            <path strokeLinecap="round" strokeWidth={1.8} d="M9 3v18" />
-          </svg>
-          <span>Generá</span>
-        </button>
+      {/* ──────────────── 2) BOTONES: "Generá" - "Adjuntá" - "Conversá" (Negro por defecto, Violeta/Lila al clickear) ──────────────── */}
+      {(() => {
+        const baseBtnClass =
+          "min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-3 text-sm sm:text-base font-bold transition-all duration-200 active:scale-[0.98] cursor-pointer";
 
-        {attached ? (
-          <div className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 px-7 py-3 text-sm sm:text-base font-bold text-emerald-400 shadow-sm">
-            <svg className="w-4.5 h-4.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
-            <span>Adjuntado</span>
+        const blackBtnClass =
+          "border border-white/[0.14] bg-black text-[#F7F8F8] hover:bg-[#121316] hover:border-white/[0.24] shadow-sm hover:shadow-[0_0_20px_rgba(255,255,255,0.06)]";
+
+        const violetBtnClass =
+          "border border-purple-400/60 bg-gradient-to-r from-[#6366F1] via-[#7C3AED] to-[#9333EA] text-white shadow-[0_0_25px_rgba(139,92,246,0.45),inset_0_1px_0_0_rgba(255,255,255,0.3)] hover:brightness-110";
+
+        const isGeneraActive = activeButton === "genera" || isSidebarOpen;
+        const isAdjuntaActive = activeButton === "adjunta" || attached || isAttaching;
+        const isConversaActive = activeButton === "conversa" || isChatOpen;
+
+        return (
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-1 shrink-0">
+            {/* 1. Botón Generá */}
+            <button
+              type="button"
+              onClick={handleGeneraClick}
+              className={cn(baseBtnClass, isGeneraActive ? violetBtnClass : blackBtnClass)}
+              title="Abrir menú lateral de proyectos y herramientas"
+            >
+              <svg
+                className={cn("w-4.5 h-4.5 shrink-0 transition-colors", isGeneraActive ? "text-white" : "text-[#A78BFA]")}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth={1.8} />
+                <path strokeLinecap="round" strokeWidth={1.8} d="M9 3v18" />
+              </svg>
+              <span>Generá</span>
+            </button>
+
+            {/* 2. Botón Adjuntá */}
+            <button
+              type="button"
+              onClick={handleAttachClick}
+              disabled={isAttaching}
+              className={cn(baseBtnClass, isAdjuntaActive ? violetBtnClass : blackBtnClass, "disabled:opacity-60")}
+              title="Adjuntar conversación a la clase"
+            >
+              {attached ? (
+                <>
+                  <svg className="w-4.5 h-4.5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Adjuntado</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className={cn("w-4.5 h-4.5 shrink-0 transition-colors", isAdjuntaActive ? "text-white" : "text-[#A78BFA]")}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg>
+                  <span>{isAttaching ? "Adjuntando…" : "Adjuntá"}</span>
+                </>
+              )}
+            </button>
+
+            {/* 3. Botón Conversá */}
+            <button
+              type="button"
+              onClick={handleConversaClick}
+              className={cn(baseBtnClass, isConversaActive ? violetBtnClass : blackBtnClass)}
+              title="Abrir chat con el tutor"
+            >
+              <span>Conversá</span>
+              <svg className="w-4 h-4 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleAttach}
-            disabled={isAttaching}
-            className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl border border-primary/50 bg-surface-2 hover:bg-surface-3 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-          >
-            {isAttaching ? "Adjuntando…" : "Adjuntá"}
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={handleOpenChat}
-          className="min-w-[140px] inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary to-indigo-600 hover:from-primary-hover hover:to-indigo-500 px-8 py-3 text-sm sm:text-base font-bold text-white shadow hover:shadow-[0_0_25px_rgba(120,150,238,0.35)] transition-all active:scale-[0.98] cursor-pointer"
-        >
-          <span>Conversá</span>
-          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
-        </button>
-      </div>
+        );
+      })()}
 
       {/* ──────────────── 3) ACTIVIDAD EN ESPERA / ACTIVIDAD ACTIVA (Mismo tamaño y estructura) ──────────────── */}
       <div className="space-y-1.5 shrink-0">

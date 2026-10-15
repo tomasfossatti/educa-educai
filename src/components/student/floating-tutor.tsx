@@ -168,7 +168,12 @@ export function FloatingTutor({
             </div>
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("close-tutor"));
+                }
+              }}
               className="w-7 h-7 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-surface-3 transition-colors"
               aria-label="Cerrar ventana"
             >
