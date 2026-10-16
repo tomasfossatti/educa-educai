@@ -38,7 +38,7 @@ export async function DevelopmentView({ studentId, courseId, viewer, base }: { s
             El snapshot se construye a partir de conversaciones con el tutor y actividades analizadas.
           </EmptyState>
         ) : (
-          <div className="divide-y divide-[#d1d1cd] rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] shadow-[0_1px_2px_rgba(0,0,0,0.06)] overflow-hidden">
+          <div className="divide-y divide-line rounded-lg border border-line bg-surface">
             {latest.dimensions.map((d) => (
               <DimensionBlock key={d.id} dimension={d} evidenceHref={evidenceHref} />
             ))}
@@ -48,39 +48,39 @@ export async function DevelopmentView({ studentId, courseId, viewer, base }: { s
 
       {snapshots.length > 1 && (
         <Section title="Historial" description="Cómo cambió el respaldo de cada dimensión con cada nueva evidencia.">
-          <div className="overflow-x-auto rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+          <div className="overflow-x-auto rounded-lg border border-line bg-surface">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-[#d1d1cd] text-xs text-[#72706b]">
+              <thead className="border-b border-line text-xs text-muted">
                 <tr>
-                  <th className="px-3.5 py-2.5 font-medium">Fecha</th>
+                  <th className="px-3 py-2 font-medium">Fecha</th>
                   {latest.dimensions.map((d) => (
-                    <th key={d.dimension} className="px-3.5 py-2.5 font-medium">
+                    <th key={d.dimension} className="px-3 py-2 font-medium">
                       {snapshotDimensionLabel[d.dimension]}
                     </th>
                   ))}
-                  <th className="px-3.5 py-2.5 font-medium">Evidencias</th>
+                  <th className="px-3 py-2 font-medium">Evidencias</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#d1d1cd]">
+              <tbody className="divide-y divide-line">
                 {snapshots.map((s) => (
                   <tr key={s.id}>
-                    <td className="whitespace-nowrap px-3.5 py-2.5 text-[#72706b]">{formatDateTime(s.createdAt)}</td>
+                    <td className="whitespace-nowrap px-3 py-2 text-ink-2">{formatDateTime(s.createdAt)}</td>
                     {latest.dimensions.map((ld) => {
                       const d = s.dimensions.find((x) => x.dimension === ld.dimension);
                       return (
-                        <td key={ld.dimension} className="px-3.5 py-2.5" title={d ? `${supportStatusLabel[d.status]}: ${d.summary}` : undefined}>
-                          <span className={d?.status === "CONTRADICTORY" ? "text-attention" : d?.status === "INSUFFICIENT" ? "text-[#92918b]" : "text-[#27251e]"}>
+                        <td key={ld.dimension} className="px-3 py-2" title={d ? `${supportStatusLabel[d.status]}: ${d.summary}` : undefined}>
+                          <span className={d?.status === "CONTRADICTORY" ? "text-attention" : d?.status === "INSUFFICIENT" ? "text-faint" : "text-ink-2"}>
                             {d ? SYMBOL[d.status] : "—"}
                           </span>
                         </td>
                       );
                     })}
-                    <td className="px-3.5 py-2.5 text-[#72706b]">{s.evidenceCount}</td>
+                    <td className="px-3 py-2 text-ink-2">{s.evidenceCount}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="border-t border-[#d1d1cd] px-3.5 py-2.5 text-xs text-[#72706b]">
+            <p className="border-t border-line px-3 py-2 text-xs text-muted">
               ● consistente · ◐ parcial · ○ insuficiente · ◑ contradictoria
             </p>
           </div>

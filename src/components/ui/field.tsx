@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 const control =
-  "w-full rounded-xl border border-[#d1d1cd] bg-[#faf8f5] px-3.5 text-sm text-[#27251e] placeholder:text-[#92918b] focus:border-[#016a71] focus:ring-1 focus:ring-[#016a71] focus:outline-none transition-colors duration-150 disabled:bg-[#fdfbfa] disabled:cursor-not-allowed font-normal";
+  "w-full rounded-lg border border-white/[0.08] bg-[#0F1011] px-3 text-sm text-[#F7F8F8] placeholder:text-[#62666D] focus:border-[#5E6AD2] focus:ring-1 focus:ring-[#5E6AD2]/50 focus:outline-none transition-colors duration-150 disabled:bg-white/[0.02] disabled:cursor-not-allowed";
 
 export function Field({
   label,
@@ -21,11 +21,11 @@ export function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={htmlFor} className="block text-sm font-medium text-[#27251e]">
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-ink">
         {label}
-        {optional && <span className="ml-1 font-normal text-[#92918b]">(opcional)</span>}
+        {optional && <span className="ml-1 font-normal text-muted">(opcional)</span>}
       </label>
-      {hint && <p className="text-xs text-[#72706b]">{hint}</p>}
+      {hint && <p className="text-xs text-muted">{hint}</p>}
       {children}
       {error && (
         <p className="text-xs text-danger" role="alert">
@@ -37,24 +37,24 @@ export function Field({
 }
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
-  return <input className={cn(control, "h-10", className)} {...props} />;
+  return <input className={cn(control, "h-9", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
-  return <textarea className={cn(control, "min-h-24 py-2.5 leading-relaxed", className)} {...props} />;
+  return <textarea className={cn(control, "min-h-24 py-2 leading-relaxed", className)} {...props} />;
 }
 
 export function Select({ className, ...props }: ComponentProps<"select">) {
-  return <select className={cn(control, "h-10 pr-8", className)} {...props} />;
+  return <select className={cn(control, "h-9 pr-8", className)} {...props} />;
 }
 
 export function Checkbox({ label, hint, ...props }: ComponentProps<"input"> & { label: ReactNode; hint?: ReactNode }) {
   return (
     <label className="flex cursor-pointer items-start gap-2.5 text-sm">
-      <input type="checkbox" className="mt-0.5 size-4 shrink-0 rounded accent-[#016a71]" {...props} />
+      <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-primary" {...props} />
       <span>
-        <span className="text-[#27251e] font-normal">{label}</span>
-        {hint && <span className="mt-0.5 block text-xs text-[#72706b]">{hint}</span>}
+        <span className="text-ink">{label}</span>
+        {hint && <span className="mt-0.5 block text-xs text-muted">{hint}</span>}
       </span>
     </label>
   );
@@ -63,10 +63,10 @@ export function Checkbox({ label, hint, ...props }: ComponentProps<"input"> & { 
 export function Radio({ label, hint, ...props }: ComponentProps<"input"> & { label: ReactNode; hint?: ReactNode }) {
   return (
     <label className="flex cursor-pointer items-start gap-2.5 text-sm">
-      <input type="radio" className="mt-0.5 size-4 shrink-0 accent-[#016a71]" {...props} />
+      <input type="radio" className="mt-0.5 size-4 shrink-0 accent-primary" {...props} />
       <span>
-        <span className="text-[#27251e] font-normal">{label}</span>
-        {hint && <span className="mt-0.5 block text-xs text-[#72706b]">{hint}</span>}
+        <span className="text-ink">{label}</span>
+        {hint && <span className="mt-0.5 block text-xs text-muted">{hint}</span>}
       </span>
     </label>
   );

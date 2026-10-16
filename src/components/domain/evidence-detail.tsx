@@ -19,14 +19,14 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <LayerTag layer="observed" />
-          <span className="text-xs text-[#72706b]">
+          <span className="text-xs text-muted">
             {evidenceKindLabel[evidence.kind]} · {evidenceSourceLabel[evidence.source]}
           </span>
         </div>
-        <p className="text-base text-[#27251e] font-normal leading-relaxed">{evidence.observation}</p>
+        <p className="text-base text-ink">{evidence.observation}</p>
         <Quote>“{evidence.content}”</Quote>
         {evidence.provenance.excerptVerified === false && (
-          <p className="text-xs text-[#72706b]">El fragmento muestra el texto completo de la fuente porque la cita propuesta por la IA no coincidía literalmente.</p>
+          <p className="text-xs text-muted">El fragmento muestra el texto completo de la fuente porque la cita propuesta por la IA no coincidía literalmente.</p>
         )}
       </section>
 
@@ -47,7 +47,7 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
           <KeyValue label="Registrada por">
             {evidence.provenance.origin === "seed" ? "Datos de demostración" : "Interpretation Engine"}
             {evidence.run && ` · ${formatDateTime(evidence.run.createdAt)}`}
-            {viewer === "teacher" && evidence.provenance.model && <span className="text-[#72706b]"> · {evidence.provenance.model}</span>}
+            {viewer === "teacher" && evidence.provenance.model && <span className="text-muted"> · {evidence.provenance.model}</span>}
           </KeyValue>
         </dl>
       </Section>
@@ -56,8 +56,8 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
         <Section title="Fuente original" description="Solo los mensajes en los que se basa esta evidencia.">
           <div className="space-y-2">
             {evidence.sourceMessages.map((m) => (
-              <div key={m.id} className={cn("prose-plain rounded-xl px-4 py-3 text-sm border", m.role === "STUDENT" ? "border-[#d1d1cd] bg-[#faf8f5] text-[#27251e]" : "border-[#d1d1cd] bg-[#fdfbfa] text-[#27251e]")}>
-                <span className="mb-1 block text-xs font-normal text-[#72706b]">{m.role === "STUDENT" ? (viewer === "student" ? "Vos" : "Estudiante") : "Tutor"} · {formatDateTime(m.createdAt)}</span>
+              <div key={m.id} className={cn("prose-plain rounded-md px-3 py-2 text-sm", m.role === "STUDENT" ? "bg-subtle" : "border border-line bg-surface")}>
+                <span className="mb-0.5 block text-xs font-medium text-muted">{m.role === "STUDENT" ? (viewer === "student" ? "Vos" : "Estudiante") : "Tutor"} · {formatDateTime(m.createdAt)}</span>
                 {m.content}
               </div>
             ))}
@@ -67,18 +67,18 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
 
       <Section title="Señales extraídas">
         {evidence.signals.length === 0 ? (
-          <p className="text-sm text-[#72706b]">Esta evidencia no produjo señales.</p>
+          <p className="text-sm text-muted">Esta evidencia no produjo señales.</p>
         ) : (
           <List>
             {evidence.signals.map((s) => (
               <ListItem key={s.id} className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2 text-xs">
                   <DimensionTag dimension={s.dimension} />
-                  <span className={s.polarity === "DIFFICULTY" ? "text-[#c08532]" : "text-[#72706b]"}>{polarityLabel[s.polarity]}</span>
-                  {s.curriculumItem && <span className="text-[#72706b]">· {s.curriculumItem.title}</span>}
+                  <span className={s.polarity === "DIFFICULTY" ? "text-attention" : "text-ink-2"}>{polarityLabel[s.polarity]}</span>
+                  {s.curriculumItem && <span className="text-muted">· {s.curriculumItem.title}</span>}
                 </div>
-                <p className="text-sm text-[#27251e]">{s.description}</p>
-                {s.rationale && <p className="text-xs text-[#72706b]">{s.rationale}</p>}
+                <p className="text-sm text-ink">{s.description}</p>
+                {s.rationale && <p className="text-xs text-muted">{s.rationale}</p>}
               </ListItem>
             ))}
           </List>
@@ -90,9 +90,9 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
           <List>
             {evidence.supports.map((s) => (
               <ListItem key={s.id} className="space-y-1.5">
-                <p className="text-sm text-[#27251e]">
-                  {s.relation === "CONTRADICTS" && <span className="text-[#c08532]">En contra de: </span>}
-                  <Link href={`${base}/inferences/${s.inference.id}`} className="text-[#016a71] hover:underline">
+                <p className="text-sm text-ink">
+                  {s.relation === "CONTRADICTS" && <span className="text-attention">En contra de: </span>}
+                  <Link href={`${base}/inferences/${s.inference.id}`} className="hover:text-primary">
                     {viewer === "student" ? s.inference.studentStatement : s.inference.statement}
                   </Link>
                 </p>
@@ -110,7 +110,7 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
         <Section title="Criterios evaluados con esta evidencia" action={<LayerTag layer="evaluated" />}>
           <List>
             {evidence.evaluationLinks.map((l) => (
-              <ListItem key={l.evaluationId} className="flex flex-wrap items-center gap-2 text-sm text-[#27251e]">
+              <ListItem key={l.evaluationId} className="flex flex-wrap items-center gap-2 text-sm">
                 <span>{l.evaluation.criterion.title}</span>
                 <EvaluationBadge result={l.evaluation.result} />
               </ListItem>

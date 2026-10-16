@@ -60,20 +60,20 @@
 }
 
 .brand-wordmark-base {
-  color: var(--color-ink) !important;
+  color: #f7f9ff;
 }
 
 .brand-wordmark-ai {
-  color: var(--color-ember) !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  background-clip: unset !important;
-  -webkit-text-fill-color: var(--color-ember) !important;
+  color: #ff2e74;
+  background: linear-gradient(135deg, #7c4dff 0%, #d327a8 47%, #ff315d 76%, #ff4a3d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .brand:hover .brand-wordmark-base,
 .brand:focus-visible .brand-wordmark-base {
-  color: #3d3b32 !important;
+  color: #ffffff;
 }
 
 @media (max-width: 620px) {

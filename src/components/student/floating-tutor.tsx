@@ -136,15 +136,15 @@ export function FloatingTutor({
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
-        /* Botón Flotante Cerrado */
+        /* Botón Flotante Cerrado: únicamente símbolo de mensaje bot */
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#27251e] text-[#faf8f5] shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-all duration-150 hover:bg-[#3d3b32] active:scale-95 cursor-pointer"
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-primary to-indigo-600 text-white shadow-xl transition-all duration-200 hover:scale-110 hover:shadow-[0_0_25px_rgba(120,150,238,0.45)] active:scale-95 border border-white/20"
           aria-label="Abrir tutor de la materia"
         >
           {/* Ícono de bot de chat */}
-          <svg className="w-5 h-5 text-[#faf8f5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -155,14 +155,14 @@ export function FloatingTutor({
         </button>
       ) : (
         /* Ventana Flotante Abierta */
-        <div className="flex flex-col w-[380px] sm:w-[430px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] shadow-[0_1px_2px_rgba(0,0,0,0.08)] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-150">
+        <div className="flex flex-col w-[380px] sm:w-[430px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-3xl border border-line bg-surface-1/95 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header de la ventana */}
-          <div className="flex items-center justify-between border-b border-[#d1d1cd] bg-[#fdfbfa] px-4 py-3">
+          <div className="flex items-center justify-between border-b border-line bg-surface-2/80 px-4 py-3">
             <div>
-              <h3 className="text-sm font-medium text-[#27251e] leading-tight">
+              <h3 className="text-sm font-bold text-ink leading-tight">
                 Tutor de la materia
               </h3>
-              <p className="text-[11px] text-[#72706b] font-normal">
+              <p className="text-[11px] text-muted">
                 {courseName} · Método socrático
               </p>
             </div>
@@ -174,7 +174,7 @@ export function FloatingTutor({
                   window.dispatchEvent(new CustomEvent("close-tutor"));
                 }
               }}
-              className="w-7 h-7 rounded-md flex items-center justify-center text-[#72706b] hover:text-[#27251e] hover:bg-[#faf8f5] transition-colors cursor-pointer"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-surface-3 transition-colors"
               aria-label="Cerrar ventana"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -184,17 +184,17 @@ export function FloatingTutor({
           </div>
 
           {/* Área de Mensajes */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs sm:text-sm bg-[#faf8f5]">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs sm:text-sm">
             {messages.map((m, idx) => (
               <div
                 key={idx}
                 className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-xl px-3.5 py-2.5 whitespace-pre-wrap leading-relaxed ${
+                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 whitespace-pre-wrap leading-relaxed shadow-sm ${
                     m.role === "user"
-                      ? "bg-[#27251e] text-[#faf8f5]"
-                      : "bg-[#fdfbfa] border border-[#d1d1cd] text-[#27251e] shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                      ? "bg-primary text-white rounded-br-none"
+                      : "bg-surface-2 border border-line text-ink rounded-bl-none"
                   }`}
                 >
                   {m.content}
@@ -202,35 +202,35 @@ export function FloatingTutor({
               </div>
             ))}
             {isLoading && (
-              <div className="flex items-center gap-1.5 text-xs text-[#72706b] pl-2 py-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#016a71] animate-bounce"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#016a71] animate-bounce [animation-delay:0.2s]"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#016a71] animate-bounce [animation-delay:0.4s]"></span>
-                <span className="ml-1 text-[11px] font-normal text-[#72706b]">Pensando pregunta guía…</span>
+              <div className="flex items-center gap-1.5 text-xs text-muted pl-2 py-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.2s]"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.4s]"></span>
+                <span className="ml-1 text-[11px]">Pensando pregunta guía…</span>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Formulario de Entrada */}
-          <form onSubmit={handleSend} className="border-t border-[#d1d1cd] bg-[#fdfbfa] p-3.5">
+          <form onSubmit={handleSend} className="border-t border-line bg-surface-2/60 p-3">
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Escribí tu consulta o idea…"
-                className="flex-1 rounded-xl border border-[#d1d1cd] bg-[#faf8f5] px-3.5 py-2 text-xs sm:text-sm text-[#27251e] placeholder:text-[#92918b] focus:border-[#016a71] focus:ring-1 focus:ring-[#016a71] focus:outline-none transition-colors"
+                className="flex-1 rounded-xl border border-line bg-surface px-3.5 py-2 text-xs sm:text-sm text-ink placeholder:text-muted focus:border-primary focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="rounded-xl bg-[#27251e] px-4 py-2 text-xs font-medium text-[#faf8f5] hover:bg-[#3d3b32] disabled:opacity-40 transition-colors cursor-pointer"
+                className="rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-primary-hover disabled:opacity-50 transition-colors"
               >
                 Enviar
               </button>
             </div>
-            <p className="text-[11px] text-[#72706b] text-center pt-2 font-normal">
+            <p className="text-[10px] text-muted text-center pt-1.5">
               El tutor formula preguntas para ayudarte a deducir el concepto.
             </p>
           </form>

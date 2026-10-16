@@ -15,9 +15,9 @@ export function PageHeader({
   return (
     <header className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0 space-y-1">
-        {eyebrow && <div className="text-[11px] font-medium uppercase tracking-wider text-[#92918b]">{eyebrow}</div>}
-        <h1 className="text-2xl sm:text-[26px] font-medium tracking-tight text-[#27251e] leading-snug">{title}</h1>
-        {description && <p className="max-w-2xl text-sm text-[#72706b] font-normal leading-relaxed">{description}</p>}
+        {eyebrow && <div className="text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</div>}
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">{title}</h1>
+        {description && <p className="max-w-2xl text-sm text-muted">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </header>
@@ -40,11 +40,11 @@ export function Section({
   id?: string;
 }) {
   return (
-    <section id={id} className={cn("space-y-3.5", className)}>
-      <div className="flex items-baseline justify-between gap-4 border-b border-[#d1d1cd] pb-2.5">
+    <section id={id} className={cn("space-y-3", className)}>
+      <div className="flex items-baseline justify-between gap-4 border-b border-line pb-2.5">
         <div>
-          <h2 className="text-base font-medium tracking-tight text-[#27251e]">{title}</h2>
-          {description && <p className="mt-0.5 text-sm text-[#72706b] font-normal leading-relaxed">{description}</p>}
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
+          {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
         </div>
         {action && <div className="shrink-0 text-sm">{action}</div>}
       </div>
@@ -57,7 +57,7 @@ export function Card({ children, className }: { children: ReactNode; className?:
   return (
     <div
       className={cn(
-        "relative rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] p-5 sm:p-6 shadow-[0_1px_2px_rgba(0,0,0,0.08)]",
+        "relative rounded-2xl border border-white/[0.08] bg-[#0F1011] p-5 shadow-[0_2px_4px_rgba(0,0,0,0.1)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.1] before:to-transparent",
         className
       )}
     >
@@ -66,12 +66,12 @@ export function Card({ children, className }: { children: ReactNode; className?:
   );
 }
 
-/** Lista con separadores finos: estructura con bordes de 16px en Soft Paper */
+/** Lista con separadores finos: la estructura por defecto en vez de muchas cards. */
 export function List({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <ul
       className={cn(
-        "divide-y divide-[#d1d1cd] rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.08)]",
+        "divide-y divide-white/[0.06] rounded-2xl border border-white/[0.08] bg-[#0F1011] shadow-[0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden",
         className
       )}
     >
@@ -81,14 +81,14 @@ export function List({ children, className }: { children: ReactNode; className?:
 }
 
 export function ListItem({ children, className }: { children: ReactNode; className?: string }) {
-  return <li className={cn("px-4 py-3.5 transition-colors hover:bg-[#faf8f5]", className)}>{children}</li>;
+  return <li className={cn("px-4 py-3.5 transition-colors hover:bg-white/[0.03]", className)}>{children}</li>;
 }
 
 export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[#d1d1cd] bg-[#fdfbfa]/60 px-5 py-8 text-center text-sm">
-      <p className="font-medium text-[#27251e] text-base">{title}</p>
-      {children && <div className="mt-1.5 text-[#72706b] max-w-md mx-auto leading-relaxed">{children}</div>}
+    <div className="rounded-2xl border border-dashed border-white/[0.12] bg-[#0F1011]/60 px-4 py-8 text-center text-sm backdrop-blur-sm">
+      <p className="font-semibold text-[#F7F8F8]">{title}</p>
+      {children && <div className="mt-1 text-[#8A8F98] max-w-md mx-auto">{children}</div>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );
@@ -104,15 +104,15 @@ export function Notice({
   children?: ReactNode;
 }) {
   const tones = {
-    info: "border-[#d1d1cd] bg-[#fdfbfa] text-[#27251e]",
-    success: "border-transparent bg-[#016a71]/10 text-[#016a71]",
-    attention: "border-[#c08532]/30 bg-[#fbf5eb] text-[#c08532]",
-    error: "border-[#cf2d56]/30 bg-[#fdf2f4] text-[#cf2d56]",
+    info: "border-line bg-surface-2 text-ink-2",
+    success: "border-success/30 bg-surface-2 text-ink-2",
+    attention: "border-attention/30 bg-attention-soft text-ink-2",
+    error: "border-danger/30 bg-danger-soft text-ink-2",
   } as const;
   return (
-    <div className={cn("rounded-2xl border px-4 py-3 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.04)]", tones[tone])} role={tone === "error" ? "alert" : undefined}>
-      {title && <p className="font-medium text-[#27251e]">{title}</p>}
-      {children && <div className={title ? "mt-1 text-[#72706b] leading-relaxed" : "leading-relaxed"}>{children}</div>}
+    <div className={cn("rounded-xl border px-3.5 py-3 text-sm backdrop-blur-sm", tones[tone])} role={tone === "error" ? "alert" : undefined}>
+      {title && <p className="font-semibold text-ink">{title}</p>}
+      {children && <div className={title ? "mt-0.5" : undefined}>{children}</div>}
     </div>
   );
 }
@@ -120,12 +120,12 @@ export function Notice({
 export function KeyValue({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="grid grid-cols-1 gap-0.5 py-1.5 text-sm sm:grid-cols-[11rem_1fr] sm:gap-4">
-      <dt className="text-[#72706b] font-normal">{label}</dt>
-      <dd className="min-w-0 text-[#27251e] font-normal">{children}</dd>
+      <dt className="text-muted">{label}</dt>
+      <dd className="min-w-0 text-ink">{children}</dd>
     </div>
   );
 }
 
 export function Quote({ children }: { children: ReactNode }) {
-  return <blockquote className="prose-plain border-l-2 border-[#016a71] pl-3.5 text-sm text-[#72706b] italic">{children}</blockquote>;
+  return <blockquote className="prose-plain border-l-2 border-primary/60 pl-3.5 text-sm text-ink-2 italic">{children}</blockquote>;
 }

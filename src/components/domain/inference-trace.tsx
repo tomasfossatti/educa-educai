@@ -40,18 +40,18 @@ export function InferenceTrace({ inference, viewer, base }: { inference: Inferen
           <span className="text-xs">
             <PolarityText polarity={inference.polarity} />
           </span>
-          {inference.curriculumItem && <span className="text-xs text-[#72706b]">· {inference.curriculumItem.title}</span>}
+          {inference.curriculumItem && <span className="text-xs text-muted">· {inference.curriculumItem.title}</span>}
         </div>
-        <p className="text-lg text-[#27251e] font-normal leading-relaxed">{viewer === "student" ? inference.studentStatement : inference.statement}</p>
+        <p className="text-lg text-ink">{viewer === "student" ? inference.studentStatement : inference.statement}</p>
         {viewer === "teacher" && (
-          <p className="text-sm text-[#72706b]">
-            Versión que ve el estudiante: <span className="text-[#27251e]">“{inference.studentStatement}”</span>
+          <p className="text-sm text-muted">
+            Versión que ve el estudiante: <span className="text-ink-2">“{inference.studentStatement}”</span>
           </p>
         )}
         <div className="flex flex-wrap gap-2">
           <SupportBadge status={inference.supportStatus} />
           <ReviewBadge status={inference.reviewStatus} audience={viewer} />
-          {inference.state === "SUPERSEDED" && <span className="text-xs text-[#72706b]">Reemplazada por una inferencia más reciente</span>}
+          {inference.state === "SUPERSEDED" && <span className="text-xs text-muted">Reemplazada por una inferencia más reciente</span>}
         </div>
       </section>
 
@@ -71,14 +71,14 @@ export function InferenceTrace({ inference, viewer, base }: { inference: Inferen
                 ))}
               </ul>
               {viewer === "teacher" && inference.proposedSupportStatus !== inference.supportStatus && (
-                <p className="mt-1 text-xs text-[#72706b]">El modelo había propuesto un respaldo mayor; las reglas de Educai lo ajustaron.</p>
+                <p className="mt-1 text-xs text-muted">El modelo había propuesto un respaldo mayor; las reglas de Educai lo ajustaron.</p>
               )}
             </KeyValue>
           )}
           {inference.run && (
             <KeyValue label="Origen">
               {inference.run.origin === "seed" ? "Dato de demostración" : "Interpretation Engine"} · {formatDateTime(inference.createdAt)}
-              {viewer === "teacher" && <span className="text-[#72706b]"> · {inference.run.promptVersion}</span>}
+              {viewer === "teacher" && <span className="text-muted"> · {inference.run.promptVersion}</span>}
             </KeyValue>
           )}
         </dl>
@@ -105,16 +105,16 @@ export function InferenceTrace({ inference, viewer, base }: { inference: Inferen
           <ul className="space-y-2 text-sm">
             {inference.supersedes && (
               <li>
-                <span className="text-[#72706b]">Antes ({formatDate(inference.supersedes.createdAt)}, {polarityLabel[inference.supersedes.polarity].toLowerCase()}): </span>
-                <Link href={`${base}/inferences/${inference.supersedes.id}`} className="text-[#016a71] hover:underline">
+                <span className="text-muted">Antes ({formatDate(inference.supersedes.createdAt)}, {polarityLabel[inference.supersedes.polarity].toLowerCase()}): </span>
+                <Link href={`${base}/inferences/${inference.supersedes.id}`} className="text-primary hover:underline">
                   {viewer === "student" ? inference.supersedes.studentStatement : inference.supersedes.statement}
                 </Link>
               </li>
             )}
             {inference.supersededBy && (
               <li>
-                <span className="text-[#72706b]">Después ({formatDate(inference.supersededBy.createdAt)}): </span>
-                <Link href={`${base}/inferences/${inference.supersededBy.id}`} className="text-[#016a71] hover:underline">
+                <span className="text-muted">Después ({formatDate(inference.supersededBy.createdAt)}): </span>
+                <Link href={`${base}/inferences/${inference.supersededBy.id}`} className="text-primary hover:underline">
                   {viewer === "student" ? inference.supersededBy.studentStatement : inference.supersededBy.statement}
                 </Link>
               </li>
@@ -129,19 +129,19 @@ export function InferenceTrace({ inference, viewer, base }: { inference: Inferen
             {inference.reviews.map((r) => (
               <ListItem key={r.id} className="space-y-1 text-sm">
                 <p>
-                  <span className="font-medium text-[#27251e]">{viewer === "teacher" ? r.teacher.user.name : "Tu docente"}</span>{" "}
-                  <span className="text-[#72706b]">marcó «{reviewVerdictLabel[r.verdict]}» · {formatDateTime(r.createdAt)}</span>
+                  <span className="font-medium text-ink">{viewer === "teacher" ? r.teacher.user.name : "Tu docente"}</span>{" "}
+                  <span className="text-muted">marcó «{reviewVerdictLabel[r.verdict]}» · {formatDateTime(r.createdAt)}</span>
                 </p>
-                {viewer === "teacher" && r.comment && <p className="prose-plain text-[#72706b]">{r.comment}</p>}
+                {viewer === "teacher" && r.comment && <p className="prose-plain text-ink-2">{r.comment}</p>}
               </ListItem>
             ))}
             {inference.studentResponses.map((r) => (
               <ListItem key={r.id} className="space-y-1 text-sm">
                 <p>
-                  <span className="font-medium text-[#27251e]">{viewer === "student" ? "Vos" : inference.student.user.name}</span>{" "}
-                  <span className="text-[#72706b]">respondió «{studentStanceLabel[r.stance]}» · {formatDateTime(r.createdAt)}</span>
+                  <span className="font-medium text-ink">{viewer === "student" ? "Vos" : inference.student.user.name}</span>{" "}
+                  <span className="text-muted">respondió «{studentStanceLabel[r.stance]}» · {formatDateTime(r.createdAt)}</span>
                 </p>
-                {r.note && <p className="prose-plain text-[#72706b]">{r.note}</p>}
+                {r.note && <p className="prose-plain text-ink-2">{r.note}</p>}
               </ListItem>
             ))}
           </List>
@@ -161,24 +161,24 @@ function EvidenceCards({ groups, base }: { groups: Group[]; base: string }) {
     <List>
       {groups.map(({ evidence, signals }) => (
         <ListItem key={evidence.id} className="space-y-2">
-          <div className="flex flex-wrap items-center gap-x-2 text-xs text-[#72706b]">
-            <span className="font-medium text-[#27251e]">{evidenceKindLabel[evidence.kind]}</span>
+          <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
+            <span className="font-medium text-ink-2">{evidenceKindLabel[evidence.kind]}</span>
             <span>· {evidenceSourceLabel[evidence.source]}</span>
             <span>· {evidence.experience.title}</span>
             <span>· {formatDate(evidence.occurredAt)}</span>
             <span>· {assistanceLevelLabel[evidence.assistanceLevel]}</span>
           </div>
-          <p className="text-sm text-[#72706b]">{evidence.observation}</p>
-          <p className="prose-plain border-l-2 border-[#d1d1cd] pl-3 text-sm text-[#27251e]">“{evidence.content}”</p>
-          {evidence.context && <p className="text-xs text-[#72706b]">Contexto: {evidence.context}</p>}
-          <ul className="space-y-0.5 text-xs text-[#72706b]">
+          <p className="text-sm text-ink-2">{evidence.observation}</p>
+          <p className="prose-plain border-l-2 border-line-strong pl-3 text-sm text-ink">“{evidence.content}”</p>
+          {evidence.context && <p className="text-xs text-muted">Contexto: {evidence.context}</p>}
+          <ul className="space-y-0.5 text-xs text-ink-2">
             {signals.map((s) => (
               <li key={s.id}>
-                Señal: <span className={s.polarity === "DIFFICULTY" ? "text-[#c08532]" : undefined}>{polarityLabel[s.polarity]}</span> — {s.description}
+                Señal: <span className={s.polarity === "DIFFICULTY" ? "text-attention" : undefined}>{polarityLabel[s.polarity]}</span> — {s.description}
               </li>
             ))}
           </ul>
-          <Link href={`${base}/evidence/${evidence.id}`} className="text-xs text-[#016a71] hover:underline">
+          <Link href={`${base}/evidence/${evidence.id}`} className="text-xs text-primary hover:underline">
             Ver la fuente y su provenance
           </Link>
         </ListItem>

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { UserMenu } from "@/components/domain/user-menu";
 import { Sidebar } from "@/components/domain/sidebar";
 import { OPEN_SIDEBAR_EVENT } from "@/lib/sidebar";
-import { cn } from "@/lib/cn";
 
 interface ShellHeaderProps {
   home: string;
@@ -53,18 +52,16 @@ export function ShellHeader({
     };
   }, []);
 
-  const isStudent = home === "/s";
-
   return (
     <>
-      <header className="topbar sticky top-0 z-40 border-b border-[#d1d1cd] bg-[#faf8f5] shrink-0">
+      <header className="topbar sticky top-0 z-40 border-b border-line bg-surface/80 backdrop-blur-md shrink-0">
         <div className="relative w-full">
-          {/* ──────────────── 1) ESQUINA IZQUIERDA: EDUCAI + SÍMBOLO MENÚ LATERAL ──────────────── */}
+          {/* ──────────────── 1) ESQUINA IZQUIERDA: EDUCAI + SÍMBOLO MENÚ LATERAL (FUERA DE LA ESTRUCTURA CENTRAL) ──────────────── */}
           <div className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 flex items-center gap-2.5 z-20">
             <Link href={home} className="brand flex items-center gap-2 group">
               <span className="brand-wordmark">
-                <span className="text-[#27251e] font-medium tracking-tight">educ</span>
-                <span className="text-[#016a71] font-medium tracking-tight">ai</span>
+                <span className="brand-wordmark-base">educ</span>
+                <span className="brand-wordmark-ai">ai</span>
               </span>
             </Link>
 
@@ -72,22 +69,22 @@ export function ShellHeader({
             <button
               type="button"
               onClick={handleOpenSidebar}
-              className="flex items-center justify-center p-1.5 rounded-md text-[#72706b] hover:text-[#27251e] hover:bg-[#fdfbfa] border border-[#d1d1cd] transition-colors active:scale-95 cursor-pointer"
+              className="flex items-center justify-center p-1.5 rounded-lg text-muted hover:text-white hover:bg-surface-2 border border-line/60 hover:border-line-strong transition-all active:scale-95 shadow-sm cursor-pointer"
               title="Abrir menú lateral"
               aria-label="Abrir menú lateral"
             >
-              <svg className="w-4 h-4 text-[#72706b] hover:text-[#27251e] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect width="18" height="18" x="3" y="3" rx="3" strokeWidth={1.8} />
+              <svg className="w-4.5 h-4.5 text-ink-2 hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect width="18" height="18" x="3" y="3" rx="2" strokeWidth={1.8} />
                 <path strokeLinecap="round" strokeWidth={1.8} d="M9 3v18" />
               </svg>
             </button>
           </div>
 
-          {/* ──────────────── 2) ESTRUCTURA CENTRAL ──────────────── */}
-          <div className={cn("mx-auto flex items-center justify-between gap-x-6 px-4 py-2.5", isStudent ? "max-w-[900px]" : "max-w-5xl")}>
+          {/* ──────────────── 2) ESTRUCTURA CENTRAL: INICIO MATERIA ACTIVIDADES DESARROLLO (ALINEADO CON EL MAIN: max-w-5xl px-4) ──────────────── */}
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-x-6 px-4 py-2.5">
             <div className="flex items-center pl-28 xl:pl-0">
               {nav && (
-                <nav className="flex items-center gap-1.5 overflow-x-auto -ml-2.5">
+                <nav className="flex items-center gap-1 overflow-x-auto -ml-2.5">
                   {nav}
                 </nav>
               )}

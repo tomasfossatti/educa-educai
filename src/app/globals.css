@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "./styles/globals.css";
+@import "./styles/obsidian.css";
+@import "./styles/obsidian-extras.css";
 @import "./styles/ux-refinement.css";
 @import "./styles/ux-polish.css";
 @import "./styles/student-home-polish.css";
@@ -9,136 +11,53 @@
 @import "./styles/color-system.css";
 
 @theme {
-  /* Perplexity Colors */
-  --color-parchment: #faf8f5;
-  --color-soft-paper: #fdfbfa;
-  --color-warm-mist: #d1d1cd;
-  --color-ash: #92918b;
-  --color-graphite: #72706b;
-  --color-ink: #27251e;
-  --color-pure-black: #000000;
-  --color-deep-teal: #016a71;
+  --color-canvas: #08090A;
+  --color-surface: #0F1011;
+  --color-surface-2: #121414;
+  --color-surface-3: #18191B;
+  --color-ink: #F7F8F8;
+  --color-ink-2: #D0D6E0;
+  --color-muted: #8A8F98;
+  --color-faint: #62666D;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.16);
+  --color-subtle: #121414;
+  --color-primary: #5E6AD2;
+  --color-primary-hover: #717DE3;
+  --color-primary-soft: rgba(94, 106, 210, 0.14);
+  --color-attention: #E4B766;
+  --color-attention-soft: #261f12;
+  --color-danger: #E26D78;
+  --color-danger-soft: #2b1417;
+  --color-success: #51C6A5;
 
-  /* Legacy aliases mapped to Perplexity */
-  --color-bone: #fdfbfa;
-  --color-linen: #f2f1ed;
-  --color-stone: #d1d1cd;
-  --color-mist: #92918b;
-  --color-driftwood: #72706b;
-  --color-ember: #f54e00;
-  --color-amber: #c08532;
-  --color-forest: #016a71;
-  --color-verdant: #016a71;
-  --color-crimson: #cf2d56;
-
-  /* Typography */
-  --font-pplxsans: 'pplxSans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-cursorgothic: 'pplxSans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-eb-garamond: 'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', ui-serif, Georgia, serif;
-  --font-berkeleymono: 'berkeleyMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --font-system-ui: 'system-ui', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-lato: 'Lato', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-apple-system: '-apple-system', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-  /* Typography — Scale */
-  --text-caption: 11px;
-  --leading-caption: 1.43;
-  --text-body-sm: 12px;
-  --leading-body-sm: 1.43;
-  --text-body: 14px;
-  --leading-body: 1.43;
-  --text-body-lg: 16px;
-  --leading-body-lg: 1.43;
-  --text-eyebrow: 11px;
-  --leading-eyebrow: 1.43;
-  --tracking-body-sm: 0;
-  --text-heading-sm: 18px;
-  --leading-heading-sm: 1.33;
-  --tracking-heading-sm: 0;
-  --text-heading: 22px;
-  --leading-heading: 1.25;
-  --tracking-heading: 0;
-  --text-heading-lg: 26px;
-  --leading-heading-lg: 1.2;
-  --tracking-heading-lg: 0;
-  --text-display: 32px;
-  --leading-display: 1.15;
-  --tracking-display: 0;
-
-  /* Spacing */
-  --spacing-4: 4px;
-  --spacing-8: 8px;
-  --spacing-12: 12px;
-  --spacing-16: 16px;
-  --spacing-20: 20px;
-  --spacing-24: 24px;
-  --spacing-32: 32px;
-  --spacing-48: 48px;
-  --spacing-56: 56px;
-  --spacing-64: 64px;
-
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-subtle: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
-  --shadow-xl: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
-  --shadow-xl-2: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
-  --shadow-subtle-2: rgba(0, 0, 0, 0.08) 0px 1px 2px 0px;
-
-  /* Semantic scale */
-  --color-canvas: #faf8f5;
-  --color-surface: #fdfbfa;
-  --color-surface-2: #faf8f5;
-  --color-surface-3: #f2f1ed;
-  --color-ink: #27251e;
-  --color-ink-2: #72706b;
-  --color-muted: #72706b;
-  --color-faint: #92918b;
-  --color-line: #d1d1cd;
-  --color-line-strong: #d1d1cd;
-  --color-subtle: #fdfbfa;
-  --color-primary: #27251e;
-  --color-primary-hover: #3d3b32;
-  --color-primary-soft: #f2f1ed;
-  --color-attention: #c08532;
-  --color-attention-soft: #fbf5eb;
-  --color-danger: #cf2d56;
-  --color-danger-soft: #fdf2f4;
-  --color-success: #016a71;
-  --color-success-soft: #f2f8f8;
-
-  --font-sans: 'pplxSans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-serif: 'EB Garamond', 'Iowan Old Style', 'Palatino Linotype', ui-serif, Georgia, serif;
-  --font-mono: 'berkeleyMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 html {
-  color-scheme: light;
-  background: #faf8f5;
+  color-scheme: dark;
+  background: #08090A;
 }
 
 body {
-  background: #faf8f5 !important;
-  color: #27251e !important;
-  font-family: var(--font-pplxsans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background:
+    radial-gradient(ellipse 65% 45% at 50% 0%, rgba(94, 106, 210, 0.09), transparent 70%),
+    linear-gradient(180deg, #08090A 0%, #060708 100%) !important;
+  color: #D0D6E0 !important;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
 
 :focus-visible {
-  outline: 2px solid #26251e;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: #8BC4F8 !important;
-  color: #26251e !important;
+  background: rgba(120, 150, 238, 0.35);
+  color: #FFFFFF;
 }
 
 /* Texto de usuario o IA: respeta saltos de línea sin romper el layout. */
@@ -147,22 +66,19 @@ body {
   overflow-wrap: anywhere;
 }
 
-/* Educai brand wordmark: Warm ink with single ember accent */
+/* Educai gradient wordmark */
 .brand-wordmark {
   display: inline-flex;
   align-items: baseline;
-  font-weight: 500;
+  font-weight: 800;
   letter-spacing: -0.04em;
-  font-size: 20px;
+  font-size: 21px;
 }
-
 .brand-wordmark-base {
-  color: #26251e !important;
+  color: #F1F4FB;
 }
-
 .brand-wordmark-ai {
-  color: #f54e00 !important;
-  background: none !important;
-  -webkit-background-clip: unset !important;
-  -webkit-text-fill-color: #f54e00 !important;
+  background: linear-gradient(135deg, #7896EE 0%, #EC2B91 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

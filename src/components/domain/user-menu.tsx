@@ -36,15 +36,15 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
 
   return (
     <div ref={menuRef} className="relative">
-      {/* Botón con ícono de avatar/perfil */}
+      {/* Botón único con ícono de avatar/perfil */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex h-8 w-8 items-center justify-center rounded-md border border-[#d1d1cd] bg-transparent text-[#72706b] shadow-none transition-colors hover:bg-[#fdfbfa] hover:text-[#27251e] focus:outline-none focus:ring-1 focus:ring-[#016a71] active:scale-95"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] bg-[#121414] text-[#D0D6E0] shadow-sm transition-all hover:border-white/[0.16] hover:bg-[#18191B] hover:text-[#F7F8F8] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2]/50 active:scale-95"
         aria-label="Abrir menú de usuario"
         aria-expanded={isOpen}
       >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -54,21 +54,21 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
         </svg>
       </button>
 
-      {/* Menú flotante en Soft Paper y bordes hairline de 16px */}
+      {/* Menú flotante (dropdown) con fondo sólido Linear */}
       {isOpen && (
         <div
-          className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] p-2 shadow-[0px_1px_2px_rgba(0,0,0,0.08)] z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+          className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/[0.08] bg-[#171718] p-2 shadow-[0px_7px_32px_rgba(0,0,0,0.5)] z-50 animate-in fade-in slide-in-from-top-2 duration-150"
         >
           {/* Datos del usuario */}
-          <div className="border-b border-[#d1d1cd] px-3 py-2">
-            <p className="truncate text-xs font-medium text-[#27251e]">{userName}</p>
-            <p className="truncate text-[11px] text-[#72706b] font-normal">{roleLabel}</p>
+          <div className="border-b border-white/[0.08] px-3 py-2.5">
+            <p className="truncate text-xs font-bold text-[#F7F8F8]">{userName}</p>
+            <p className="truncate text-[11px] text-[#8A8F98]">{roleLabel}</p>
           </div>
 
           {/* Enlaces de usuario si los hay (ej. Tu contexto) */}
           {userLinks && (
             <div
-              className="border-b border-[#d1d1cd] px-1 py-1.5 text-xs text-[#27251e] [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-xl [&_a]:px-2.5 [&_a]:py-1.5 [&_a]:transition-colors hover:[&_a]:bg-[#faf8f5] hover:[&_a]:text-[#27251e]"
+              className="border-b border-white/[0.08] px-1 py-1.5 text-xs text-[#D0D6E0] [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-lg [&_a]:px-2.5 [&_a]:py-1.5 [&_a]:transition-colors hover:[&_a]:bg-white/[0.06] hover:[&_a]:text-[#F7F8F8]"
               onClick={() => setIsOpen(false)}
             >
               {userLinks}
@@ -80,7 +80,7 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-normal text-[#cf2d56] transition-colors hover:bg-[#fdf2f4]"
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-400 transition-colors hover:bg-rose-950/20 hover:text-rose-300"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path

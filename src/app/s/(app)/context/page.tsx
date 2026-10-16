@@ -37,11 +37,11 @@ export default async function ContextPage() {
               workPreferences: profile.declaredWorkPreferences ?? "",
             }}
           />
-          <p className="text-xs text-[#72706b]">Última actualización: {formatDate(profile.declaredUpdatedAt)}</p>
+          <p className="text-xs text-muted">Última actualización: {formatDate(profile.declaredUpdatedAt)}</p>
         </Section>
 
         <Section title="Qué sabe Educai sobre vos" description="Todo lo que se guarda proviene de lo que hiciste dentro de Educai.">
-          <dl className="divide-y divide-[#d1d1cd] rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] px-5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
+          <dl className="divide-y divide-line rounded-lg border border-line bg-surface px-4">
             <KeyValue label="Conversaciones con el tutor">
               {summary.conversations} ({summary.messages} mensajes tuyos) · Origen: tus sesiones de estudio · Visibles: solo vos
             </KeyValue>
@@ -56,7 +56,7 @@ export default async function ContextPage() {
             <KeyValue label="Intervenciones">{plural(summary.interventions, "acción", "acciones")} de tu docente que te incluyeron</KeyValue>
             <KeyValue label="Contexto declarado">Visible para tu docente: {profile.shareContextWithTeachers ? "sí" : "no"}</KeyValue>
           </dl>
-          <p className="text-xs text-[#72706b]">
+          <p className="text-xs text-muted">
             Podés eliminar una conversación desde su página: se borran también la evidencia y las inferencias que dependían de ella.
           </p>
         </Section>

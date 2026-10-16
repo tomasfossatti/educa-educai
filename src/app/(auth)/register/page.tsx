@@ -10,8 +10,8 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-normal tracking-[-0.312px] text-ink">Crear cuenta</h1>
-        <p className="mt-1 text-sm text-ink-2 font-serif">Elegí cómo vas a usar Educai.</p>
+        <h1 className="text-xl font-semibold">Crear cuenta</h1>
+        <p className="mt-1 text-sm text-ink-2">Elegí cómo vas a usar Educai.</p>
       </div>
       <RegisterForm defaultRole={role} />
       <p className="text-sm text-ink-2">

@@ -26,17 +26,15 @@ export function SubmissionForm({ activityId, prompts, draft }: { activityId: str
       ))}
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-[#27251e]">¿Usaste ayuda para responder?</legend>
-        <p className="text-xs text-[#72706b] leading-relaxed">
+        <legend className="text-sm font-medium text-ink">¿Usaste ayuda para responder?</legend>
+        <p className="text-xs text-muted">
           No cambia cómo se te evalúa: es contexto para interpretar la evidencia con honestidad (por ejemplo, para no confundir lo que hiciste con lo
           que hizo una IA).
         </p>
-        <div className="space-y-2 pt-1">
-          {(Object.keys(declaredAssistanceLabel) as DeclaredAssistance[]).map((value) => (
-            <Radio key={value} name="declaredAssistance" value={value} label={declaredAssistanceLabel[value]} defaultChecked={draft?.declaredAssistance === value} />
-          ))}
-        </div>
-        {state?.fieldErrors?.declaredAssistance && <p className="text-xs text-danger" role="alert">{state.fieldErrors.declaredAssistance}</p>}
+        {(Object.keys(declaredAssistanceLabel) as DeclaredAssistance[]).map((value) => (
+          <Radio key={value} name="declaredAssistance" value={value} label={declaredAssistanceLabel[value]} defaultChecked={draft?.declaredAssistance === value} />
+        ))}
+        {state?.fieldErrors?.declaredAssistance && <p className="text-xs text-danger">{state.fieldErrors.declaredAssistance}</p>}
       </fieldset>
 
       <Field label="Detalle sobre la ayuda" htmlFor="assistanceNote" optional>
@@ -44,10 +42,10 @@ export function SubmissionForm({ activityId, prompts, draft }: { activityId: str
       </Field>
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-[#27251e]">
-          ¿Cuánta confianza tenés en tu respuesta? <span className="font-normal text-[#92918b]">(opcional)</span>
+        <legend className="text-sm font-medium text-ink">
+          ¿Cuánta confianza tenés en tu respuesta? <span className="font-normal text-muted">(opcional)</span>
         </legend>
-        <div className="flex flex-wrap gap-4 pt-1">
+        <div className="flex flex-wrap gap-4">
           {(Object.keys(confidenceLabel) as Confidence[]).map((value) => (
             <Radio key={value} name="confidence" value={value} label={confidenceLabel[value]} defaultChecked={draft?.confidence === value} />
           ))}
@@ -55,7 +53,7 @@ export function SubmissionForm({ activityId, prompts, draft }: { activityId: str
       </fieldset>
 
       <FormMessage state={state} />
-      <div className="flex flex-wrap gap-2.5 border-t border-[#d1d1cd] pt-4">
+      <div className="flex flex-wrap gap-2 border-t border-line pt-4">
         <PendingButton pending={pending} name="intent" value="submit" pendingText="Enviando…">
           Entregar
         </PendingButton>
