@@ -57,16 +57,16 @@ export async function ExperienceResults({ experienceId, studentId, courseId }: {
     <div className="space-y-8">
       {feedback && (
         <Section title="Feedback" description="Basado en la evidencia de esta experiencia.">
-          <div className="space-y-3 rounded-lg border border-line bg-surface p-4">
-            <p className="prose-plain text-sm text-ink">{feedback.summary}</p>
+          <div className="space-y-3 rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] p-5 sm:p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+            <p className="prose-plain text-sm text-[#27251e] leading-relaxed">{feedback.summary}</p>
             {feedback.contrastWithDeclared && (
-              <div className="space-y-1 border-t border-line pt-3">
-                <div className="flex gap-1.5">
+              <div className="space-y-1.5 border-t border-[#d1d1cd] pt-3.5">
+                <div className="flex items-center gap-2">
                   <LayerTag layer="declared" />
-                  <span className="text-xs text-muted">vs.</span>
+                  <span className="text-xs text-[#72706b]">vs.</span>
                   <LayerTag layer="observed" />
                 </div>
-                <p className="prose-plain text-sm text-ink-2">{feedback.contrastWithDeclared}</p>
+                <p className="prose-plain text-sm text-[#72706b] leading-relaxed">{feedback.contrastWithDeclared}</p>
               </div>
             )}
           </div>
@@ -91,10 +91,10 @@ export async function ExperienceResults({ experienceId, studentId, courseId }: {
 
       {insufficient.length > 0 && (
         <Section title="Todavía no hay evidencia suficiente sobre…">
-          <ul className="space-y-1 text-sm text-ink-2">
+          <ul className="space-y-1 text-sm text-[#72706b]">
             {insufficient.map((a, i) => (
               <li key={i}>
-                <span className="text-ink">
+                <span className="text-[#27251e] font-medium">
                   {a.curriculumItemId ? (itemTitle.get(a.curriculumItemId) ?? "Un tema") : "General"} · {dimensionLabel[a.dimension]}
                 </span>
                 : {a.note}
@@ -114,10 +114,10 @@ export async function ExperienceResults({ experienceId, studentId, courseId }: {
             {evaluations.map((e) => (
               <ListItem key={e.id} className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-ink">{e.criterion.title}</span>
+                  <span className="text-sm font-medium text-[#27251e]">{e.criterion.title}</span>
                   <EvaluationBadge result={e.result} />
                 </div>
-                <p className="text-sm text-ink-2">{e.rationale}</p>
+                <p className="text-sm text-[#72706b] leading-relaxed">{e.rationale}</p>
               </ListItem>
             ))}
           </List>

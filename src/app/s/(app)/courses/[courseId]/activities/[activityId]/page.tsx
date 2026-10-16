@@ -35,18 +35,18 @@ export default async function StudentActivityPage({ params }: { params: Promise<
   return (
     <>
       <PageHeader eyebrow={`${course.name} · ${activityKindLabel[activity.kind]}`} title={activity.title} />
-      <div className="space-y-10">
+      <div className="space-y-8">
         <Section title="Situación">
-          <p className="prose-plain text-sm text-ink">{activity.scenario}</p>
-          <p className="prose-plain text-sm text-ink-2">{activity.instructions}</p>
+          <p className="prose-plain text-sm text-[#27251e] leading-relaxed">{activity.scenario}</p>
+          <p className="prose-plain text-sm text-[#72706b] leading-relaxed">{activity.instructions}</p>
           {(worked.length > 0 || criteria.length > 0) && (
-            <dl className="border-t border-line pt-2">
+            <dl className="border-t border-[#d1d1cd] pt-3">
               {worked.length > 0 && <KeyValue label="Trabaja">{worked.map((w) => w.title).join(" · ")}</KeyValue>}
               {criteria.length > 0 && <KeyValue label="Criterios">{criteria.map((c) => c.title).join(" · ")}</KeyValue>}
             </dl>
           )}
           {activity.status === "PUBLISHED" && (
-            <form action={startConversationAction} className="pt-1">
+            <form action={startConversationAction} className="pt-2">
               <input type="hidden" name="courseId" value={courseId} />
               <input type="hidden" name="activityId" value={activity.id} />
               <SubmitButton variant="secondary" size="sm" pendingText="Abriendo…">
@@ -61,20 +61,22 @@ export default async function StudentActivityPage({ params }: { params: Promise<
             title="Tu respuesta"
             description="Explicá tus decisiones y su porqué: eso es lo que permite observar cómo aplicás lo que sabés. Podés guardar un borrador."
           >
-            <SubmissionForm
-              activityId={activity.id}
-              prompts={prompts}
-              draft={
-                latest
-                  ? {
-                      answers: parseAnswers(latest.answers),
-                      declaredAssistance: latest.declaredAssistance,
-                      assistanceNote: latest.assistanceNote,
-                      confidence: latest.confidence,
-                    }
-                  : null
-              }
-            />
+            <div className="rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] p-5 sm:p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+              <SubmissionForm
+                activityId={activity.id}
+                prompts={prompts}
+                draft={
+                  latest
+                    ? {
+                        answers: parseAnswers(latest.answers),
+                        declaredAssistance: latest.declaredAssistance,
+                        assistanceNote: latest.assistanceNote,
+                        confidence: latest.confidence,
+                      }
+                    : null
+                }
+              />
+            </div>
           </Section>
         ) : latest ? (
           <>
@@ -83,14 +85,14 @@ export default async function StudentActivityPage({ params }: { params: Promise<
               description={`Enviada el ${formatDateTime(latest.submittedAt)} · la producción original se conserva tal como la enviaste.`}
               action={<LayerTag layer="observed" />}
             >
-              <div className="space-y-4 rounded-lg border border-line bg-surface p-4">
+              <div className="space-y-4 rounded-2xl border border-[#d1d1cd] bg-[#fdfbfa] p-5 sm:p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
                 {prompts.map((p) => (
                   <div key={p.key} className="space-y-1">
-                    <p className="text-sm font-medium text-ink">{p.label}</p>
-                    <p className="prose-plain text-sm text-ink-2">{parseAnswers(latest.answers)[p.key] || "—"}</p>
+                    <p className="text-sm font-medium text-[#27251e]">{p.label}</p>
+                    <p className="prose-plain text-sm text-[#72706b] leading-relaxed">{parseAnswers(latest.answers)[p.key] || "—"}</p>
                   </div>
                 ))}
-                <dl className="border-t border-line pt-2">
+                <dl className="border-t border-[#d1d1cd] pt-3">
                   <KeyValue label="Ayuda declarada">
                     {latest.declaredAssistance ? declaredAssistanceLabel[latest.declaredAssistance] : "No declarada"}
                     {latest.assistanceNote ? ` — ${latest.assistanceNote}` : ""}

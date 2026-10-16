@@ -478,10 +478,10 @@ export function PageLMStudio() {
   return (
     <div className="w-full flex-1 flex flex-col h-[calc(100vh-5.5rem)] text-ink overflow-hidden">
       {/* ──────────────── CABECERA ESTILO NOTEBOOKLM ──────────────── */}
-      <header className="flex items-center justify-between px-3 py-2 border-b border-white/[0.08] bg-[#08090A] shrink-0">
+      <header className="flex items-center justify-between px-3 py-2 border-b border-[#cdcdc9] bg-[#f2f1ed] shrink-0">
         <div className="flex items-center gap-3">
           {/* Logo circular de cuaderno */}
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.15)] border border-primary-hover/40">
+          <div className="w-8 h-8 rounded bg-[#26251e] flex items-center justify-center text-[#f7f7f4] border border-[#26251e]">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
@@ -496,16 +496,16 @@ export function PageLMStudio() {
               onBlur={() => setIsEditingTitle(false)}
               onChange={(e) => setNotebookTitle(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && setIsEditingTitle(false)}
-              className="rounded-lg bg-[#121414] border border-primary px-2.5 py-1 text-sm font-semibold text-[#F7F8F8] focus:outline-none focus:ring-1 focus:ring-primary/40"
+              className="rounded bg-[#f7f7f4] border border-[#26251e] px-2.5 py-1 text-sm font-normal text-[#26251e] focus:outline-none focus:ring-1 focus:ring-[#26251e]"
             />
           ) : (
             <button
               type="button"
               onClick={() => setIsEditingTitle(true)}
-              className="text-sm font-semibold text-[#F7F8F8] hover:text-primary transition-colors flex items-center gap-2 group"
+              className="text-sm font-normal text-[#26251e] hover:text-[#f54e00] transition-colors flex items-center gap-2 group"
             >
               <span>{notebookTitle}</span>
-              <svg className="w-3.5 h-3.5 text-[#8A8F98] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5 text-[#7a7974] opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
             </button>
@@ -520,13 +520,13 @@ export function PageLMStudio() {
               setChatMessages([]);
               setActiveStudioView("grid");
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.08] bg-[#121414] hover:bg-[#18191B] text-xs font-semibold text-[#8A8F98] hover:text-[#F7F8F8] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#cdcdc9] bg-[#e6e5e0] hover:bg-[#deddd8] text-xs font-normal text-[#26251e] transition-colors"
           >
             <span>+ Crear cuaderno</span>
           </button>
           <Link
             href="/s"
-            className="px-3 py-1.5 rounded-xl border border-white/[0.08] bg-[#121414] hover:bg-[#18191B] text-xs font-semibold text-[#8A8F98] hover:text-[#F7F8F8] transition-colors"
+            className="px-3 py-1.5 rounded border border-[#cdcdc9] bg-[#e6e5e0] hover:bg-[#deddd8] text-xs font-normal text-[#26251e] transition-colors"
           >
             ← Volver al curso
           </Link>

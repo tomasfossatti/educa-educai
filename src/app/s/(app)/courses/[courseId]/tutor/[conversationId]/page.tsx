@@ -50,7 +50,7 @@ export default async function TutorPage({ params }: { params: Promise<{ courseId
         />
 
         {active ? (
-          <form action={closeConversationAction.bind(null, conversation.id)} className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
+          <form action={closeConversationAction.bind(null, conversation.id)} className="flex flex-wrap items-center gap-3 border-t border-[#d1d1cd] pt-4">
             <ConfirmSubmit
               variant="secondary"
               message="¿Terminar la sesión? Educai va a analizar la conversación para generar evidencia y feedback. Después no podrás seguir escribiendo en ella."
@@ -58,7 +58,7 @@ export default async function TutorPage({ params }: { params: Promise<{ courseId
             >
               Terminar sesión y generar evidencia
             </ConfirmSubmit>
-            <span className="text-xs text-muted">
+            <span className="text-xs text-[#72706b]">
               {studentMessages === 0 ? "Escribí al menos un mensaje para poder terminar." : "Podés volver más tarde: la sesión queda abierta."}
             </span>
           </form>
@@ -75,7 +75,7 @@ export default async function TutorPage({ params }: { params: Promise<{ courseId
             >
               Eliminar conversación
             </ConfirmSubmit>
-            <span className="text-xs text-muted">Borra la conversación y todo lo que Educai derivó de ella.</span>
+            <span className="text-xs text-[#72706b]">Borra la conversación y todo lo que Educai derivó de ella.</span>
           </form>
         </Section>
       </div>

@@ -28,7 +28,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       totalClasses={8}
       nav={<StudentNav defaultCourseId={courseId} />}
       userLinks={
-        <Link href="/s/context" className="text-ink-2 hover:text-ink">
+        <Link href="/s/context" className="text-sm font-normal text-[#72706b] hover:text-[#27251e] transition-colors">
           Tu contexto
         </Link>
       }

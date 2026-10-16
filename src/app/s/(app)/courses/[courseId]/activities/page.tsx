@@ -47,10 +47,10 @@ export default async function StudentActivitiesPage({ params }: { params: Promis
             return (
               <ListItem key={a.id} className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <Link href={`/s/courses/${courseId}/activities/${a.id}`} className="text-sm font-medium text-ink hover:text-primary">
+                  <Link href={`/s/courses/${courseId}/activities/${a.id}`} className="text-sm font-medium text-[#27251e] hover:text-[#016a71] transition-colors">
                     {a.title}
                   </Link>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-[#72706b] font-normal">
                     {activityKindLabel[a.kind]} · publicada {formatDate(a.publishedAt)}
                   </p>
                 </div>

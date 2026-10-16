@@ -100,12 +100,14 @@ export function Chat({ conversationId, initialMessages, active }: { conversation
           <div key={m.id} className={cn("flex", m.role === "STUDENT" ? "justify-end" : "justify-start")}>
             <div
               className={cn(
-                "prose-plain max-w-[85%] rounded-lg px-3.5 py-2.5 text-sm leading-relaxed",
-                m.role === "STUDENT" ? "bg-subtle text-ink" : "border border-line bg-surface text-ink",
+                "prose-plain max-w-[85%] rounded-xl px-4 py-3 text-sm leading-relaxed",
+                m.role === "STUDENT"
+                  ? "bg-[#27251e] text-[#faf8f5] shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                  : "border border-[#d1d1cd] bg-[#fdfbfa] text-[#27251e] shadow-[0_1px_2px_rgba(0,0,0,0.04)]",
               )}
             >
-              {m.role === "TUTOR" && <span className="mb-1 block text-xs font-medium text-muted">Tutor</span>}
-              {m.content || <span className="text-muted">Pensando…</span>}
+              {m.role === "TUTOR" && <span className="mb-1 block text-xs font-medium text-[#72706b]">Tutor</span>}
+              {m.content || <span className="text-[#92918b]">Pensando…</span>}
             </div>
           </div>
         ))}
@@ -115,7 +117,7 @@ export function Chat({ conversationId, initialMessages, active }: { conversation
       {error && <Notice tone="error">{error}</Notice>}
 
       {active && (
-        <form onSubmit={send} className="space-y-2 border-t border-line pt-4">
+        <form onSubmit={send} className="space-y-2 border-t border-[#d1d1cd] pt-4">
           <label htmlFor="message" className="sr-only">
             Tu mensaje
           </label>
@@ -126,10 +128,10 @@ export function Chat({ conversationId, initialMessages, active }: { conversation
             onKeyDown={onKeyDown}
             maxLength={4000}
             placeholder="Escribí tu mensaje. Enter para enviar, Shift+Enter para salto de línea."
-            className="min-h-20"
+            className="min-h-24"
             disabled={streaming}
           />
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-1">
             <Button type="submit" disabled={streaming || !input.trim()}>
               {streaming ? "El tutor está respondiendo…" : "Enviar"}
             </Button>

@@ -2,26 +2,32 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger" | "invert";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "invert" | "amber" | "forest";
 type Size = "sm" | "md";
 
 const base =
-  "inline-flex items-center justify-center gap-1.5 font-medium transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-1.5 font-normal transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap active:scale-[0.99]";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-primary text-white hover:bg-primary-hover shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2),0_2px_4px_rgba(0,0,0,0.15)] font-semibold border border-primary-hover/40",
+    "bg-[#27251e] text-[#faf8f5] hover:bg-[#3d3b32] font-normal border border-transparent shadow-[0_1px_2px_rgba(0,0,0,0.08)] rounded-xl",
   secondary:
-    "border border-white/[0.08] bg-[#18191B] text-[#D0D6E0] hover:bg-[#202225] hover:border-white/[0.16] hover:text-[#F7F8F8] font-medium shadow-sm",
-  ghost: "text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.06]",
-  danger: "border border-rose-500/30 bg-surface text-rose-400 hover:bg-rose-500/10",
+    "border border-[#d1d1cd] bg-transparent text-[#72706b] hover:text-[#27251e] hover:border-[#27251e] hover:bg-[#fdfbfa] font-normal shadow-none rounded-md",
+  ghost:
+    "bg-transparent text-[#72706b] hover:text-[#27251e] hover:bg-[#fdfbfa] font-normal border border-transparent rounded-md",
+  amber:
+    "bg-[#c08532] text-[#faf8f5] hover:bg-[#ad7427] font-normal border border-transparent rounded-md",
+  forest:
+    "bg-[#016a71] text-[#faf8f5] hover:bg-[#015257] font-normal border border-transparent rounded-md",
+  danger:
+    "border border-[#cf2d56]/30 bg-[#fdf2f4] text-[#cf2d56] hover:bg-[#fbdde3] font-normal rounded-md",
   invert:
-    "bg-[#E5E5E6] text-[#08090A] hover:bg-white hover:text-black font-semibold border border-transparent shadow-[0_1px_2px_rgba(0,0,0,0.2)]",
+    "bg-[#fdfbfa] text-[#27251e] hover:bg-[#faf8f5] font-normal border border-[#d1d1cd] rounded-md",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs rounded-lg",
-  md: "h-9.5 px-4 text-sm rounded-xl",
+  sm: "h-8 px-3 text-xs",
+  md: "h-9 px-4 text-sm",
 };
 
 export function buttonClass(variant: Variant = "primary", size: Size = "md", className?: string) {
@@ -47,5 +53,5 @@ export function ButtonLink({
 }
 
 export function TextLink({ className, ...props }: ComponentProps<typeof Link>) {
-  return <Link className={cn("text-primary underline-offset-2 hover:underline hover:text-primary-hover", className)} {...props} />;
+  return <Link className={cn("text-[#016a71] underline-offset-2 hover:underline transition-colors duration-150 font-normal", className)} {...props} />;
 }

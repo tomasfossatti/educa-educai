@@ -26,18 +26,18 @@ export function DimensionBlock({ dimension, evidenceHref }: { dimension: Dimensi
   const items = dimension.details.items ?? [];
   const showItemDimension = dimension.dimension === "CONSISTENCY" || dimension.dimension === "EVOLUTION";
   return (
-    <div className="space-y-2 px-4 py-4">
+    <div className="space-y-2.5 px-5 py-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-ink">{snapshotDimensionLabel[dimension.dimension]}</h3>
-          <p className="text-xs text-muted">{snapshotDimensionQuestion[dimension.dimension]}</p>
+          <h3 className="text-sm font-medium text-[#27251e]">{snapshotDimensionLabel[dimension.dimension]}</h3>
+          <p className="text-xs text-[#72706b]">{snapshotDimensionQuestion[dimension.dimension]}</p>
         </div>
         <SupportBadge status={dimension.status} />
       </div>
-      <p className="text-sm text-ink-2">{dimension.summary}</p>
+      <p className="text-sm text-[#72706b] leading-relaxed">{dimension.summary}</p>
 
       {dimension.details.assistance && (
-        <p className="text-xs text-muted">
+        <p className="text-xs text-[#92918b]">
           Asistencia registrada:{" "}
           {(["NONE", "LOW", "MEDIUM", "HIGH", "UNKNOWN"] as const)
             .filter((k) => dimension.details.assistance![k] > 0)
@@ -48,14 +48,14 @@ export function DimensionBlock({ dimension, evidenceHref }: { dimension: Dimensi
 
       {items.length > 0 && (
         <details className="group text-sm">
-          <summary className="cursor-pointer select-none text-primary hover:underline">
+          <summary className="cursor-pointer select-none text-[#016a71] hover:underline font-normal">
             Ver evidencia ({dimension.evidenceIds.length})
           </summary>
-          <ul className="mt-2 space-y-2 border-l border-line pl-3">
+          <ul className="mt-2 space-y-2 border-l border-[#d1d1cd] pl-3">
             {items.map((item, i) => (
               <li key={`${item.curriculumItemId ?? "general"}-${item.dimension}-${i}`} className="space-y-1">
-                <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
-                  <span className="font-medium text-ink-2">{item.title}</span>
+                <div className="flex flex-wrap items-center gap-x-2 text-xs text-[#72706b]">
+                  <span className="font-medium text-[#27251e]">{item.title}</span>
                   {showItemDimension && <span>· {dimensionLabel[item.dimension]}</span>}
                   <span className={item.direction === "DIFFICULTY" ? "text-attention" : undefined}>· {DIRECTION_LABEL[item.direction]}</span>
                   {TREND_LABEL[item.trend] && <span>· {TREND_LABEL[item.trend]}</span>}
@@ -70,7 +70,7 @@ export function DimensionBlock({ dimension, evidenceHref }: { dimension: Dimensi
                 </div>
                 <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
                   {item.evidenceIds.map((id, n) => (
-                    <Link key={id} href={evidenceHref(id)} className="text-primary hover:underline">
+                    <Link key={id} href={evidenceHref(id)} className="text-[#016a71] hover:underline font-normal">
                       Evidencia {n + 1}
                     </Link>
                   ))}

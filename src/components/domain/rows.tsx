@@ -23,8 +23,8 @@ export interface InferenceRowData {
 export function InferenceRow({ inference, href, audience }: { inference: InferenceRowData; href: string; audience: "student" | "teacher" }) {
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
-        {inference.studentName && <span className="font-medium text-ink-2">{inference.studentName}</span>}
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#72706b]">
+        {inference.studentName && <span className="font-medium text-[#27251e]">{inference.studentName}</span>}
         <span>{dimensionLabel[inference.dimension]}</span>
         <span aria-hidden>·</span>
         <span className={inference.polarity === "DIFFICULTY" ? "text-attention" : undefined}>{polarityLabel[inference.polarity]}</span>
@@ -37,11 +37,11 @@ export function InferenceRow({ inference, href, audience }: { inference: Inferen
         <span aria-hidden>·</span>
         <span>{formatDate(inference.createdAt)}</span>
       </div>
-      <p className="text-sm text-ink">{audience === "student" ? inference.studentStatement : inference.statement}</p>
-      <div className="flex flex-wrap items-center gap-2">
+      <p className="text-sm text-[#27251e] leading-relaxed">{audience === "student" ? inference.studentStatement : inference.statement}</p>
+      <div className="flex flex-wrap items-center gap-2 pt-0.5">
         <SupportBadge status={inference.supportStatus} />
         <ReviewBadge status={inference.reviewStatus} audience={audience} />
-        <Link href={href} className="text-sm text-primary hover:underline">
+        <Link href={href} className="text-sm text-[#016a71] hover:underline font-normal">
           ¿Por qué Educai cree esto? ({inference.evidenceCount} {inference.evidenceCount === 1 ? "evidencia" : "evidencias"})
         </Link>
       </div>
@@ -63,9 +63,9 @@ export interface EvidenceRowData {
 
 export function EvidenceRow({ evidence, href }: { evidence: EvidenceRowData; href: string }) {
   return (
-    <Link href={href} className="block space-y-1.5 hover:bg-subtle/60 -mx-4 -my-3 px-4 py-3">
-      <div className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
-        {evidence.studentName && <span className="font-medium text-ink-2">{evidence.studentName}</span>}
+    <Link href={href} className="block space-y-1.5 hover:bg-[#faf8f5] -mx-4 -my-3 px-4 py-3 transition-colors">
+      <div className="flex flex-wrap items-center gap-x-2 text-xs text-[#72706b]">
+        {evidence.studentName && <span className="font-medium text-[#27251e]">{evidence.studentName}</span>}
         <span>{evidenceKindLabel[evidence.kind]}</span>
         <span aria-hidden>·</span>
         <span>{evidenceSourceLabel[evidence.source]}</span>
@@ -76,8 +76,8 @@ export function EvidenceRow({ evidence, href }: { evidence: EvidenceRowData; hre
         <span aria-hidden>·</span>
         <span>{assistanceLevelLabel[evidence.assistanceLevel]}</span>
       </div>
-      <p className="text-sm text-ink-2">{evidence.observation}</p>
-      <p className="prose-plain border-l-2 border-line-strong pl-3 text-sm text-ink">“{truncate(evidence.content, 280)}”</p>
+      <p className="text-sm text-[#72706b] leading-relaxed">{evidence.observation}</p>
+      <p className="prose-plain border-l-2 border-[#d1d1cd] pl-3 text-sm text-[#27251e]">“{truncate(evidence.content, 280)}”</p>
     </Link>
   );
 }

@@ -35,7 +35,7 @@ export function ReviewBadge({ status, audience = "teacher" }: { status: ReviewSt
 }
 
 export function PolarityText({ polarity }: { polarity: Polarity }) {
-  return <span className={polarity === "DIFFICULTY" ? "text-attention" : "text-ink-2"}>{polarityLabel[polarity]}</span>;
+  return <span className={polarity === "DIFFICULTY" ? "text-[#c08532]" : "text-[#72706b]"}>{polarityLabel[polarity]}</span>;
 }
 
 export function DimensionTag({ dimension }: { dimension: Dimension }) {
@@ -62,7 +62,7 @@ export function LayerTag({ layer }: { layer: keyof typeof LAYER }) {
   return (
     <span
       title={LAYER[layer].help}
-      className="inline-flex items-center rounded-sm bg-subtle px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted"
+      className="inline-flex items-center rounded-full border border-[#d1d1cd] bg-[#fdfbfa] px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-[#72706b]"
     >
       {LAYER[layer].label}
     </span>
