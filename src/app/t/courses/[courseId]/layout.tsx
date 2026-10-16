@@ -11,6 +11,8 @@ export default async function CourseLayout({ children, params }: { children: Rea
       home="/t"
       userName={user.name}
       roleLabel={`Docente · ${profile.institution.name}`}
+      courseId={courseId}
+      courseTitle={course.name}
       nav={<TeacherCourseNav courseId={courseId} />}
     >
       <p className="-mt-4 mb-6 text-xs text-muted">

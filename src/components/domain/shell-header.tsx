@@ -10,11 +10,25 @@ interface ShellHeaderProps {
   home: string;
   userName: string;
   roleLabel: string;
+  courseId?: string;
+  courseTitle?: string;
+  currentClassNumber?: number;
+  totalClasses?: number;
   nav?: ReactNode;
   userLinks?: ReactNode;
 }
 
-export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: ShellHeaderProps) {
+export function ShellHeader({
+  home,
+  userName,
+  roleLabel,
+  courseId,
+  courseTitle,
+  currentClassNumber,
+  totalClasses,
+  nav,
+  userLinks,
+}: ShellHeaderProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleOpenSidebar = useCallback(() => {
@@ -90,6 +104,10 @@ export function ShellHeader({ home, userName, roleLabel, nav, userLinks }: Shell
         home={home}
         userName={userName}
         roleLabel={roleLabel}
+        courseId={courseId}
+        courseTitle={courseTitle}
+        currentClassNumber={currentClassNumber}
+        totalClasses={totalClasses}
       />
     </>
   );

@@ -7,6 +7,10 @@ export function AppShell({
   home,
   userName,
   roleLabel,
+  courseId,
+  courseTitle,
+  currentClassNumber,
+  totalClasses,
   nav,
   userLinks,
   children,
@@ -14,6 +18,10 @@ export function AppShell({
   home: string;
   userName: string;
   roleLabel: string;
+  courseId?: string;
+  courseTitle?: string;
+  currentClassNumber?: number;
+  totalClasses?: number;
   nav?: ReactNode;
   userLinks?: ReactNode;
   children: ReactNode;
@@ -32,6 +40,10 @@ export function AppShell({
         home={home}
         userName={userName}
         roleLabel={roleLabel}
+        courseId={courseId}
+        courseTitle={courseTitle}
+        currentClassNumber={currentClassNumber}
+        totalClasses={totalClasses}
         nav={nav}
         userLinks={userLinks}
       />
