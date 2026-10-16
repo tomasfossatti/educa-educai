@@ -13,22 +13,7 @@ export interface AttachedFile {
   extension: "txt" | "pdf" | "docx" | "md";
 }
 
-const INITIAL_ATTACHED_FILES: AttachedFile[] = [
-  {
-    id: "f-1",
-    name: "Reporte_Validacion_Hipotesis_V1.pdf",
-    size: "49.2 KB",
-    time: "Hace 15 minutos",
-    extension: "pdf",
-  },
-  {
-    id: "f-2",
-    name: "Entrevistas_Comensales_Rosario.docx",
-    size: "128.4 KB",
-    time: "Hace 2 horas",
-    extension: "docx",
-  },
-];
+const INITIAL_ATTACHED_FILES: AttachedFile[] = [];
 
 interface ClassDashboardProps {
   courseId: string;
@@ -100,7 +85,6 @@ export function ClassDashboard({
   const [isAttachOpen, setIsAttachOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>(INITIAL_ATTACHED_FILES);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const attachDropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -135,12 +119,10 @@ export function ClassDashboard({
   const processFiles = (files: File[]) => {
     const allowed = [".txt", ".pdf", ".docx", ".md"];
     const newItems: AttachedFile[] = [];
-    let hasInvalid = false;
 
     for (const f of files) {
       const ext = ("." + f.name.split(".").pop()?.toLowerCase()) as ".txt" | ".pdf" | ".docx" | ".md";
       if (!allowed.includes(ext)) {
-        hasInvalid = true;
         continue;
       }
       newItems.push({
@@ -152,16 +134,10 @@ export function ClassDashboard({
       });
     }
 
-    if (hasInvalid) {
-      setUploadError("Solo se admiten documentos en formato .txt, .pdf, .docx o .md");
-      setTimeout(() => setUploadError(null), 4000);
-    } else {
-      setUploadError(null);
-    }
-
     if (newItems.length > 0) {
       setAttachedFiles((prev) => [...newItems, ...prev]);
       setAttached(true);
+      setIsAttachOpen(false);
       if (activeConversation && onAttachConversation) {
         onAttachConversation(activeConversation.id);
       }
@@ -173,16 +149,6 @@ export function ClassDashboard({
       processFiles(Array.from(e.target.files));
       e.target.value = "";
     }
-  };
-
-  const handleDeleteFile = (id: string) => {
-    setAttachedFiles((prev) => {
-      const next = prev.filter((item) => item.id !== id);
-      if (next.length === 0) {
-        setAttached(false);
-      }
-      return next;
-    });
   };
 
   useEffect(() => {
@@ -472,7 +438,7 @@ export function ClassDashboard({
                     <svg className="w-4.5 h-4.5 text-white shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Adjuntado ({attachedFiles.length})</span>
+                    <span>Adjuntado</span>
                   </>
                 ) : (
                   <>
@@ -489,146 +455,51 @@ export function ClassDashboard({
                 )}
               </button>
 
-              {/* Menú Desplegable de Documentos Adjuntos (Estilo Gemini) */}
+              {/* Menú Desplegable: solo opción de adjuntar nuevos archivos */}
               {isAttachOpen && (
                 <div
                   ref={attachDropdownRef}
-                  className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[360px] sm:w-[420px] max-w-[calc(100vw-2rem)] rounded-2xl border border-white/[0.14] bg-[#0E1013] p-4 shadow-[0px_16px_40px_rgba(0,0,0,0.75)] backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-150 text-left"
-                >
-                  {/* Cabecera idéntica a la captura */}
-                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                      </svg>
-                      <h4 className="text-xs sm:text-sm font-bold text-[#F7F8F8]">Historial de archivos adjuntos</h4>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsAttachOpen(false)}
-                      className="p-1 rounded-lg text-[#8A8F98] hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
-                      title="Cerrar"
-                      aria-label="Cerrar"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Zona Drag & Drop interactiva */}
-                  <div
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setIsDragging(true);
-                    }}
-                    onDragLeave={() => setIsDragging(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsDragging(false);
-                      if (e.dataTransfer.files) {
-                        processFiles(Array.from(e.dataTransfer.files));
-                      }
-                    }}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={cn(
-                      "my-3 flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed p-4 text-center cursor-pointer transition-all duration-150",
-                      isDragging
-                        ? "border-purple-400 bg-purple-500/10"
-                        : "border-white/[0.12] bg-[#141619] hover:border-purple-400/50 hover:bg-[#181B1F]"
-                    )}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".txt,.pdf,.docx,.md"
-                      multiple
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
-                    <div className="w-8 h-8 rounded-full bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-[#F7F8F8]">
-                        Suelta los archivos aquí o <span className="text-purple-400 underline underline-offset-2">explora</span>
-                      </p>
-                      <p className="text-[10px] text-[#8A8F98] mt-0.5">
-                        Acepta .txt, .pdf, .docx y .md (máx. 25 MB)
-                      </p>
-                    </div>
-                  </div>
-
-                  {uploadError && (
-                    <div className="mb-2 p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px] text-center">
-                      {uploadError}
-                    </div>
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    if (e.dataTransfer.files) {
+                      processFiles(Array.from(e.dataTransfer.files));
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Adjuntá tu conversación con la IA acá"
+                  className={cn(
+                    "absolute left-1/2 -translate-x-1/2 top-full mt-3 w-[340px] sm:w-[380px] max-w-[calc(100vw-2rem)]",
+                    "rounded-2xl border p-6 text-center cursor-pointer transition-all duration-200 select-none",
+                    "shadow-[0px_16px_40px_rgba(0,0,0,0.85)] backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95",
+                    isDragging
+                      ? "border-purple-400 bg-purple-500/15 ring-2 ring-purple-400/30"
+                      : "border-white/[0.14] bg-[#0E1013] hover:border-purple-400/50 hover:bg-[#13161A]"
                   )}
-
-                  {/* Lista de archivos adjuntos (similar a la captura) */}
-                  <div className="space-y-1.5 max-h-[190px] overflow-y-auto pr-0.5">
-                    {attachedFiles.length === 0 ? (
-                      <p className="py-4 text-center text-xs text-[#8A8F98]">No hay archivos adjuntos aún.</p>
-                    ) : (
-                      attachedFiles.map((file) => (
-                        <div
-                          key={file.id}
-                          className="group/file flex items-center justify-between rounded-xl border border-white/[0.06] bg-[#141619] p-2.5 hover:bg-[#191C20] hover:border-white/[0.12] transition-colors"
-                        >
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center shrink-0">
-                              <svg className="w-3.5 h-3.5 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold text-[#F7F8F8] truncate" title={file.name}>
-                                {file.name}
-                              </p>
-                              <p className="text-[10px] text-[#8A8F98] truncate">
-                                <span className="uppercase font-mono text-[9px] px-1 py-0.2 rounded bg-white/[0.06] text-[#D0D6E0] mr-1">
-                                  {file.extension}
-                                </span>
-                                {file.size} · {file.time}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Botón eliminar archivo */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteFile(file.id);
-                            }}
-                            className="p-1 rounded-lg text-[#8A8F98] hover:text-rose-400 hover:bg-rose-950/20 transition-colors opacity-70 group-hover/file:opacity-100 cursor-pointer"
-                            title="Eliminar archivo"
-                            aria-label="Eliminar archivo"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Footer con estado de confirmación */}
-                  <div className="mt-3 pt-2.5 border-t border-white/[0.08] flex items-center justify-between text-[11px]">
-                    <span className="text-[#8A8F98] flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span>{attachedFiles.length} {attachedFiles.length === 1 ? "archivo adjunto" : "archivos adjuntos"}</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsAttachOpen(false)}
-                      className="px-3 py-1 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white font-semibold text-[11px] hover:brightness-110 transition-all shadow-sm cursor-pointer"
-                    >
-                      Listo
-                    </button>
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".txt,.pdf,.docx,.md"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  <div className="flex flex-col items-center justify-center gap-3 pointer-events-none">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/15 border border-purple-400/30 flex items-center justify-center text-purple-300">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-semibold text-[#F7F8F8]">
+                      Adjuntá tu conversación con la IA acá
+                    </p>
                   </div>
                 </div>
               )}
