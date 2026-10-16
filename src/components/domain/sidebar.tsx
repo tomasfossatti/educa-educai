@@ -37,12 +37,6 @@ const AI_RESOURCES = [
     badge: "Workbench",
     description: "Agente de estudio autónomo paso a paso",
   },
-  {
-    name: "DeepStudent (README_CN)",
-    href: "/s/deep-student/docs",
-    badge: "Docs CN",
-    description: "Guía de arquitectura y agentes",
-  },
 ];
 
 export function Sidebar({
