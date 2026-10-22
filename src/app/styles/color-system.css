@@ -77,6 +77,7 @@ html.dark {
   --neutral-badge-border: #2A3448;
 }
 
+:root {
   /* Map the pre-existing Educai/Obsidian tokens onto the same system. */
   --obsidian-bg: var(--bg-base);
   --obsidian-bg-2: var(--bg-elevated);
