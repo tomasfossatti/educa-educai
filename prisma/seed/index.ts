@@ -68,6 +68,11 @@ async function reset() {
 }
 
 async function main() {
+  try {
+    await db.$executeRawUnsafe("DISCARD ALL;");
+  } catch {
+    // ignore if not supported by driver
+  }
   await reset();
   const passwordHash = await hashPassword(DEMO_PASSWORD);
 
