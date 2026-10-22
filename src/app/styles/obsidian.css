@@ -18,8 +18,10 @@
   --obsidian-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
 }
 
-html { color-scheme: dark; background: var(--obsidian-bg); }
-body {
+html.dark { color-scheme: dark; background: var(--obsidian-bg); }
+html:not(.dark) { color-scheme: light; background: #F6F5F4; }
+
+html.dark body {
   background:
     radial-gradient(circle at 14% 0%, rgba(74, 103, 220, .18), transparent 33rem),
     radial-gradient(circle at 88% 14%, rgba(36, 177, 222, .09), transparent 30rem),
@@ -27,7 +29,16 @@ body {
   color: var(--obsidian-text) !important;
   min-height: 100vh;
 }
-body::before {
+
+html:not(.dark) body {
+  background:
+    radial-gradient(ellipse 65% 45% at 50% 0%, rgba(94, 106, 210, 0.05), transparent 70%),
+    linear-gradient(180deg, #F6F5F4 0%, #EDEDEC 100%) !important;
+  color: var(--obsidian-text) !important;
+  min-height: 100vh;
+}
+
+html.dark body::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -37,6 +48,18 @@ body::before {
   background-size: 72px 72px;
   mask-image: linear-gradient(to bottom, black, transparent 78%);
 }
+
+html:not(.dark) body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -3;
+  background-image: linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+}
+
 ::selection { background: rgba(91,124,250,.45); color: white; }
 * { scrollbar-color: rgba(121,151,255,.42) rgba(255,255,255,.035); }
 

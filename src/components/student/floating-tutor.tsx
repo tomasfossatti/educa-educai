@@ -155,9 +155,9 @@ export function FloatingTutor({
         </button>
       ) : (
         /* Ventana Flotante Abierta */
-        <div className="flex flex-col w-[380px] sm:w-[430px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-3xl border border-line bg-surface-1/95 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="flex flex-col w-[380px] sm:w-[430px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-xl border border-white/[0.12] bg-[#0A0B0D]/95 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header de la ventana */}
-          <div className="flex items-center justify-between border-b border-line bg-surface-2/80 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-white/[0.08] bg-[#0F1011] px-4 py-3">
             <div>
               <h3 className="text-sm font-bold text-ink leading-tight">
                 Tutor de la materia
@@ -191,10 +191,10 @@ export function FloatingTutor({
                 className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 whitespace-pre-wrap leading-relaxed shadow-sm ${
+                  className={`max-w-[88%] whitespace-pre-wrap leading-relaxed ${
                     m.role === "user"
-                      ? "bg-primary text-white rounded-br-none"
-                      : "bg-surface-2 border border-line text-ink rounded-bl-none"
+                      ? "bg-primary text-white rounded-xl rounded-br-sm px-3.5 py-2.5 font-sans text-xs sm:text-sm shadow-sm"
+                      : "bg-[#121414] border border-white/[0.08] text-[#F7F8F8]/95 rounded-xl rounded-bl-sm p-3.5 font-editorial text-[13.5px] sm:text-[14px]"
                   }`}
                 >
                   {m.content}

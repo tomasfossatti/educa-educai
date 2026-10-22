@@ -345,12 +345,14 @@ export function ClassDashboard({
       </div>
 
       {/* ──────────────── 1) TITULO Y DESCRIPCIÓN + BOTÓN PREGUNTAS GUÍA IA (Espacio al lado del título) ──────────────── */}
-      <div className="rounded-2xl border border-line/80 bg-gradient-to-br from-surface-1 via-surface-2/80 to-surface-3/60 p-5 sm:p-6 lg:p-7 shadow-lg backdrop-blur-xl shrink-0">
+      <div className="rounded-xl border border-white/[0.08] bg-[#0F1011] p-5 sm:p-6 lg:p-7 shadow-none transition-colors duration-200 hover:border-white/[0.14] shrink-0">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
           {/* Lado izquierdo: Título principal personalizado y descripción */}
           <div className="space-y-2 flex-1 max-w-2xl">
-            <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight text-white leading-snug">
-              Hoy vas a aplicar {effectiveConcept.toLowerCase()} en {effectiveOrg}
+            <h1 className="text-xl sm:text-2xl lg:text-[25px] font-bold tracking-tight text-white leading-snug">
+              Hoy vas a aplicar{" "}
+              <span className="concept-pill">{effectiveConcept.toLowerCase()}</span>{" "}
+              en <span className="text-white/90">{effectiveOrg}</span>
             </h1>
             {effectiveDescription && (
               <p className="text-xs sm:text-sm text-muted leading-relaxed line-clamp-2">
@@ -364,12 +366,12 @@ export function ClassDashboard({
             <button
               type="button"
               onClick={() => handleAskQuestion(CLASS_QUESTIONS[questionIndex])}
-              className="w-full text-left group relative flex flex-col justify-between gap-3 rounded-xl border border-primary/30 bg-surface-2/90 hover:bg-surface-3/90 p-4 sm:p-4.5 shadow-sm transition-all duration-300 hover:border-primary/60 hover:shadow-[0_0_20px_rgba(120,150,238,0.25)] hover:scale-[1.01] active:scale-[0.99]"
+              className="w-full text-left group relative flex flex-col justify-between gap-3 rounded-xl border border-primary/30 bg-[#121414] hover:bg-[#18191B] p-4 sm:p-4.5 shadow-none transition-all duration-200 hover:border-primary/60 active:scale-[0.99]"
               aria-label="Preguntarle a la IA esta consulta"
             >
-              {/* Pregunta */}
-              <p className="text-xs sm:text-sm font-semibold text-white leading-snug min-h-[42px] transition-opacity duration-300">
-                {CLASS_QUESTIONS[questionIndex]}
+              {/* Pregunta con tipografía editorial reflexiva */}
+              <p className="font-editorial text-[13.5px] sm:text-[14.5px] italic text-[#F7F8F8]/95 leading-relaxed min-h-[42px] transition-opacity duration-300">
+                “{CLASS_QUESTIONS[questionIndex]}”
               </p>
 
               {/* Abajo a la derecha: flecha siempre visible, texto "Preguntale a la IA" visible únicamente en hover */}
@@ -536,16 +538,16 @@ export function ClassDashboard({
 
         {/* Tarjeta con dimensiones, padding y estructura exactamente idénticas en ambos estados */}
         <div
-          className={`rounded-2xl p-4 sm:p-5 lg:p-5.5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 transition-colors duration-300 ${
+          className={`rounded-xl p-4 sm:p-5 lg:p-5.5 shadow-none flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 transition-colors duration-200 ${
             isUnlocked
               ? "border border-emerald-500/30 bg-emerald-950/20"
-              : "border border-line bg-surface-2/40"
+              : "border border-white/[0.08] bg-[#0F1011] hover:border-white/[0.14]"
           }`}
         >
           <div className="space-y-1.5 flex-1">
             <span
-              className={`text-xs font-semibold transition-colors ${
-                isUnlocked ? "text-white" : "text-muted"
+              className={`text-xs font-semibold tracking-wide uppercase transition-colors ${
+                isUnlocked ? "text-emerald-400" : "text-muted"
               }`}
             >
               {isUnlocked ? "Actividad activa" : "Actividad en espera"}
@@ -553,7 +555,7 @@ export function ClassDashboard({
             <h3 className="text-sm sm:text-base font-bold text-ink">
               {activity?.title || "Práctica: hipótesis falsables en logística de última milla"}
             </h3>
-            <p className="text-xs sm:text-sm text-muted max-w-2xl leading-relaxed line-clamp-2">
+            <p className="font-editorial text-xs sm:text-[13.5px] text-[#D0D6E0]/85 max-w-2xl leading-relaxed line-clamp-2">
               {activity?.description ||
                 "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio."}
             </p>

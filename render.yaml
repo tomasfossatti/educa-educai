@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: educai-v2
+    name: educai-mvp
     runtime: node
     plan: free
     buildCommand: npm install && npx prisma db push --force-reset && npm run db:seed && npm run build

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { UserMenu } from "@/components/domain/user-menu";
 import { Sidebar } from "@/components/domain/sidebar";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { OPEN_SIDEBAR_EVENT } from "@/lib/sidebar";
 
 interface ShellHeaderProps {
@@ -90,7 +91,8 @@ export function ShellHeader({
               )}
             </div>
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <UserMenu userName={userName} roleLabel={roleLabel} userLinks={userLinks} />
             </div>
           </div>

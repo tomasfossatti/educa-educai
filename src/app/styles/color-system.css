@@ -1,5 +1,45 @@
-/* Educai chromatic system — single source of truth for dark surfaces and semantic color. */
+/* Educai chromatic system — single source of truth for surfaces and semantic color. */
 :root {
+  color-scheme: light;
+  --bg-base: #F6F5F4;
+  --bg-elevated: #FFFFFF;
+
+  --surface-1: #FFFFFF;
+  --surface-2: #EDEDEC;
+  --surface-3: #E3E2E0;
+  --surface-secondary: #F6F5F4;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+
+  --text-primary: #111111;
+  --text-secondary: #55524E;
+  --text-tertiary: #787774;
+  --text-disabled: #A6A5A3;
+
+  --primary: #5E6AD2;
+  --primary-hover: #4F5ABF;
+  --primary-muted: rgba(94, 106, 210, 0.08);
+  --primary-border: rgba(94, 106, 210, 0.25);
+
+  --brand-pink: #D9187C;
+  --brand-pink-muted: #FDF2F8;
+
+  --success: #059669;
+  --success-muted: #ECFDF5;
+
+  --warning: #D97706;
+  --danger: #DC2626;
+
+  --eyebrow: #5E6AD2;
+  --privacy-text: #4B5563;
+  --neutral-badge-text: #4B5563;
+  --neutral-badge-bg: #F3F4F6;
+  --neutral-badge-border: #E5E7EB;
+}
+
+html.dark {
+  color-scheme: dark;
   --bg-base: #08090A;
   --bg-elevated: #0B0C0E;
 
@@ -35,6 +75,7 @@
   --neutral-badge-text: #AAB4C7;
   --neutral-badge-bg: #151B29;
   --neutral-badge-border: #2A3448;
+}
 
   /* Map the pre-existing Educai/Obsidian tokens onto the same system. */
   --obsidian-bg: var(--bg-base);

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { logoutAction } from "@/server/actions/auth";
 import { cn } from "@/lib/cn";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -251,11 +252,13 @@ export function Sidebar({
             </div>
           </div>
 
-          <form action={logoutAction} className="pt-1">
-            <button
-              type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/20 bg-rose-950/20 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-950/40 hover:text-rose-200 transition-colors"
-            >
+          <div className="pt-1 space-y-2">
+            <ThemeToggle showLabel className="w-full justify-center" />
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/20 bg-rose-950/20 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-950/40 hover:text-rose-200 transition-colors"
+              >
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"

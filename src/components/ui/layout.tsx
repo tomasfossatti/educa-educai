@@ -57,7 +57,7 @@ export function Card({ children, className }: { children: ReactNode; className?:
   return (
     <div
       className={cn(
-        "relative rounded-2xl border border-white/[0.08] bg-[#0F1011] p-5 shadow-[0_2px_4px_rgba(0,0,0,0.1)] before:pointer-events-none before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/[0.1] before:to-transparent",
+        "relative rounded-xl border border-white/[0.08] bg-[#0F1011] p-5 shadow-none transition-colors duration-150 hover:border-white/[0.14]",
         className
       )}
     >
@@ -71,7 +71,7 @@ export function List({ children, className }: { children: ReactNode; className?:
   return (
     <ul
       className={cn(
-        "divide-y divide-white/[0.06] rounded-2xl border border-white/[0.08] bg-[#0F1011] shadow-[0_2px_4px_rgba(0,0,0,0.1)] overflow-hidden",
+        "divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#0F1011] overflow-hidden",
         className
       )}
     >
@@ -86,7 +86,7 @@ export function ListItem({ children, className }: { children: ReactNode; classNa
 
 export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-white/[0.12] bg-[#0F1011]/60 px-4 py-8 text-center text-sm backdrop-blur-sm">
+    <div className="rounded-xl border border-dashed border-white/[0.12] bg-[#0F1011]/60 px-4 py-8 text-center text-sm backdrop-blur-sm">
       <p className="font-semibold text-[#F7F8F8]">{title}</p>
       {children && <div className="mt-1 text-[#8A8F98] max-w-md mx-auto">{children}</div>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
@@ -126,6 +126,30 @@ export function KeyValue({ label, children }: { label: string; children: ReactNo
   );
 }
 
-export function Quote({ children }: { children: ReactNode }) {
-  return <blockquote className="prose-plain border-l-2 border-primary/60 pl-3.5 text-sm text-ink-2 italic">{children}</blockquote>;
+/** Cita de evidencia o voz de estudiante con tipografía editorial serif. */
+export function Quote({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <blockquote className={cn("prose-plain font-editorial border-l-2 border-primary/70 pl-4 py-1 text-[15px] leading-relaxed text-[#F7F8F8]/90 italic tracking-[-0.01em]", className)}>
+      {children}
+    </blockquote>
+  );
 }
+
+/** Cápsula de concepto pedagógico para insertar naturalmente dentro de la prosa. */
+export function ConceptPill({
+  tone = "primary",
+  children,
+  className,
+}: {
+  tone?: "primary" | "amber" | "emerald";
+  children: ReactNode;
+  className?: string;
+}) {
+  const toneClasses = {
+    primary: "concept-pill",
+    amber: "concept-pill concept-pill-amber",
+    emerald: "concept-pill concept-pill-emerald",
+  };
+  return <span className={cn(toneClasses[tone], className)}>{children}</span>;
+}
+

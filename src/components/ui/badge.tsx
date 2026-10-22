@@ -22,3 +22,6 @@ export function Badge({ tone = "neutral", children, title, className }: { tone?:
     </span>
   );
 }
+
+export { ConceptPill } from "./layout";
+

@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  async rewrites() {
+    return [
+      {
+        source: "/segunda-luz",
+        destination: "/segunda-luz/index.html",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
