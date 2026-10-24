@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { User, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/server/actions/auth";
 
 interface UserMenuProps {
@@ -36,41 +38,29 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
 
   return (
     <div ref={menuRef} className="relative">
-      {/* Botón único con ícono de avatar/perfil */}
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="icon-round"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.08] bg-[#121414] text-[#D0D6E0] shadow-sm transition-all hover:border-white/[0.16] hover:bg-[#18191B] hover:text-[#F7F8F8] focus:outline-none focus:ring-1 focus:ring-[#5E6AD2]/50 active:scale-95"
         aria-label="Abrir menú de usuario"
         aria-expanded={isOpen}
       >
-        <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.8}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      </button>
+        <User className="size-4 text-ink-2" />
+      </Button>
 
-      {/* Menú flotante (dropdown) con fondo sólido Linear */}
       {isOpen && (
         <div
-          className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-white/[0.08] bg-[#171718] p-2 shadow-[0px_7px_32px_rgba(0,0,0,0.5)] z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+          className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-line bg-surface p-2 shadow-lg z-50 animate-in fade-in duration-150"
         >
           {/* Datos del usuario */}
-          <div className="border-b border-white/[0.08] px-3 py-2.5">
-            <p className="truncate text-xs font-bold text-[#F7F8F8]">{userName}</p>
-            <p className="truncate text-[11px] text-[#8A8F98]">{roleLabel}</p>
+          <div className="border-b border-line px-3 py-2">
+            <p className="truncate text-xs font-bold text-ink">{userName}</p>
+            <p className="truncate text-xs text-muted">{roleLabel}</p>
           </div>
 
-          {/* Enlaces de usuario si los hay (ej. Tu contexto) */}
+          {/* Enlaces de usuario si los hay */}
           {userLinks && (
-            <div
-              className="border-b border-white/[0.08] px-1 py-1.5 text-xs text-[#D0D6E0] [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-lg [&_a]:px-2.5 [&_a]:py-1.5 [&_a]:transition-colors hover:[&_a]:bg-white/[0.06] hover:[&_a]:text-[#F7F8F8]"
-              onClick={() => setIsOpen(false)}
-            >
+            <div className="border-b border-line px-1 py-1 text-xs text-ink-2 [&_a]:flex [&_a]:items-center [&_a]:gap-2 [&_a]:rounded-lg [&_a]:px-2.5 [&_a]:py-1.5 [&_a]:transition-colors hover:[&_a]:bg-surface-2 hover:[&_a]:text-ink">
               {userLinks}
             </div>
           )}
@@ -78,20 +68,15 @@ export function UserMenu({ userName, roleLabel, userLinks }: UserMenuProps) {
           {/* Opción de cerrar sesión */}
           <div className="pt-1">
             <form action={logoutAction}>
-              <button
+              <Button
+                variant="danger"
+                size="sm"
                 type="submit"
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-400 transition-colors hover:bg-rose-950/20 hover:text-rose-300"
+                className="w-full justify-start text-xs"
               >
-                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
+                <LogOut className="size-3.5 mr-1" />
                 <span>Salir</span>
-              </button>
+              </Button>
             </form>
           </div>
         </div>

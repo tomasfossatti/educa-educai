@@ -60,11 +60,8 @@ const LAYER = {
 
 export function LayerTag({ layer }: { layer: keyof typeof LAYER }) {
   return (
-    <span
-      title={LAYER[layer].help}
-      className="inline-flex items-center rounded-sm bg-subtle px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-muted"
-    >
+    <Badge tone="neutral" title={LAYER[layer].help} className="font-mono text-muted">
       {LAYER[layer].label}
-    </span>
+    </Badge>
   );
 }

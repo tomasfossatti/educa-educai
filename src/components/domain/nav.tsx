@@ -1,23 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 
 function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
   return (
-    <Link
+    <ButtonLink
       href={href}
+      variant={active ? "secondary" : "ghost"}
+      size="nav"
       aria-current={active ? "page" : undefined}
-      className={cn(
-        "rounded-lg px-2.5 py-1 text-xs whitespace-nowrap transition-all duration-150 font-medium",
-        active
-          ? "bg-white/[0.08] border border-white/[0.12] text-[#F7F8F8] shadow-sm"
-          : "text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.04]",
-      )}
+      className={active ? "font-semibold text-ink" : undefined}
     >
       {label}
-    </Link>
+    </ButtonLink>
   );
 }
 
@@ -38,11 +35,15 @@ export function StudentNav({ defaultCourseId }: { defaultCourseId: string | null
             label="Materia"
             active={Boolean(match) && (section === "" || section.startsWith("/tutor"))}
           />
-          <NavLink href={`${base}/activities`} label="Actividades" active={section.startsWith("/activities")} />
+          <NavLink
+            href={`${base}/activities`}
+            label="Actividades"
+            active={Boolean(match) && section.startsWith("/activities")}
+          />
           <NavLink
             href={`${base}/development`}
             label="Desarrollo"
-            active={section.startsWith("/development") || section.startsWith("/inferences") || section.startsWith("/evidence")}
+            active={Boolean(match) && section.startsWith("/development")}
           />
         </>
       )}
@@ -50,23 +51,21 @@ export function StudentNav({ defaultCourseId }: { defaultCourseId: string | null
   );
 }
 
-/** Navegación del docente dentro de una materia: priorización → evidencia → decisión. */
-export function TeacherCourseNav({ courseId }: { courseId: string }) {
+/** Navegación del docente: Materia, Atención, Estudiantes, Actividades, Currícula. */
+export function TeacherNav({ courseId }: { courseId: string }) {
   const pathname = usePathname();
   const base = `/t/courses/${courseId}`;
   const section = pathname.slice(base.length);
-  const items = [
-    { href: base, label: "Curso", active: section === "" || section.startsWith("/metrics") },
-    { href: `${base}/attention`, label: "Atención", active: ["/attention", "/insights", "/inferences", "/evidence"].some((s) => section.startsWith(s)) },
-    { href: `${base}/students`, label: "Estudiantes", active: section.startsWith("/students") || section.startsWith("/submissions") },
-    { href: `${base}/activities`, label: "Actividades", active: section.startsWith("/activities") },
-    { href: `${base}/curriculum`, label: "Currícula", active: section.startsWith("/curriculum") },
-  ];
   return (
     <>
-      {items.map((item) => (
-        <NavLink key={item.href} {...item} />
-      ))}
+      <NavLink href="/t" label="Mis materias" active={pathname === "/t"} />
+      <NavLink href={base} label="Materia" active={pathname === base} />
+      <NavLink href={`${base}/attention`} label="Atención" active={section.startsWith("/attention")} />
+      <NavLink href={`${base}/students`} label="Estudiantes" active={section.startsWith("/students")} />
+      <NavLink href={`${base}/activities`} label="Actividades" active={section.startsWith("/activities")} />
+      <NavLink href={`${base}/curriculum`} label="Currícula" active={section.startsWith("/curriculum")} />
     </>
   );
 }
+
+export const TeacherCourseNav = TeacherNav;

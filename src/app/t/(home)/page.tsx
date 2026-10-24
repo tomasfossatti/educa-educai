@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button";
 import { requireTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 
@@ -128,7 +129,7 @@ export default async function TeacherHome() {
             <strong>Creá tu primera materia</strong>
             <span>Después vas a poder cargar el programa, crear actividades y recibir evidencia.</span>
             <div className="empty-action">
-              <Link className="btn" href="/t/new">Crear materia</Link>
+              <ButtonLink href="/t/new" variant="primary">Crear materia</ButtonLink>
             </div>
           </div>
         )}

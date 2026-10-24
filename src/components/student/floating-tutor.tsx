@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MessageSquare, X, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/field";
+import { Card } from "@/components/ui/layout";
+import { cn } from "@/lib/cn";
 
-interface Message {
+export interface Message {
   role: "user" | "assistant";
   content: string;
 }
@@ -11,122 +16,129 @@ interface FloatingTutorProps {
   courseId: string;
   courseName: string;
   topicTitle?: string;
-  initialConversationId?: string | null;
+  conceptTitle?: string;
+  conceptDescription?: string;
+  initialConversationId?: string;
   initialMessageCount?: number;
 }
 
 export function FloatingTutor({
   courseId,
   courseName,
-  topicTitle = "Hipótesis de negocio falsables",
+  topicTitle,
+  conceptTitle,
+  conceptDescription,
   initialConversationId,
   initialMessageCount = 0,
 }: FloatingTutorProps) {
+  const activeTopic = topicTitle ?? conceptTitle ?? "hipótesis falsables";
   const [isOpen, setIsOpen] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(initialConversationId ?? null);
-  const [hasInteracted, setHasInteracted] = useState<boolean>(Boolean(initialConversationId && initialMessageCount > 0));
-
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: `Hola. Soy tu tutor para la clase de hoy en **${courseName}**.\n\nNo te daré respuestas directas para copiar, sino preguntas para ayudarte a construir tu propio razonamiento sobre **${topicTitle}**.\n\n¿Qué parte del tema o qué duda te gustaría pensar juntos?`,
+      content: `Hola. Estoy acá para acompañarte a pensar cómo aplicar "${activeTopic}" a tu caso real. ¿Qué situación de tu trabajo querés analizar hoy?`,
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const conversationIdRef = useRef(conversationId);
-  conversationIdRef.current = conversationId;
-  const isLoadingRef = useRef(isLoading);
-  isLoadingRef.current = isLoading;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      scrollToBottom();
     }
-  }, [messages, isLoading, isOpen]);
+  }, [messages, isOpen]);
 
-  const sendQuestion = async (textToSend: string) => {
-    const trimmed = textToSend.trim();
-    if (!trimmed || isLoadingRef.current) return;
+  useEffect(() => {
+    function handleOpenEvent(e: Event) {
+      const customEvent = e as CustomEvent<{
+        courseId?: string;
+        courseName?: string;
+        conceptTitle?: string;
+        conceptDescription?: string;
+        initialQuestion?: string;
+      }>;
+      setIsOpen(true);
+      if (customEvent.detail?.initialQuestion) {
+        sendQuestion(customEvent.detail.initialQuestion);
+      }
+    }
 
-    setIsOpen(true);
-    const userMessage: Message = { role: "user", content: trimmed };
+    function handleCloseEvent() {
+      setIsOpen(false);
+    }
+
+    window.addEventListener("educai:open-floating-tutor", handleOpenEvent);
+    window.addEventListener("close-tutor", handleCloseEvent);
+    return () => {
+      window.removeEventListener("educai:open-floating-tutor", handleOpenEvent);
+      window.removeEventListener("close-tutor", handleCloseEvent);
+    };
+  }, []);
+
+  const sendQuestion = async (userText: string) => {
+    if (!userText.trim() || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: userText.trim() };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-    setHasInteracted(true);
 
     try {
-      const activeId = conversationIdRef.current;
-      if (activeId) {
-        const res = await fetch(`/api/tutor/${activeId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: trimmed }),
+      const response = await fetch("/api/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseId,
+          messages: [...messages, userMessage],
+          conceptTitle,
+          conceptDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error en la respuesta del tutor");
+      }
+
+      if (!response.body) {
+        throw new Error("Sin contenido");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantText = "";
+
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        assistantText += chunk;
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = { role: "assistant", content: assistantText };
+          return updated;
         });
-
-        if (res.ok && res.body) {
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let assistantText = "";
-          setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            assistantText += chunk;
-            setMessages((prev) => {
-              const next = [...prev];
-              next[next.length - 1] = { role: "assistant", content: assistantText };
-              return next;
-            });
-          }
-          setIsLoading(false);
-          return;
-        }
       }
-
-      await new Promise((r) => setTimeout(r, 800));
-      let response = "";
-      if (trimmed.toLowerCase().includes("hipotesis") || trimmed.toLowerCase().includes("hipótesis")) {
-        response = `Para que esa hipótesis sea verdaderamente **falsable**, ¿cuál es la métrica exacta que vas a medir y qué número concreto demostraría que tu supuesto era incorrecto?`;
-      } else if (trimmed.toLowerCase().includes("segmento") || trimmed.toLowerCase().includes("cliente")) {
-        response = `¿Ese segmento lo estás definiendo solo por datos demográficos o por una **necesidad concreta** que tienen en común?`;
-      } else {
-        response = `¿Qué evidencia concreta te llevó a pensar eso y cómo podríamos diseñar un experimento simple para comprobarlo antes de invertir?`;
-      }
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "¿Qué supuesto clave tendrías que comprobar primero para ver si tu idea se sostiene?" },
+        {
+          role: "assistant",
+          content:
+            "¿Qué métrica observable elegirías para poner a prueba esa idea esta semana?",
+        },
       ]);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    const handleOpen = () => setIsOpen(true);
-    const handleAsk = (e: Event) => {
-      const customEvent = e as CustomEvent<{ question?: string }>;
-      if (customEvent.detail?.question) {
-        void sendQuestion(customEvent.detail.question);
-      } else {
-        setIsOpen(true);
-      }
-    };
-
-    window.addEventListener("open-tutor", handleOpen);
-    window.addEventListener("ask-tutor", handleAsk);
-    return () => {
-      window.removeEventListener("open-tutor", handleOpen);
-      window.removeEventListener("ask-tutor", handleAsk);
-    };
-  }, []);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,51 +148,40 @@ export function FloatingTutor({
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {!isOpen ? (
-        /* Botón Flotante Cerrado: únicamente símbolo de mensaje bot */
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="icon-round"
           onClick={() => setIsOpen(true)}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-primary to-indigo-600 text-white shadow-xl transition-all duration-200 hover:scale-110 hover:shadow-[0_0_25px_rgba(120,150,238,0.45)] active:scale-95 border border-white/20"
+          className="size-12"
           aria-label="Abrir tutor de la materia"
         >
-          {/* Ícono de bot de chat */}
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.8}
-              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-            />
-          </svg>
-        </button>
+          <MessageSquare className="size-5 text-white" />
+        </Button>
       ) : (
-        /* Ventana Flotante Abierta */
-        <div className="flex flex-col w-[380px] sm:w-[430px] max-w-[calc(100vw-2rem)] h-[560px] max-h-[82vh] rounded-xl border border-white/[0.12] bg-[#0A0B0D]/95 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <Card padding="none" className="flex flex-col w-80 sm:w-96 h-96 max-h-full overflow-hidden animate-in fade-in duration-150">
           {/* Header de la ventana */}
-          <div className="flex items-center justify-between border-b border-white/[0.08] bg-[#0F1011] px-4 py-3">
+          <div className="flex items-center justify-between border-b border-line bg-surface-2 px-4 py-3">
             <div>
               <h3 className="text-sm font-bold text-ink leading-tight">
                 Tutor de la materia
               </h3>
-              <p className="text-[11px] text-muted">
+              <p className="text-xs text-muted">
                 {courseName} · Método socrático
               </p>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => {
                 setIsOpen(false);
                 if (typeof window !== "undefined") {
                   window.dispatchEvent(new CustomEvent("close-tutor"));
                 }
               }}
-              className="w-7 h-7 rounded-full flex items-center justify-center text-muted hover:text-ink hover:bg-surface-3 transition-colors"
               aria-label="Cerrar ventana"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              <X className="size-4 text-muted" />
+            </Button>
           </div>
 
           {/* Área de Mensajes */}
@@ -188,25 +189,24 @@ export function FloatingTutor({
             {messages.map((m, idx) => (
               <div
                 key={idx}
-                className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}
+                className={cn("flex flex-col", m.role === "user" ? "items-end" : "items-start")}
               >
                 <div
-                  className={`max-w-[88%] whitespace-pre-wrap leading-relaxed ${
+                  className={cn(
+                    "max-w-xs sm:max-w-sm rounded-lg p-3 text-xs sm:text-sm leading-relaxed",
                     m.role === "user"
-                      ? "bg-primary text-white rounded-xl rounded-br-sm px-3.5 py-2.5 font-sans text-xs sm:text-sm shadow-sm"
-                      : "bg-[#121414] border border-white/[0.08] text-[#F7F8F8]/95 rounded-xl rounded-bl-sm p-3.5 font-editorial text-[13.5px] sm:text-[14px]"
-                  }`}
+                      ? "bg-primary text-white"
+                      : "bg-surface-2 text-ink-2"
+                  )}
                 >
-                  {m.content}
+                  <p className="prose-plain">{m.content}</p>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex items-center gap-1.5 text-xs text-muted pl-2 py-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.2s]"></span>
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.4s]"></span>
-                <span className="ml-1 text-[11px]">Pensando pregunta guía…</span>
+                <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="ml-1 text-xs">Pensando pregunta guía…</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -215,26 +215,26 @@ export function FloatingTutor({
           {/* Formulario de Entrada */}
           <form onSubmit={handleSend} className="border-t border-line bg-surface-2/60 p-3">
             <div className="flex items-center gap-2">
-              <input
-                type="text"
+              <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Escribí tu consulta o idea…"
-                className="flex-1 rounded-xl border border-line bg-surface px-3.5 py-2 text-xs sm:text-sm text-ink placeholder:text-muted focus:border-primary focus:outline-none"
+                className="flex-1 text-xs"
               />
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-primary-hover disabled:opacity-50 transition-colors"
               >
-                Enviar
-              </button>
+                <Send className="size-3.5" />
+              </Button>
             </div>
-            <p className="text-[10px] text-muted text-center pt-1.5">
+            <p className="text-xs text-muted text-center pt-1.5">
               El tutor formula preguntas para ayudarte a deducir el concepto.
             </p>
           </form>
-        </div>
+        </Card>
       )}
     </div>
   );

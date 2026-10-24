@@ -1,6 +1,19 @@
 /* Student home refinement: one grid, clearer hierarchy, denser desktop composition. */
 
 .student-home {
+  --home-surface: var(--surface-1);
+  --home-surface-hover: var(--surface-2);
+  --home-surface-priority: var(--surface-1);
+  --home-surface-priority-hover: var(--surface-2);
+  --home-border: var(--border-subtle);
+  --home-border-hover: var(--border-strong);
+  --home-secondary: var(--text-secondary);
+  --home-tertiary: var(--text-tertiary);
+  padding-top: clamp(34px, 4vw, 48px);
+  padding-bottom: 72px;
+}
+
+html.dark .student-home {
   --home-surface: rgba(12, 17, 29, .58);
   --home-surface-hover: rgba(18, 24, 39, .76);
   --home-surface-priority: rgba(22, 30, 50, .82);
@@ -9,8 +22,6 @@
   --home-border-hover: rgba(143, 174, 255, .3);
   --home-secondary: #aeb9cf;
   --home-tertiary: #8f9cb4;
-  padding-top: clamp(34px, 4vw, 48px);
-  padding-bottom: 72px;
 }
 
 .student-home-intro {
@@ -97,7 +108,7 @@
 }
 .continue-card h3 {
   margin: 0 0 6px;
-  color: #f8faff !important;
+  color: var(--text-primary) !important;
   font-size: 20px;
   line-height: 1.28;
   letter-spacing: -.025em;
@@ -198,7 +209,7 @@
 }
 .student-course-card h3 {
   margin: 0;
-  color: #f4f7ff !important;
+  color: var(--text-primary) !important;
   font-size: 18px;
   line-height: 1.3;
   letter-spacing: -.02em;
@@ -293,7 +304,7 @@
 }
 
 /* Navbar uses the same shell geometry while becoming quieter. */
-.topbar {
+html.dark .topbar {
   border-bottom-color: rgba(163,184,255,.08) !important;
   box-shadow: none !important;
 }

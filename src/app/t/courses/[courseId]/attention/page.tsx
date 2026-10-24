@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { AttentionItemRow } from "@/components/domain/attention-item";
 import { InferenceRow } from "@/components/domain/rows";
+import { ButtonLink } from "@/components/ui/button";
 import { EmptyState, List, ListItem, PageHeader, Section } from "@/components/ui/layout";
 import { cn } from "@/lib/cn";
 import { requireCourseTeacher } from "@/server/auth/guards";
@@ -64,13 +65,15 @@ export default async function AttentionPage({
         <Section id="pendientes" title="Inferencias" description="Confirmá, corregí o contextualizá: tus revisiones calibran a Educai.">
           <nav className="flex flex-wrap gap-1 text-sm">
             {(Object.keys(FILTERS) as (keyof typeof FILTERS)[]).map((key) => (
-              <Link
+              <ButtonLink
                 key={key}
                 href={`${base}/attention?filter=${key}#pendientes`}
-                className={cn("rounded-md px-2.5 py-1", filter === key ? "bg-subtle font-medium text-ink" : "text-ink-2 hover:bg-subtle")}
+                variant={filter === key ? "secondary" : "ghost"}
+                size="nav"
+                className={filter === key ? "font-semibold text-ink" : undefined}
               >
                 {FILTERS[key].label}
-              </Link>
+              </ButtonLink>
             ))}
           </nav>
           {inferences.length === 0 ? (

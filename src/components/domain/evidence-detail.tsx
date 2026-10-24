@@ -56,10 +56,10 @@ export function EvidenceDetailView({ evidence, viewer, base }: { evidence: Detai
         <Section title="Fuente original" description="Solo los mensajes en los que se basa esta evidencia.">
           <div className="space-y-2">
             {evidence.sourceMessages.map((m) => (
-              <div key={m.id} className={cn("prose-plain rounded-md px-3 py-2 text-sm", m.role === "STUDENT" ? "bg-subtle" : "border border-line bg-surface")}>
+              <article key={m.id} className={cn("prose-plain rounded-lg p-3 text-sm", m.role === "STUDENT" ? "bg-surface-2" : "border border-line bg-surface")}>
                 <span className="mb-0.5 block text-xs font-medium text-muted">{m.role === "STUDENT" ? (viewer === "student" ? "Vos" : "Estudiante") : "Tutor"} · {formatDateTime(m.createdAt)}</span>
                 {m.content}
-              </div>
+              </article>
             ))}
           </div>
         </Section>

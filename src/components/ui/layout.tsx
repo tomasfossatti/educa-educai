@@ -53,11 +53,27 @@ export function Section({
   );
 }
 
-export function Card({ children, className }: { children: ReactNode; className?: string }) {
+const cardPaddings = {
+  none: "p-0",
+  sm: "p-4",
+  md: "p-5",
+  lg: "p-6",
+} as const;
+
+export function Card({
+  children,
+  className,
+  padding = "md",
+}: {
+  children: ReactNode;
+  className?: string;
+  padding?: keyof typeof cardPaddings;
+}) {
   return (
     <div
       className={cn(
-        "relative rounded-xl border border-white/[0.08] bg-[#0F1011] p-5 shadow-none transition-colors duration-150 hover:border-white/[0.14]",
+        "relative rounded-xl border border-line bg-surface shadow-xs transition-colors duration-150 hover:border-line-strong",
+        cardPaddings[padding],
         className
       )}
     >
@@ -71,7 +87,7 @@ export function List({ children, className }: { children: ReactNode; className?:
   return (
     <ul
       className={cn(
-        "divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-[#0F1011] overflow-hidden",
+        "divide-y divide-line rounded-xl border border-line bg-surface overflow-hidden shadow-[var(--shadow-card)]",
         className
       )}
     >
@@ -81,14 +97,14 @@ export function List({ children, className }: { children: ReactNode; className?:
 }
 
 export function ListItem({ children, className }: { children: ReactNode; className?: string }) {
-  return <li className={cn("px-4 py-3.5 transition-colors hover:bg-white/[0.03]", className)}>{children}</li>;
+  return <li className={cn("px-4 py-3.5 transition-colors hover:bg-surface-2/60", className)}>{children}</li>;
 }
 
 export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="rounded-xl border border-dashed border-white/[0.12] bg-[#0F1011]/60 px-4 py-8 text-center text-sm backdrop-blur-sm">
-      <p className="font-semibold text-[#F7F8F8]">{title}</p>
-      {children && <div className="mt-1 text-[#8A8F98] max-w-md mx-auto">{children}</div>}
+    <div className="rounded-xl border border-dashed border-line bg-surface/60 px-4 py-8 text-center text-sm">
+      <p className="font-semibold text-ink">{title}</p>
+      {children && <div className="mt-1 text-muted max-w-md mx-auto">{children}</div>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );
@@ -119,17 +135,17 @@ export function Notice({
 
 export function KeyValue({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-1 gap-0.5 py-1.5 text-sm sm:grid-cols-[11rem_1fr] sm:gap-4">
-      <dt className="text-muted">{label}</dt>
-      <dd className="min-w-0 text-ink">{children}</dd>
+    <div className="grid grid-cols-1 gap-1 py-1.5 text-sm sm:grid-cols-4 sm:gap-4">
+      <dt className="text-muted sm:col-span-1">{label}</dt>
+      <dd className="min-w-0 text-ink sm:col-span-3">{children}</dd>
     </div>
   );
 }
 
-/** Cita de evidencia o voz de estudiante con tipografía editorial serif. */
+/** Cita de evidencia o voz de estudiante con tipografía editorial. */
 export function Quote({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <blockquote className={cn("prose-plain font-editorial border-l-2 border-primary/70 pl-4 py-1 text-[15px] leading-relaxed text-[#F7F8F8]/90 italic tracking-[-0.01em]", className)}>
+    <blockquote className={cn("prose-plain font-editorial border-l-2 border-primary/70 pl-4 py-1 text-sm leading-relaxed text-ink/90 italic", className)}>
       {children}
     </blockquote>
   );

@@ -1,0 +1,25 @@
+{
+  "include": [
+    "src"
+  ],
+  "tokenSources": [
+    "src/app/globals.css",
+    "src/app/styles/color-system.css",
+    "src/app/styles/globals.css",
+    "src/app/styles/obsidian.css",
+    "src/components/obsidian/arrow-fill-button.css"
+  ],
+  "uiDir": "src/components/ui",
+  "registry": "registry.json",
+  "driftList": "scripts/ui-drift.tsv",
+  "allowlist": "scripts/check-allowlist.json",
+  "nativeControls": {
+    "button": "Button",
+    "input": "Input",
+    "select": "Select",
+    "textarea": "Textarea",
+    "input:checkbox": "Checkbox",
+    "input:radio": "Radio"
+  },
+  "buttonFile": "src/components/ui/button.tsx"
+}

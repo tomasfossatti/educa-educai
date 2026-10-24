@@ -1,26 +1,40 @@
 /* Educai chromatic system — single source of truth for surfaces and semantic color. */
 :root {
   color-scheme: light;
-  --bg-base: #F6F5F4;
+  --bg-base: #F5F5F8;
+  --background: #F5F5F8;
+  --background-gradient: #F0F0FA;
   --bg-elevated: #FFFFFF;
 
+  --surface: #FFFFFF;
   --surface-1: #FFFFFF;
-  --surface-2: #EDEDEC;
-  --surface-3: #E3E2E0;
-  --surface-secondary: #F6F5F4;
+  --surface-2: #F0F0F4;
+  --surface-3: #E4E4EC;
+  --surface-secondary: #F0F0F4;
+  --surface-elevated: #FFFFFF;
 
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.16);
+  --border-subtle: #E2E2EA;
+  --border-strong: #CDCDDB;
+  --border-card: #DCDCE8;
 
-  --text-primary: #111111;
-  --text-secondary: #55524E;
-  --text-tertiary: #787774;
-  --text-disabled: #A6A5A3;
+  --text-primary: #191922;
+  --text-secondary: #555563;
+  --text-tertiary: #747481;
+  --text-disabled: #9E9EA9;
 
-  --primary: #5E6AD2;
-  --primary-hover: #4F5ABF;
-  --primary-muted: rgba(94, 106, 210, 0.08);
-  --primary-border: rgba(94, 106, 210, 0.25);
+  --accent-primary: #5145E5;
+  --accent-hover: #4338CA;
+  --accent-active: #3730A3;
+  --accent-soft: #EEEDFF;
+  --accent-border: #C9C6F4;
+  --focus-ring: #6558F5;
+  --button-text: #FFFFFF;
+
+  --primary: var(--accent-primary);
+  --primary-hover: var(--accent-hover);
+  --primary-active: var(--accent-active);
+  --primary-muted: var(--accent-soft);
+  --primary-border: var(--accent-border);
 
   --brand-pink: #D9187C;
   --brand-pink-muted: #FDF2F8;
@@ -31,33 +45,56 @@
   --warning: #D97706;
   --danger: #DC2626;
 
-  --eyebrow: #5E6AD2;
-  --privacy-text: #4B5563;
-  --neutral-badge-text: #4B5563;
-  --neutral-badge-bg: #F3F4F6;
-  --neutral-badge-border: #E5E7EB;
+  --status-today-bg: #E5F7F0;
+  --status-today-border: #A8E4D0;
+  --status-today-text: #087F5B;
+  --status-today-dot: #0DAD7A;
+
+  --shadow-card: 0 8px 24px rgba(25, 25, 45, 0.06);
+  --shadow-popover: 0 12px 28px rgba(25, 25, 45, 0.10);
+  --shadow-button: 0 2px 5px rgba(40, 35, 100, 0.12);
+
+  --eyebrow: #5145E5;
+  --privacy-text: #555563;
+  --neutral-badge-text: #555563;
+  --neutral-badge-bg: #F0F0F4;
+  --neutral-badge-border: #E2E2EA;
 }
 
 html.dark {
   color-scheme: dark;
   --bg-base: #08090A;
+  --background: #08090A;
+  --background-gradient: #08090A;
   --bg-elevated: #0B0C0E;
 
+  --surface: #0F1011;
   --surface-1: #0F1011;
   --surface-2: #121414;
   --surface-3: #18191B;
   --surface-secondary: #0D0E10;
+  --surface-elevated: #0F1011;
 
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.16);
+  --border-card: rgba(255, 255, 255, 0.08);
 
   --text-primary: #F7F8F8;
   --text-secondary: #D0D6E0;
   --text-tertiary: #8A8F98;
   --text-disabled: #62666D;
 
+  --accent-primary: #5E6AD2;
+  --accent-hover: #717DE3;
+  --accent-active: #4F5ABF;
+  --accent-soft: rgba(94, 106, 210, 0.14);
+  --accent-border: rgba(94, 106, 210, 0.35);
+  --focus-ring: #717DE3;
+  --button-text: #FFFFFF;
+
   --primary: #5E6AD2;
   --primary-hover: #717DE3;
+  --primary-active: #4F5ABF;
   --primary-muted: rgba(94, 106, 210, 0.14);
   --primary-border: rgba(94, 106, 210, 0.35);
 
@@ -69,6 +106,15 @@ html.dark {
 
   --warning: #E4B766;
   --danger: #E26D78;
+
+  --status-today-bg: rgba(6, 78, 59, 0.4);
+  --status-today-border: rgba(16, 185, 129, 0.3);
+  --status-today-text: #34D399;
+  --status-today-dot: #10B981;
+
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-popover: 0 12px 28px rgba(0, 0, 0, 0.6);
+  --shadow-button: 0 2px 5px rgba(0, 0, 0, 0.25);
 
   --eyebrow: #829DE8;
   --privacy-text: #94A0B8;
@@ -114,7 +160,7 @@ html.dark {
   --color-success-soft: var(--success-muted);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-  --color-focus: rgba(120, 150, 238, .28);
+  --color-focus: rgba(101, 88, 245, .28);
 
   --bg: var(--bg-base);
   --surface: var(--surface-1);
@@ -141,11 +187,26 @@ html {
 }
 
 body {
+  background: var(--bg-base) !important;
+  color: var(--text-primary) !important;
+}
+
+html.dark body {
   background:
     radial-gradient(circle at 18% 20%, rgba(82, 104, 190, .13), transparent 34%),
     radial-gradient(circle at 92% 18%, rgba(25, 103, 130, .08), transparent 30%),
     var(--bg-base) !important;
-  color: var(--text-primary) !important;
+}
+
+/* Helper utilities for status indicator */
+.status-badge-today {
+  background-color: var(--status-today-bg) !important;
+  border-color: var(--status-today-border) !important;
+  color: var(--status-today-text) !important;
+}
+
+.status-dot-today {
+  background-color: var(--status-today-dot) !important;
 }
 
 /* The chromatic refactor uses only the controlled background above. */
@@ -417,4 +478,73 @@ p {
   .teacher-dashboard .teacher-create-course {
     transition: none !important;
   }
+}
+
+/* ──────────────── Light Graphite + Violet System Guarantees ──────────────── */
+html:not(.dark) .topbar {
+  background: var(--bg-base) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+html:not(.dark) .card,
+html:not(.dark) .surface-section,
+html:not(.dark) .kpi,
+html:not(.dark) .empty,
+html:not(.dark) .course-header,
+html:not(.dark) .chat-shell,
+html:not(.dark) .auth-card,
+html:not(.dark) .details-block {
+  background: var(--surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-card) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html:not(.dark) .card::before,
+html:not(.dark) .surface-section::before,
+html:not(.dark) .kpi::before,
+html:not(.dark) .auth-card::before,
+html:not(.dark) .course-header::before {
+  display: none !important;
+}
+
+html:not(.dark) .btn {
+  background: var(--accent-primary) !important;
+  color: var(--button-text) !important;
+  border: 1px solid transparent !important;
+  box-shadow: var(--shadow-button) !important;
+}
+
+html:not(.dark) .btn:hover:not(:disabled) {
+  background: var(--accent-hover) !important;
+  transform: translateY(-1px);
+  filter: none !important;
+  box-shadow: var(--shadow-button) !important;
+}
+
+html:not(.dark) .btn:active:not(:disabled) {
+  background: var(--accent-active) !important;
+  transform: translateY(0);
+}
+
+html:not(.dark) .btn.secondary {
+  background: var(--surface-2) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-subtle) !important;
+  box-shadow: none !important;
+}
+
+html:not(.dark) .btn.ghost {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-subtle) !important;
+  box-shadow: none !important;
+}
+
+html:not(.dark) .obsidian-ambient {
+  display: none !important;
 }

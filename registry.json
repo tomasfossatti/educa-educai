@@ -1,0 +1,40 @@
+{
+  "name": "educai",
+  "items": [
+    {
+      "name": "button",
+      "source": "src/components/ui/button.tsx",
+      "files": ["src/components/ui/button.tsx"]
+    },
+    {
+      "name": "field",
+      "source": "src/components/ui/field.tsx",
+      "files": ["src/components/ui/field.tsx"]
+    },
+    {
+      "name": "layout",
+      "source": "src/components/ui/layout.tsx",
+      "files": ["src/components/ui/layout.tsx"]
+    },
+    {
+      "name": "badge",
+      "source": "src/components/ui/badge.tsx",
+      "files": ["src/components/ui/badge.tsx"]
+    },
+    {
+      "name": "client",
+      "source": "src/components/ui/client.tsx",
+      "files": ["src/components/ui/client.tsx"]
+    },
+    {
+      "name": "theme-toggle",
+      "source": "src/components/ui/theme-toggle.tsx",
+      "files": ["src/components/ui/theme-toggle.tsx"]
+    },
+    {
+      "name": "avatar",
+      "source": "src/components/ui/avatar.tsx",
+      "files": ["src/components/ui/avatar.tsx"]
+    }
+  ]
+}
