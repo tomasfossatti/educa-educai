@@ -16,6 +16,10 @@
     "db:seed": "tsx --conditions=react-server --tsconfig tsconfig.json prisma/seed/index.ts",
     "db:reset": "prisma migrate reset --force --skip-seed && npm run db:seed",
     "metrics": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/metrics.ts",
+    "mcp:build": "npm --prefix packages/canvas-mcp run build",
+    "mcp:start": "npm --prefix packages/canvas-mcp run start",
+    "mcp:dev": "npm --prefix packages/canvas-mcp run dev",
+    "mcp:renew": "npm --prefix packages/canvas-mcp run renew-session",
     "postinstall": "prisma generate"
   },
   "dependencies": {

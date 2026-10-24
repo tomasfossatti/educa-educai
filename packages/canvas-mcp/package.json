@@ -1,0 +1,41 @@
+{
+  "name": "mcp-server-canvas-lms",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server for Canvas LMS using session cookies and custom User-Agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "mcp-server-canvas-lms": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "watch": "tsc --watch",
+    "renew-session": "node renew_canvas_cookie.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "canvas",
+    "canvas-lms",
+    "siglo21",
+    "instructure"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "axios": "^1.7.9",
+    "dotenv": "^16.6.1",
+    "pdf-parse": "^2.4.5",
+    "puppeteer": "^25.16.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/pdf-parse": "^1.1.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
