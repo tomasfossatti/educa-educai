@@ -205,3 +205,7 @@ src/
 tests/                   Unitarios e integración
 scripts/                 Métricas por consola
 ```
+
+## Licencia
+
+[MIT](LICENSE) © 2026 Tomás Fossatti
