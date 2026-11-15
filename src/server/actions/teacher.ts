@@ -2,7 +2,7 @@
 
 import { randomInt } from "node:crypto";
 import type { ActionType, ReviewStatus } from "@prisma/client";
-import { refresh } from "next/cache";
+import { refresh } from "@/server/next-refresh";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { activityPromptsSchema } from "@/domain/activity";

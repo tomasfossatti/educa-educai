@@ -10,7 +10,7 @@ Claude Code escribe y corre todas las pruebas. Este documento define qué se pru
 | Integración | Vitest con PostgreSQL real | Acciones del servidor, capa de permisos, motor de análisis con el proveedor de IA guionado | En el CI |
 | Punta a punta | Playwright | Flujos completos de estudiante y docente en un navegador | En el CI y antes de cerrar cada etapa |
 | IA real | Script con la clave de staging | Calidad de extracción, citas y respuestas con el modelo real | A mano, antes de cerrar las etapas 2, 3 y 4 |
-| Carga | k6 o script propio | 60 estudiantes simulados conversando a la vez | Etapa 6 |
+| Carga | Playwright (`npm run test:load`, `tests/load`) | 60 estudiantes simulados conversando a la vez, con demora simulada de la IA | Etapa 6, a mano antes de cambios grandes |
 
 ## Proveedor de IA guionado
 
