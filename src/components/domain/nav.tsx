@@ -46,6 +46,7 @@ export function StudentNav({ defaultCourseId }: { defaultCourseId: string | null
             label="Desarrollo"
             active={Boolean(match) && section.startsWith("/development")}
           />
+          <NavLink href={`${base}/ficha`} label={TEXT.file.myTitle} active={Boolean(match) && section.startsWith("/ficha")} />
         </>
       )}
     </>

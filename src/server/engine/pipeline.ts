@@ -91,6 +91,7 @@ interface DraftSignal {
   evidenceRef: string;
   dimension: Dimension;
   polarity: Polarity;
+  confidence: "MEDIUM" | "HIGH";
   curriculumItemId: string | null;
   description: string;
   rationale: string;
@@ -409,11 +410,14 @@ async function interpret(run: LoadedRun, logStep: (e: Omit<StepEntry, "at">) => 
   for (const s of signalOutput.signals) {
     const evidence = drafts.get(s.evidenceRef);
     if (!evidence) continue;
+    // Paso 3 del spec: las señales de confianza baja se descartan antes de guardarse.
+    if (s.confidence === "LOW") continue;
     const curriculumItemId = resolveItem(s.curriculumRef);
     signals.add({
       evidenceRef: s.evidenceRef.trim(),
       dimension: s.dimension,
       polarity: s.polarity,
+      confidence: s.confidence,
       curriculumItemId,
       description: s.description,
       rationale: s.rationale,
@@ -935,6 +939,7 @@ async function persist(run: LoadedRun, input: PersistInput): Promise<void> {
             polarity: s.polarity,
             description: s.description,
             rationale: s.rationale,
+            confidence: s.confidence,
             curriculumItemId: s.curriculumItemId,
           },
         });

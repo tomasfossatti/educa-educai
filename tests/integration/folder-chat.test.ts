@@ -97,3 +97,34 @@ describe.skipIf(!TEST_DB)("chat de carpeta y subidas (integración)", () => {
     await expect(chat.uploadExternalConversation(bruno, anaSubject, { text: "Yo: hola" })).rejects.toBeInstanceOf(guards.AccessDenied);
   });
 });
+
+describe.skipIf(!TEST_DB)("cierre por inactividad (integración)", () => {
+  it("cierra y encola las conversaciones con el último mensaje hace más de 20 minutos", async () => {
+    const { db } = await import("@/server/db");
+    const { closeInactiveConversations } = await import("@/server/engine/trigger");
+    const folders = await import("@/server/services/folders");
+    const f = factories(db);
+    const t = await f.teacher();
+    const courseId = (await f.course(t.id)).id;
+    const s = await f.student();
+    await db.enrollment.create({ data: { courseId, studentId: s.id } });
+    await folders.ensureStudentFolders(s.id);
+    const folderId = (await db.folder.findFirstOrThrow({ where: { studentId: s.id, courseId } })).id;
+
+    const mk = async (minutesAgo: number) => {
+      const { conversation } = await f.conversation({ studentId: s.id, folderId, courseId, messages: [["STUDENT", "Pregunta"]] });
+      await db.aIConversation.update({ where: { id: conversation.id }, data: { status: "ACTIVE", closedAt: null } });
+      await db.message.updateMany({ where: { conversationId: conversation.id }, data: { createdAt: new Date(Date.now() - minutesAgo * 60_000) } });
+      return conversation;
+    };
+    const old = await mk(25);
+    const recent = await mk(5);
+
+    expect(await closeInactiveConversations({ courseId })).toBe(1);
+    expect((await db.aIConversation.findUniqueOrThrow({ where: { id: old.id } })).status).toBe("CLOSED");
+    expect((await db.aIConversation.findUniqueOrThrow({ where: { id: recent.id } })).status).toBe("ACTIVE");
+    expect(await db.interpretationRun.count({ where: { experienceId: old.experienceId } })).toBe(1);
+    // Idempotente.
+    expect(await closeInactiveConversations({ courseId })).toBe(0);
+  });
+});

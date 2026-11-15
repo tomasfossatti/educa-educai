@@ -241,4 +241,43 @@ describe.skipIf(!TEST_DB)("Interpretation Engine (integración)", () => {
     expect(orphan).toBe(0);
     expect(await db.developmentSnapshot.count({ where: { studentId: ids.student } })).toBe(1);
   });
+  it("descarta las señales de confianza baja y guarda la confianza de las demás", async () => {
+    const ai = await import("@/server/ai");
+    const { ScriptedProvider } = await import("@/server/ai/scripted");
+    const text =
+      "Para mí una hipótesis falsable es la que dice qué resultado la tiraría abajo, por ejemplo si menos de 20 de 200 oficinistas se suscriben en dos semanas la descarto.";
+    const turns: [role: "STUDENT" | "TUTOR", content: string][] = [
+      ["STUDENT", "No entiendo bien qué es una hipótesis falsable en un negocio de viandas."],
+      ["TUTOR", "¿Cómo sabrías si tu idea resultó falsa?"],
+      ["STUDENT", text],
+    ];
+    const base = new ScriptedProvider();
+    // Proveedor que marca LOW todas las señales: no se tiene que guardar ninguna.
+    ai.setProviderForTesting({
+      name: "scripted",
+      isConfigured: () => true,
+      streamChat: (call) => base.streamChat(call),
+      async generateStructured(call) {
+        const result = await base.generateStructured(call);
+        if (call.operation === "interpret.signals") {
+          const data = result.data as { signals: { confidence: string }[] };
+          data.signals = data.signals.map((s) => ({ ...s, confidence: "LOW" }));
+        }
+        return result;
+      },
+    });
+    try {
+      const low = await conversationRun(turns);
+      await runInterpretation(low.run.id);
+      expect(await db.signal.count({ where: { runId: low.run.id } })).toBe(0);
+    } finally {
+      ai.setProviderForTesting(null);
+    }
+
+    const high = await conversationRun(turns);
+    await runInterpretation(high.run.id);
+    const stored = await db.signal.findMany({ where: { runId: high.run.id } });
+    expect(stored.length).toBeGreaterThan(0);
+    expect(stored.every((s) => s.confidence === "HIGH" && s.studentStatus === "PENDING")).toBe(true);
+  });
 });

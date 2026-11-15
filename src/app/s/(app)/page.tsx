@@ -10,12 +10,14 @@ import { truncate } from "@/domain/text-guards";
 import { acceptInviteAction, selectCourseAction } from "@/server/actions/student";
 import { FoldersSection } from "@/components/student/folders-section";
 import { requireStudent } from "@/server/auth/guards";
+import { closeInactiveConversations } from "@/server/engine/trigger";
 import { getCurrentCourseId, getPendingInvites, getStudentCourses, getStudentHome } from "@/server/services/student-home";
 
 export const metadata: Metadata = { title: "Inicio" };
 
 export default async function StudentHome() {
   const { user, profile } = await requireStudent();
+  await closeInactiveConversations({ studentId: user.id });
   const [courses, invites, courseId] = await Promise.all([
     getStudentCourses(user.id),
     getPendingInvites(user.email),
