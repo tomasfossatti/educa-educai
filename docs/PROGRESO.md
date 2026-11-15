@@ -22,7 +22,7 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 - [ ] Lista de entidades nuevas y cambios al esquema, revisada por Tomás (escrita en `DECISIONES.md`, espera revisión)
 
 ### Etapa 2: auditoría de educa-educai
-- [ ] La app corre en local y en un entorno de prueba con PostgreSQL
+- [x] La app corre en local y en un entorno de prueba con PostgreSQL (staging en Vercel con Neon; `npm run test:staging` pasa el flujo completo)
 - [x] `render.yaml` usa migraciones, sin `db push --accept-data-loss` ni seed en cada build
 - [x] Sin usuarios de demo con contraseña pública fuera del entorno local (#7)
 - [x] Límite de intentos de login (#7)

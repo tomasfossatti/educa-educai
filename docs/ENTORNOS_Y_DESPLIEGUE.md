@@ -16,6 +16,7 @@
 - Funciones en `gru1`, junto a la base. Node 22.
 - Contraseña de sitio: `SITE_PASSWORD` (variable sensible del proyecto; copia en `.secrets/staging/SITE_PASSWORD`). El navegador la pide con cualquier usuario. `/api/health` queda abierto para el chequeo. Sin la variable, la app no pide nada (local, CI y producción).
 - IA: proveedor guionado hasta cargar la clave del proveedor real.
+- Prueba de humo: `npm run test:staging` recorre con la interfaz el flujo docente → material → estudiante con consentimiento → pregunta con cita, y el chequeo de salud. Lee la contraseña de `.secrets/staging/SITE_PASSWORD` o de `STAGING_SITE_PASSWORD`. Crea cuentas sintéticas con correos `@test.educai`.
 - Límite propio de Vercel: un pedido no puede superar 4,5 MB, así que en staging el material de la cátedra se sube en archivos de hasta ese tamaño (en local y en producción el límite es 20 MB).
 
 ## Flujo de cambios
@@ -64,7 +65,7 @@ Los plazos los deciden Tomás y el abogado (`docs/legal/tratamiento-de-datos.md`
 
 - Logs estructurados sin contenido de conversaciones ni datos personales.
 - Métricas de uso de IA por estudiante y por cátedra en `AIUsageEvent`, con alerta al llegar al 80% del tope semanal.
-- `/api/health` devuelve si la app llega a la base, la última migración aplicada y la versión desplegada (`RENDER_GIT_COMMIT`), sin datos de nadie. El proveedor la usa como chequeo de salud (`healthCheckPath` en `render.yaml`).
+- `/api/health` devuelve si la app llega a la base, la última migración aplicada y la versión desplegada (`VERCEL_GIT_COMMIT_SHA` o `RENDER_GIT_COMMIT`), sin datos de nadie. El proveedor la usa como chequeo de salud (`healthCheckPath` en `render.yaml`).
 
 ## Lista de verificación antes de abrir el piloto
 
