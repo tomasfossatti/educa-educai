@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Descarga de los datos propios
+Para el derecho de acceso (art. 14) el estudiante descarga desde "Tu contexto" un JSON con todo lo suyo, sin el hash de la contraseña ni las sesiones; nadie más puede pedir esa copia. Se adelantó a la respuesta del abogado porque solo entrega a cada persona lo suyo y no amplía lo que ve nadie. En la misma pantalla se corrigió un texto que decía que las conversaciones eran visibles "solo" para el estudiante, cuando con consentimiento también las ve el docente de la materia.
+
 ### 2026-11-15 · Endurecimiento antes de la revisión de seguridad
 Se sumó el test estático que pedía `PRUEBAS.md` (cada página, ruta y acción llama a un control de permisos), un flujo de Playwright que intenta abrir datos ajenos cambiando ids en la URL, control propio en `/s/join` y `/t/new`, un límite de 200 MB descomprimidos para DOCX y PPTX, y el borrado de las invitaciones con el correo al borrar la cuenta. El test estático confirma que hay un control, no que sea el correcto: eso lo siguen cubriendo los tests V1 a V15.
 
