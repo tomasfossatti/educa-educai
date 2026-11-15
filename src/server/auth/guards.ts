@@ -61,3 +61,52 @@ export const requireTeacherStudent = cache(async (courseId: string, studentId: s
   if (!enrollment) notFound();
   return { user, course, student: enrollment.student };
 });
+
+// ───────────── Autorización sin redirección (servicios, herramientas de chat y tests) ─────────────
+
+export type Viewer = Pick<SessionUser, "id" | "role">;
+
+/** Acceso rechazado por la capa de permisos. Las páginas lo traducen a 404. */
+export class AccessDenied extends Error {
+  constructor(message = "Acceso no permitido.") {
+    super(message);
+    this.name = "AccessDenied";
+  }
+}
+
+/** Consentimiento de análisis activo (dado y no retirado). */
+export function hasActiveConsent(profile: { consentAnalysisAt: Date | null } | null): boolean {
+  return Boolean(profile?.consentAnalysisAt);
+}
+
+async function activeEnrollment(courseId: string, studentId: string) {
+  return db.enrollment.findFirst({
+    where: { courseId, studentId, status: "ACTIVE" },
+    include: { student: { select: { consentAnalysisAt: true } }, course: { select: { teacherId: true } } },
+  });
+}
+
+/**
+ * Quién puede ver los datos de un estudiante en una cátedra (ficha, evidencia, conversaciones):
+ * - el propio estudiante, si está inscripto (V7);
+ * - el docente de esa cátedra, si el estudiante está inscripto y tiene el consentimiento activo (V2, V3, V6, V11).
+ * Nadie más: ni otro estudiante (V8), ni el administrador (V14).
+ */
+export async function assertCanViewConversations(viewer: Viewer, studentId: string, courseId: string): Promise<void> {
+  const enrollment = await activeEnrollment(courseId, studentId);
+  if (!enrollment) throw new AccessDenied();
+  if (viewer.role === "STUDENT" && viewer.id === studentId) return;
+  if (viewer.role === "TEACHER" && enrollment.course.teacherId === viewer.id && hasActiveConsent(enrollment.student)) return;
+  throw new AccessDenied();
+}
+
+/** La ficha se construye con la misma evidencia que las conversaciones: misma regla. */
+export const assertCanViewStudentFile = assertCanViewConversations;
+
+/** Una carpeta solo la abre su dueño. */
+export async function assertFolderOwner(viewer: Viewer, folderId: string) {
+  if (viewer.role !== "STUDENT") throw new AccessDenied();
+  const folder = await db.folder.findFirst({ where: { id: folderId, studentId: viewer.id } });
+  if (!folder) throw new AccessDenied();
+  return folder;
+}

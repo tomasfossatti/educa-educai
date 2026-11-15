@@ -3,6 +3,7 @@ import type { EvidenceSource, RunStatus } from "@prisma/client";
 import { after } from "next/server";
 import { isAIConfigured } from "@/server/ai";
 import { ENGINE_PROMPT_VERSION } from "@/server/ai/prompts/shared";
+import { hasActiveConsent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { runInterpretation } from "./pipeline";
 
@@ -24,7 +25,7 @@ export async function queueInterpretation(params: {
   let status: RunStatus = "QUEUED";
   let statusNote: string | null = null;
   let error: string | null = null;
-  if (!profile?.consentAnalysisAt) {
+  if (!hasActiveConsent(profile)) {
     status = "SKIPPED";
     statusNote = "No se analizó porque no diste consentimiento para el análisis. Podés activarlo en Tu contexto.";
   } else if (!isAIConfigured()) {

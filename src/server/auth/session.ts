@@ -40,7 +40,7 @@ export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: "STUDENT" | "TEACHER";
+  role: "STUDENT" | "TEACHER" | "ADMIN";
 }
 
 /** Usuario de la sesión actual (memoizado por request). */

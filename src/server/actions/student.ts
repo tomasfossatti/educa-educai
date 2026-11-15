@@ -5,16 +5,17 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { parseActivityPrompts } from "@/domain/activity";
-import { CURRENT_COURSE_COOKIE } from "@/lib/constants";
+import { CONSENT_VERSION, CURRENT_COURSE_COOKIE } from "@/lib/constants";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
 import { requireEnrolledStudent, requireStudent } from "@/server/auth/guards";
 import { destroySession } from "@/server/auth/session";
 import { db } from "@/server/db";
 import { queueInterpretation, retryInterpretation } from "@/server/engine/trigger";
 import { EVENT, track } from "@/server/events";
+import { setAnalysisConsent } from "@/server/services/consent";
+import { ensureStudentFolders } from "@/server/services/folders";
 import { deleteExperienceCascade } from "@/server/services/privacy";
 
-const CONSENT_VERSION = "2026-10";
 
 const declaredField = z.string().max(1500, "Máximo 1500 caracteres.").optional();
 
@@ -64,6 +65,7 @@ async function enrollWithCode(studentId: string, rawCode: string): Promise<{ cou
     create: { courseId: course.id, studentId },
     update: { status: "ACTIVE" },
   });
+  await ensureStudentFolders(studentId);
   return { courseId: course.id };
 }
 
@@ -92,6 +94,7 @@ export async function completeOnboardingAction(_prev: ActionState | null, formDa
       onboardingCompletedAt: new Date(),
     },
   });
+  await ensureStudentFolders(user.id);
   await track(EVENT.studentOnboardingCompleted, {
     userId: user.id,
     studentId: user.id,
@@ -113,17 +116,11 @@ export async function updateContextAction(_prev: ActionState | null, formData: F
 }
 
 export async function updatePrivacyAction(formData: FormData): Promise<void> {
-  const { user, profile } = await requireStudent();
+  const { user } = await requireStudent();
   const consent = formData.get("consent") === "on";
   const shareContext = formData.get("shareContext") === "on";
-  await db.studentProfile.update({
-    where: { userId: user.id },
-    data: {
-      shareContextWithTeachers: shareContext,
-      consentAnalysisAt: consent ? (profile.consentAnalysisAt ?? new Date()) : null,
-      consentVersion: consent ? CONSENT_VERSION : null,
-    },
-  });
+  await db.studentProfile.update({ where: { userId: user.id }, data: { shareContextWithTeachers: shareContext } });
+  await setAnalysisConsent(user.id, consent);
   refresh();
 }
 
@@ -147,6 +144,7 @@ export async function acceptInviteAction(inviteId: string): Promise<void> {
     }),
     db.courseInvite.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } }),
   ]);
+  await ensureStudentFolders(user.id);
   await setCurrentCourse(invite.courseId);
   redirect(`/s/courses/${invite.courseId}`);
 }
@@ -202,12 +200,17 @@ export async function closeConversationAction(conversationId: string): Promise<v
   const { user } = await requireStudent();
   const conversation = await db.aIConversation.findFirst({ where: { id: conversationId, studentId: user.id, status: "ACTIVE" } });
   if (!conversation) notFound();
-  await requireEnrolledStudent(conversation.courseId);
+  if (conversation.courseId) await requireEnrolledStudent(conversation.courseId);
   const closedAt = new Date();
   await db.$transaction([
     db.aIConversation.update({ where: { id: conversation.id }, data: { status: "CLOSED", closedAt } }),
     db.experience.update({ where: { id: conversation.experienceId }, data: { completedAt: closedAt } }),
   ]);
+  // Las conversaciones de la carpeta del proyecto no tienen cátedra: no se interpretan contra un programa.
+  if (!conversation.courseId) {
+    refresh();
+    return;
+  }
   await queueInterpretation({
     experienceId: conversation.experienceId,
     courseId: conversation.courseId,
@@ -228,7 +231,7 @@ export async function deleteConversationAction(conversationId: string): Promise<
   const conversation = await db.aIConversation.findFirst({ where: { id: conversationId, studentId: user.id } });
   if (!conversation) notFound();
   await deleteExperienceCascade(conversation.experienceId, user.id, conversation.courseId);
-  redirect(`/s/courses/${conversation.courseId}`);
+  redirect(conversation.courseId ? `/s/courses/${conversation.courseId}` : "/s");
 }
 
 // ───────────── Actividades ─────────────

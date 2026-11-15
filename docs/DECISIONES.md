@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Etapa 3: esquema de carpetas y material
+Se implementó la lista de la etapa 1 en la parte que usa la etapa 3: `Folder`, `FolderContext`, `Material`, `MaterialChunk` (con `embedding vector(1024)` nulo e índice de texto completo en español), `ConversationOrigin`, `Message.citations`, `Role.ADMIN` y en `StudentProfile` `consentWithdrawnAt`, `career`, `studyYear` y `projectDescription`. `AIConversation.courseId` y `Experience.courseId` pasan a opcionales por la carpeta del proyecto. `folderId` queda opcional en la base hasta que todo el código cree conversaciones con carpeta; la migración asigna las existentes a la carpeta de su materia. Todo es aditivo. `MasteryRecord`, `ClassSession` y `AccessLog` llegan con las etapas 4 y 5.
+
+### 2026-11-15 · Sin consentimiento, el docente tampoco abre la ficha
+La ficha se arma con la misma evidencia que las conversaciones, así que se aplica la misma regla (V6, V11): el docente la abre solo si el estudiante está inscripto y tiene el consentimiento activo. El estudiante siempre ve la suya.
+
 ### 2026-11-15 · Descartar PageLM, DeepStudent, Get It y Gemini
 Las tres herramientas no figuran en el spec y sus acciones llamaban a la IA sin exigir sesión. Gemini está fuera del stack del spec. Sin `AI_PROVIDER`, el proveedor por defecto pasa a ser Anthropic.
 
