@@ -219,7 +219,7 @@ export function FloatingTutor({
           </div>
 
           {/* Formulario de Entrada */}
-          <form onSubmit={handleSend} className="border-t border-line bg-surface-2/60 p-3">
+          <form method="post" onSubmit={handleSend} className="border-t border-line bg-surface-2/60 p-3">
             <div className="flex items-center gap-2">
               <Input
                 value={input}

@@ -9,7 +9,7 @@ export function RegisterForm({ defaultRole }: { defaultRole: "STUDENT" | "TEACHE
   const { state, pending, onSubmit } = useActionForm(registerAction);
   const [role, setRole] = useState(defaultRole);
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <FormMessage state={state} />
       <fieldset className="space-y-2">
         <legend className="mb-1 text-sm font-medium">Soy</legend>

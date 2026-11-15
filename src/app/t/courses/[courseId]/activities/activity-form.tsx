@@ -33,7 +33,7 @@ export function ActivityForm({ courseId, items, defaults, promptsLocked }: { cou
   const criteria = items.filter((i) => i.kind === "CRITERION");
 
   return (
-    <form onSubmit={onSubmit} className="space-y-8">
+    <form method="post" onSubmit={onSubmit} className="space-y-8">
       <input type="hidden" name="courseId" value={courseId} />
       {defaults.id && <input type="hidden" name="activityId" value={defaults.id} />}
       <FormMessage state={state} />

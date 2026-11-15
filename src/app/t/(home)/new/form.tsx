@@ -7,7 +7,7 @@ import { createCourseAction } from "@/server/actions/teacher";
 export function NewCourseForm() {
   const { state, pending, onSubmit } = useActionForm(createCourseAction);
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <FormMessage state={state} />
       <Field label="Nombre de la materia" htmlFor="name" error={state?.fieldErrors?.name}>
         <Input id="name" name="name" required maxLength={160} placeholder="Ej.: Estrategia y Validación de Negocios" />

@@ -11,7 +11,7 @@ export function ProgramForm({ courseId, defaultText }: { courseId: string; defau
   const { state, pending, onSubmit } = useActionForm(startExtractionAction);
   const [fileName, setFileName] = useState<string | null>(null);
   return (
-    <form onSubmit={onSubmit} className="space-y-4" encType="multipart/form-data">
+    <form method="post" onSubmit={onSubmit} className="space-y-4" encType="multipart/form-data">
       <input type="hidden" name="courseId" value={courseId} />
       <FormMessage state={state} />
       <Field
@@ -54,7 +54,7 @@ export function ItemForm({
   const { state, pending, onSubmit, ref } = useActionForm(saveCurriculumItemAction, { resetOnSuccess: !item });
   const [kind, setKind] = useState<CurriculumKind>(item?.kind ?? "CONCEPT");
   return (
-    <form ref={ref} onSubmit={onSubmit} className="space-y-3">
+    <form ref={ref} method="post" onSubmit={onSubmit} className="space-y-3">
       <input type="hidden" name="courseId" value={courseId} />
       {item && <input type="hidden" name="itemId" value={item.id} />}
       <div className="grid gap-3 sm:grid-cols-[12rem_1fr]">

@@ -18,7 +18,7 @@ const VERDICT_HINT: Record<ReviewVerdict, string> = {
 export function ReviewForm({ inferenceId, compact = false }: { inferenceId: string; compact?: boolean }) {
   const { state, pending, onSubmit } = useActionForm(reviewInferenceAction);
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <form method="post" onSubmit={onSubmit} className="space-y-3">
       <input type="hidden" name="inferenceId" value={inferenceId} />
       <fieldset className={compact ? "flex flex-wrap gap-x-4 gap-y-2" : "space-y-2"}>
         <legend className="sr-only">Tu revisión</legend>
@@ -56,7 +56,7 @@ export function InterventionForm({
 }) {
   const { state, pending, onSubmit } = useActionForm(createInterventionAction);
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <input type="hidden" name="courseId" value={courseId} />
       {inferenceId && <input type="hidden" name="inferenceId" value={inferenceId} />}
       {insightKey && <input type="hidden" name="insightKey" value={insightKey} />}

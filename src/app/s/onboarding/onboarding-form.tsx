@@ -50,7 +50,7 @@ export function OnboardingForm({
   const panel = (index: number) => cn("space-y-5", step !== index && "hidden");
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="space-y-8" noValidate={false}>
+    <form ref={formRef} method="post" onSubmit={onSubmit} className="space-y-8" noValidate={false}>
       <div>
         <p className="text-xs text-muted">
           Paso {step + 1} de {STEPS.length} · {STEPS[step]}
