@@ -3,13 +3,16 @@ services:
     name: educai-mvp
     runtime: node
     plan: free
-    buildCommand: npm install && npx prisma db push --accept-data-loss && npm run db:seed && npm run build
+    # Migraciones versionadas (prisma migrate deploy). Nunca db push ni seed en el build.
+    buildCommand: npm ci && npm run db:migrate && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
         value: "22"
       - key: SESSION_COOKIE_SECURE
         value: "true"
+      - key: AI_PROVIDER
+        value: anthropic
       - key: DATABASE_URL
         sync: false
       - key: GEMINI_API_KEY
