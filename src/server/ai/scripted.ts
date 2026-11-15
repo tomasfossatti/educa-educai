@@ -180,12 +180,22 @@ function feedback(message: string) {
   };
 }
 
-
-
-
-
-
-
+/** Chat de carpeta: si hay fragmentos, responde citando el primero; si no, avisa que no hay fuente. */
+function folderChat(message: string) {
+  const first = /^\[1\] (.+?), página (\d+):\n([\s\S]*?)(?:\n\[2\]|\nPREGUNTA:)/m.exec(message);
+  if (!first) {
+    return {
+      answer: "No encontré esto en el material de la cátedra, así que no puedo darte una respuesta con fuente. (Respuesta del proveedor de prueba.)",
+      sources: [],
+      noSource: true,
+    };
+  }
+  return {
+    answer: `Según el material [1]: «${quote(first[3].trim(), 120)}». (Respuesta del proveedor de prueba.)`,
+    sources: [1],
+    noSource: false,
+  };
+}
 
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
@@ -194,6 +204,7 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "interpret.evaluate": evaluate,
   "interpret.infer": infer,
   "interpret.feedback": feedback,
+  "folder.chat": folderChat,
 };
 
 export class ScriptedProvider implements LLMProvider {

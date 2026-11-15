@@ -12,7 +12,8 @@ export type AIOperation =
   | "interpret.signals"
   | "interpret.evaluate"
   | "interpret.infer"
-  | "interpret.feedback";
+  | "interpret.feedback"
+  | "folder.chat";
 
 export type Effort = "low" | "medium" | "high";
 

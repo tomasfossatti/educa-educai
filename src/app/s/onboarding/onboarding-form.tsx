@@ -6,11 +6,16 @@ import { Checkbox, Field, Input, Textarea } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
 import { Notice } from "@/components/ui/layout";
 import { cn } from "@/lib/cn";
+import { TEXT } from "@/lib/texts";
 import { completeOnboardingAction } from "@/server/actions/student";
 
 const STEPS = ["Cómo funciona", "Tu contexto", "Intereses y objetivos", "Cómo te ves", "Tu materia"] as const;
 
 const FIELD_STEP: Record<string, number> = {
+  consent: 0,
+  career: 1,
+  studyYear: 1,
+  projectDescription: 1,
   currentContext: 1,
   interests: 2,
   goals: 2,
@@ -77,20 +82,26 @@ export function OnboardingForm({
             cuestionarlas y corregir tu información cuando quieras.
           </p>
         </div>
-        <Notice title="Quién ve qué">
+        <Notice title={TEXT.consent.title}>
           <ul className="mt-1 list-disc space-y-0.5 pl-4">
-            <li>Tus conversaciones completas: solo vos.</li>
-            <li>Evidencia (fragmentos de lo que produjiste) e inferencias: vos y el docente de esa materia.</li>
-            <li>Lo que declares en este formulario: vos, y tu docente solo si lo autorizás.</li>
+            <li>{TEXT.consent.teacherSees}</li>
+            <li>{TEXT.consent.nobodyElse}</li>
+            <li>{TEXT.consent.sameFile}</li>
+            <li>{TEXT.consent.ifNot}</li>
+            <li>{TEXT.consent.canChange}</li>
           </ul>
         </Notice>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-ink">{TEXT.consent.question}</legend>
+          {state?.fieldErrors?.consent && <p className="text-xs text-danger">{state.fieldErrors.consent}</p>}
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name="consent" value="yes" required /> {TEXT.consent.yes}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name="consent" value="no" required /> {TEXT.consent.no}
+          </label>
+        </fieldset>
         <div className="space-y-3">
-          <Checkbox
-            name="consent"
-            label="Acepto que Educai analice mis conversaciones con el tutor y mis entregas en esta plataforma para generar evidencia y feedback."
-            hint="Si no aceptás, igual podés usar el tutor y entregar actividades, pero no vas a recibir feedback basado en evidencia. Podés cambiarlo después."
-            defaultChecked
-          />
           <Checkbox
             name="shareContext"
             label="Compartir con mis docentes lo que declare sobre mi contexto, intereses y objetivos."
@@ -111,6 +122,17 @@ export function OnboardingForm({
           error={state?.fieldErrors?.currentContext}
         >
           <Textarea id="currentContext" name="currentContext" required minLength={3} maxLength={1500} placeholder="Ej.: Trabajo en el área comercial de un restaurante y estoy armando un emprendimiento de catering." />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
+          <Field label={TEXT.profile.career} htmlFor="career" error={state?.fieldErrors?.career}>
+            <Input id="career" name="career" required minLength={2} maxLength={120} placeholder={TEXT.profile.careerPlaceholder} />
+          </Field>
+          <Field label={TEXT.profile.year} htmlFor="studyYear" optional error={state?.fieldErrors?.studyYear}>
+            <Input id="studyYear" name="studyYear" type="number" min={1} max={10} />
+          </Field>
+        </div>
+        <Field label={TEXT.profile.project} htmlFor="projectDescription" hint={TEXT.profile.projectHint} error={state?.fieldErrors?.projectDescription}>
+          <Textarea id="projectDescription" name="projectDescription" required minLength={3} maxLength={600} className="min-h-20" />
         </Field>
       </section>
 
