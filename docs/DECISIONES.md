@@ -12,6 +12,20 @@ Decisión: qué se eligió y por qué.
 Consecuencias: qué cambia en el código, los datos o el spec.
 ```
 
+## Decisiones de la construcción
+
+### 2026-11-15 · Borrar packages/canvas-mcp
+Código viejo de Firestore/heatmap que nada de `src/` importaba; borrarlo era preferible a tipar sus `any`. Se quitaron también los scripts `mcp:*`.
+
+### 2026-11-15 · Excluir .agents/** del lint
+Skills de terceros versionados (ver `skills-lock.json`); editarlos se pierde en cada actualización. Las reglas de lint no se cambiaron.
+
+### 2026-11-15 · setState fuera del cuerpo sincrónico de los efectos
+Carga de `localStorage` aplicada en `queueMicrotask`, `useSyncExternalStore` en el selector de tema y un ref a la última `sendQuestion` en el tutor flotante, para cumplir las reglas de React sin desactivarlas.
+
+### 2026-11-15 · Tests de integración en CI
+El CI define `TEST_DATABASE_URL` para que `tests/integration` corra contra el Postgres del servicio en vez de saltearse.
+
 ## Decisiones previas a la construcción
 
 ### Repositorio propio sobre educa-educai

@@ -17,12 +17,13 @@ jobs:
           POSTGRES_DB: educai_test
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U educai"
+          --health-cmd "pg_isready -U educai -d educai_test"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
       DATABASE_URL: postgresql://educai:educai@localhost:5432/educai_test
+      TEST_DATABASE_URL: postgresql://educai:educai@localhost:5432/educai_test
       SESSION_COOKIE_SECURE: "false"
       SESSION_SECRET: ci-only-secret-not-used-anywhere-else
       AI_PROVIDER: scripted
