@@ -11,7 +11,7 @@ Lo que conviene mirar con más cuidado, ordenado por riesgo. Los dos primeros so
 
 3. **Consultas directas a Prisma en páginas.** Muchas páginas, sobre todo las heredadas, hacen el control con un `require*` y después consultan la base directamente, filtrando a mano por estudiante o por cátedra. La regla 1 de `CLAUDE.md` pide que todo pase por `guards.ts`. Vale la pena leer el `where` de cada consulta en `src/app/t/courses/[courseId]/**` y `src/app/s/(app)/courses/**`.
 4. **`requireTeacherStudent` no exige consentimiento.** La ficha del docente lo resuelve aparte. Cualquier dato nuevo que se agregue a esa página tiene que pasar por `loadStudentFile` o por un filtro de consentimiento.
-5. **Controles solo en el layout.** `/s/join` y `/t/new` dependen del layout para el control de sesión. En Next, un layout no es una frontera de seguridad confiable para todas las navegaciones. Hoy esas páginas solo muestran formularios y sus acciones tienen control propio.
+5. **Controles solo en el layout (corregido).** `/s/join` y `/t/new` dependían del layout para el control de sesión; ahora lo hacen en la página. `tests/unit/guard-coverage.test.ts` falla si una página, ruta o acción nueva no llama a ningún control. Ese test es estático: confirma que el control existe, no que sea el correcto.
 6. **Contexto declarado.** El docente ve el contexto que el estudiante declaró si este activó "compartir con docentes" (`shareContextWithTeachers`), aunque no haya dado el consentimiento de análisis. Es una elección separada del estudiante; confirmar que el texto de esa opción lo deja claro.
 7. **Rutas heredadas del tutor** (`/s/courses/[courseId]/tutor/...` y `/api/tutor/...`). Siguen activas junto con el chat de carpetas. Si no se usan en el piloto, conviene sacarlas para reducir superficie.
 
@@ -23,7 +23,7 @@ Lo que conviene mirar con más cuidado, ordenado por riesgo. Los dos primeros so
 
 ## Archivos y contenido
 
-11. **Material de la cátedra (PDF, DOCX, PPTX, hasta 20 MB).** DOCX y PPTX son ZIP: no hay límite al tamaño descomprimido (`src/server/material/extract.ts`), así que un archivo armado a propósito podría consumir memoria. Solo lo sube el docente, lo que baja el riesgo.
+11. **Material de la cátedra (PDF, DOCX, PPTX, hasta 20 MB).** DOCX y PPTX son ZIP: antes de abrirlos se revisa el índice interno y se rechazan los que descomprimidos superan 200 MB, los de más de 10.000 entradas y los ZIP64 (`assertSafeZip` en `src/server/material/extract.ts`). Los PDF no tienen un control equivalente.
 12. **Inyección de instrucciones.** Una conversación subida o un archivo del material puede traer texto que intente manipular al modelo. La salida del modelo se valida con zod y el código decide qué se muestra y a quién; las herramientas de los chats reciben datos ya filtrados por permisos. Vale la pena intentar, desde el chat del docente, pedir datos de otra cátedra (V12) y, desde el del estudiante, datos de otro estudiante (V13).
 13. **Citas.** El código solo conserva los números de fragmentos que existen y aparecen en el texto. Confirmar que un fragmento citado nunca pertenece a otra cátedra (`searchMaterial` filtra por `courseId`).
 

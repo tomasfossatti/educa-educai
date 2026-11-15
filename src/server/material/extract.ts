@@ -67,7 +67,46 @@ async function pdfPages(data: Uint8Array): Promise<PageText[]> {
   return text.map((t, i) => ({ page: i + 1, text: normalize(t) }));
 }
 
+/** Tamaño máximo descomprimido de un DOCX o PPTX: frena archivos armados para agotar la memoria. */
+export const MAX_UNZIPPED_BYTES = 200 * 1024 * 1024;
+const MAX_ZIP_ENTRIES = 10_000;
+
+/**
+ * Revisa el directorio central del ZIP antes de abrirlo: cantidad de entradas y tamaño total
+ * descomprimido declarado. JSZip, además, corta si el tamaño real no coincide con el declarado.
+ */
+export function assertSafeZip(data: Uint8Array, maxBytes = MAX_UNZIPPED_BYTES): void {
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const fail = (why: string): never => {
+    throw new Error(`El archivo no se puede procesar: ${why}.`);
+  };
+  // Fin del directorio central: firma 0x06054b50, a lo sumo 64 KB de comentario al final.
+  let eocd = -1;
+  for (let i = data.byteLength - 22; i >= Math.max(0, data.byteLength - 22 - 65_535); i--) {
+    if (view.getUint32(i, true) === 0x06054b50) {
+      eocd = i;
+      break;
+    }
+  }
+  if (eocd < 0) fail("no es un archivo de Office válido");
+  const entries = view.getUint16(eocd + 10, true);
+  const offset = view.getUint32(eocd + 16, true);
+  if (entries === 0xffff || offset === 0xffffffff) fail("usa un formato ZIP64 que no se acepta");
+  if (entries > MAX_ZIP_ENTRIES) fail("tiene demasiados archivos internos");
+  let total = 0;
+  let p = offset;
+  for (let n = 0; n < entries; n++) {
+    if (p + 46 > data.byteLength || view.getUint32(p, true) !== 0x02014b50) fail("el índice interno está dañado");
+    const size = view.getUint32(p + 24, true);
+    if (size === 0xffffffff) fail("usa un formato ZIP64 que no se acepta");
+    total += size;
+    if (total > maxBytes) fail(`descomprimido supera los ${Math.round(maxBytes / 1024 / 1024)} MB`);
+    p += 46 + view.getUint16(p + 28, true) + view.getUint16(p + 30, true) + view.getUint16(p + 32, true);
+  }
+}
+
 async function pptxSlides(data: Uint8Array): Promise<PageText[]> {
+  assertSafeZip(data);
   const zip = await JSZip.loadAsync(data);
   const slides = Object.keys(zip.files)
     .map((name) => ({ name, n: Number(/^ppt\/slides\/slide(\d+)\.xml$/.exec(name)?.[1]) }))
@@ -103,6 +142,7 @@ export async function extractPages(data: Uint8Array, kind: MaterialKind): Promis
     case "pptx":
       return pptxSlides(data);
     case "docx": {
+      assertSafeZip(data);
       const { value } = await mammoth.extractRawText({ buffer: Buffer.from(data) });
       return sectionsFromText(value);
     }
