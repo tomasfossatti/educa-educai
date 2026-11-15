@@ -9,6 +9,7 @@ import {
   Users,
   BookOpen,
   FileText,
+  Presentation,
   LogOut,
 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -167,6 +168,16 @@ export function Sidebar({
               >
                 <FileText className="size-4 text-primary shrink-0" />
                 <span>{TEXT.material.nav}</span>
+              </ButtonLink>
+
+              <ButtonLink
+                href={`/t/courses/${teacherCourseId}/clases`}
+                variant={pathname.startsWith(`/t/courses/${teacherCourseId}/clases`) ? "secondary" : "ghost"}
+                size="sm"
+                className="w-full justify-start gap-3"
+              >
+                <Presentation className="size-4 text-primary shrink-0" />
+                <span>{TEXT.classes.nav}</span>
               </ButtonLink>
             </div>
           )}

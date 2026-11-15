@@ -103,7 +103,16 @@ export async function getClassOverview(viewer: Viewer, courseId: string, opts: {
     })
     .map((e) => ({ studentId: e.studentId, name: e.student.user.name, lastConversationAt: lastByStudent.get(e.studentId) ?? null }));
 
+  const startOfDay = new Date(now);
+  startOfDay.setHours(0, 0, 0, 0);
+  const nextClass = await db.classSession.findFirst({
+    where: { courseId, date: { gte: startOfDay } },
+    orderBy: { date: "asc" },
+    select: { id: true, date: true, approvedAt: true, items: { select: { curriculumItem: { select: { title: true } } } } },
+  });
+
   return {
+    nextClass: nextClass ? { id: nextClass.id, date: nextClass.date, approved: Boolean(nextClass.approvedAt), topics: nextClass.items.map((i) => i.curriculumItem.title) } : null,
     participation: { enrolled: enrollments.length, consented: consenting.size, conversedThisWeek: conversed.length },
     topics: topicRows,
     alerts: { inactive, attention: (await getAttentionQueue(courseId)).slice(0, 10) },

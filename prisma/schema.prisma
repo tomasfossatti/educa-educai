@@ -164,6 +164,7 @@ model Course {
   aiUsageEvents    AIUsageEvent[]
   productEvents    ProductEvent[]
   folders          Folder[]
+  classSessions    ClassSession[]
   materials        Material[]
   materialChunks   MaterialChunk[]
 
@@ -248,6 +249,7 @@ model CurriculumItem {
   focusedChats     AIConversation[]
   quizAttempts     QuizAttempt[]
   masteryRecords   MasteryRecord[]
+  classSessions    ClassSessionItem[]
 
   @@index([courseId, status])
 }
@@ -1171,4 +1173,33 @@ model ConversationThread {
   messages       Message[]
 
   @@index([conversationId])
+}
+
+// ───────────────────────────── Clases y slides ─────────────────────────────
+
+/// Una clase de la cátedra: fecha, temas y objetivo, y el borrador de slides que arma la IA.
+model ClassSession {
+  id          String             @id @default(cuid())
+  courseId    String
+  course      Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  date        DateTime
+  objective   String?
+  /// [{ kind, title, bullets[], notes, sources: [{ fileName, page }] }]
+  slidesDraft Json?
+  /// Aprobación del docente: desde ahí el estudiante ve la próxima clase en su inicio.
+  approvedAt  DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  items       ClassSessionItem[]
+
+  @@index([courseId, date])
+}
+
+model ClassSessionItem {
+  classSessionId   String
+  classSession     ClassSession   @relation(fields: [classSessionId], references: [id], onDelete: Cascade)
+  curriculumItemId String
+  curriculumItem   CurriculumItem @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+
+  @@id([classSessionId, curriculumItemId])
 }

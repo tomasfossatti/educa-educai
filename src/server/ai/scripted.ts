@@ -227,6 +227,27 @@ function contextSummary(message: string) {
   return { summary: `Perfil de prueba basado en ${facts.length} hechos.` };
 }
 
+/** Slides: una por tipo, todas citando el primer fragmento. */
+function slidesGenerate(message: string) {
+  const first = /^\[1\] (.+?), página (\d+):\n([\s\S]*?)(?:\n\[2\]|\nTEMAS:)/m.exec(message);
+  const fact = first ? quote(first[3].trim(), 90) : "el tema";
+  const kinds = [
+    ["EXPLANATION", "Qué es"],
+    ["ANALOGY", "Una analogía"],
+    ["EXERCISE", "Ejercicio de 5 minutos"],
+    ["CHECK", "Pregunta de chequeo"],
+  ] as const;
+  return {
+    slides: kinds.map(([kind, title]) => ({
+      kind,
+      title,
+      bullets: [`Según el material [1]: «${fact}»`, "Punto generado por el proveedor de prueba."],
+      notes: "Notas para el docente. (Proveedor de prueba.)",
+      sources: first ? [1] : [],
+    })),
+  };
+}
+
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
   "interpret.observe": observe,
@@ -238,6 +259,7 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "quiz.generate": quizGenerate,
   "context.facts": contextFacts,
   "context.summary": contextSummary,
+  "slides.generate": slidesGenerate,
 };
 
 export class ScriptedProvider implements LLMProvider {
