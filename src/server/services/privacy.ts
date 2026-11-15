@@ -1,4 +1,5 @@
 import "server-only";
+import { AccessDenied } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { computeAndStoreSnapshot } from "@/server/engine/snapshot";
 
@@ -46,4 +47,71 @@ export async function getStudentDataSummary(studentId: string) {
     db.aIUsageEvent.count({ where: { studentId } }),
   ]);
   return { conversations, messages, submissions, evidence, inferences, reviews, interventions, usage };
+}
+
+/**
+ * Copia de todos los datos del estudiante, para el derecho de acceso (Ley 25.326, art. 14).
+ * Solo para el propio estudiante: no hay forma de pedir la copia de otra persona. No incluye el
+ * hash de la contraseña ni las sesiones. De los accesos a su ficha incluye quién y cuándo (V9).
+ */
+export async function exportStudentData(viewer: { id: string; role: string }) {
+  if (viewer.role !== "STUDENT") throw new AccessDenied();
+  const studentId = viewer.id;
+  const [user, profile, enrollments, folders, conversations, signals, inferences, responses, quizzes, mastery, accesses, aiCallsRecorded] = await Promise.all([
+    db.user.findUniqueOrThrow({ where: { id: studentId }, select: { name: true, email: true, role: true, createdAt: true } }),
+    db.studentProfile.findUniqueOrThrow({ where: { userId: studentId } }),
+    db.enrollment.findMany({ where: { studentId }, select: { status: true, joinedAt: true, course: { select: { name: true } } } }),
+    db.folder.findMany({
+      where: { studentId },
+      select: {
+        id: true,
+        kind: true,
+        name: true,
+        createdAt: true,
+        contexts: { orderBy: { createdAt: "asc" }, select: { layer: true, content: true, editedByStudent: true, archivedAt: true, createdAt: true } },
+      },
+    }),
+    db.aIConversation.findMany({
+      where: { studentId },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        folderId: true,
+        title: true,
+        origin: true,
+        status: true,
+        createdAt: true,
+        closedAt: true,
+        messages: { orderBy: { createdAt: "asc" }, select: { role: true, content: true, threadId: true, createdAt: true } },
+      },
+    }),
+    db.signal.findMany({
+      where: { studentId },
+      select: { description: true, confidence: true, studentStatus: true, respondedAt: true, createdAt: true, curriculumItem: { select: { title: true } }, evidence: { select: { content: true } } },
+    }),
+    db.inference.findMany({
+      where: { studentId, reviewStatus: { not: "INCORRECT" } },
+      select: { studentStatement: true, dimension: true, polarity: true, state: true, createdAt: true, curriculumItem: { select: { title: true } } },
+    }),
+    db.studentResponse.findMany({ where: { studentId }, select: { stance: true, note: true, createdAt: true } }),
+    db.quizAttempt.findMany({ where: { studentId }, select: { questions: true, answers: true, correct: true, total: true, status: true, createdAt: true, curriculumItem: { select: { title: true } } } }),
+    db.masteryRecord.findMany({ where: { studentId }, select: { score: true, attempts: true, lastEvidenceAt: true, curriculumItem: { select: { title: true } } } }),
+    db.accessLog.findMany({ where: { studentId }, orderBy: { createdAt: "desc" }, select: { view: true, createdAt: true, viewer: { select: { name: true, role: true } } } }),
+    db.aIUsageEvent.count({ where: { studentId } }),
+  ]);
+  return {
+    generatedAt: new Date().toISOString(),
+    account: user,
+    profile: { ...profile, userId: undefined },
+    enrollments,
+    folders,
+    conversations,
+    doubts: signals,
+    conclusions: inferences,
+    responsesToConclusions: responses,
+    quizzes,
+    mastery,
+    accessToMyFile: accesses,
+    aiCallsRecorded,
+  };
 }

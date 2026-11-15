@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Descarga de los datos propios
+Para el derecho de acceso (art. 14) el estudiante descarga desde "Tu contexto" un JSON con todo lo suyo, sin el hash de la contraseña ni las sesiones; nadie más puede pedir esa copia. Se adelantó a la respuesta del abogado porque solo entrega a cada persona lo suyo y no amplía lo que ve nadie. En la misma pantalla se corrigió un texto que decía que las conversaciones eran visibles "solo" para el estudiante, cuando con consentimiento también las ve el docente de la materia.
+
 ### 2026-11-15 · Documentos para el abogado en docs/legal
 Describen lo que la app hace hoy, verificado contra el código, en lugar de una política redactada de antemano: aviso de consentimiento, tratamiento de datos y puntos para el convenio. Las brechas (sin descarga de datos, sin plazos de conservación automáticos, el aviso no nombra a los proveedores) quedan señaladas y no se implementan hasta que el abogado y Tomás decidan, porque cambian el alcance.
 

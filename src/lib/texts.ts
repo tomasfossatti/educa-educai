@@ -210,6 +210,11 @@ export const TEXT = {
     missing: "Elegí un archivo .txt o pegá el texto.",
     onlyTxt: "Solo se aceptan archivos .txt.",
   },
+  myData: {
+    title: "Descargar mis datos",
+    description: "Una copia de todo lo que Educai guarda sobre vos, en un archivo JSON: perfil, carpetas, conversaciones, dudas, conclusiones, quizzes y quién abrió tu ficha.",
+    button: "Descargar mis datos",
+  },
   budget: {
     warning: (pct: number, resets: string) =>
       `Usaste el ${pct}% de tu cupo semanal de IA. Cuando llegues al 100%, el chat y el quiz se pausan hasta el ${resets}.`,
