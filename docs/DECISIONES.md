@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Documentos para el abogado en docs/legal
+Describen lo que la app hace hoy, verificado contra el código, en lugar de una política redactada de antemano: aviso de consentimiento, tratamiento de datos y puntos para el convenio. Las brechas (sin descarga de datos, sin plazos de conservación automáticos, el aviso no nombra a los proveedores) quedan señaladas y no se implementan hasta que el abogado y Tomás decidan, porque cambian el alcance.
+
 ### 2026-11-15 · Consentimiento en las vistas del docente heredadas de educa-educai
 Al preparar la revisión de seguridad apareció una brecha de V6 y V11: el detalle de evidencia y de conclusión, la cola de atención, los insights por tema, el resumen de la clase, el snapshot de desarrollo y el análisis de las entregas solo exigían inscripción. Un docente podía seguir leyendo fragmentos y mensajes de origen de un estudiante que había retirado el consentimiento. Ahora esas lecturas exigen consentimiento activo (en el servicio, no en cada página), y abrir una evidencia o una conclusión queda en `AccessLog` (V2). La regla no cambia: se aplica donde faltaba.
 
