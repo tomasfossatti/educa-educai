@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Sin revisión de abogado ni revisión de seguridad externa (decisión de Tomás)
+Tomás decidió quitar de la etapa 6 la revisión del abogado (aviso de consentimiento y convenio) y la revisión de seguridad hecha por una persona. Los documentos de `docs/legal/` y `docs/seguridad/` quedan como referencia y siguen al día con el código. Lo que queda sin una mirada externa: el texto del aviso y las bases legales del tratamiento (incluida la transferencia internacional si se usa DeepSeek con estudiantes reales), y la verificación de permisos por alguien distinto de quien escribió el código. Lo cubren, hasta donde puede el código, los tests V1 a V15, el test de cobertura de permisos y los intentos por URL de Playwright.
+
 ### 2026-11-15 · DeepSeek como proveedor de IA provisorio
 Tomás decidió usar la API de DeepSeek mientras no haya clave de Anthropic. Se sumó `src/server/ai/deepseek.ts` detrás de la misma interfaz (`AI_PROVIDER=deepseek`), sin dependencias nuevas: modo JSON con el esquema en el prompt y validación con zod, el PDF del programa convertido a texto, `reasoning_effort` low para el chat y high para el análisis, y costo con la tarifa de caché. Modelo `deepseek-flash` y precios configurables por variable; por defecto, la tarifa pico más alta publicada, para que el tope de gasto se active antes. Anthropic sigue disponible y es el valor por defecto. Riesgo: según su política de privacidad, DeepSeek procesa los datos en China; con datos sintéticos no importa, con estudiantes reales es una transferencia internacional que habría que resolver antes del piloto.
 
