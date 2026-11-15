@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Consentimiento en las vistas del docente heredadas de educa-educai
+Al preparar la revisión de seguridad apareció una brecha de V6 y V11: el detalle de evidencia y de conclusión, la cola de atención, los insights por tema, el resumen de la clase, el snapshot de desarrollo y el análisis de las entregas solo exigían inscripción. Un docente podía seguir leyendo fragmentos y mensajes de origen de un estudiante que había retirado el consentimiento. Ahora esas lecturas exigen consentimiento activo (en el servicio, no en cada página), y abrir una evidencia o una conclusión queda en `AccessLog` (V2). La regla no cambia: se aplica donde faltaba.
+
 ### 2026-11-15 · Prueba de carga con Playwright y criterios medidos en el servidor
 La prueba de carga (`npm run test:load`) usa Playwright con 60 contextos de navegador en lugar de k6, porque las acciones de Next no tienen una API HTTP estable para guionar a mano. Como los navegadores comparten la máquina, los criterios se miden en el servidor: login ≤ 5 s, páginas ≤ 1,5 s y preguntas ≤ 1 s más la demora de la IA (p95), cero errores e integridad de datos. Se recomienda una instancia de al menos 2 CPU para producción (detalle en `docs/informes/carga-etapa-6.md`). El proveedor guionado acepta `SCRIPTED_AI_LATENCY_MS` para simular la demora del modelo.
 

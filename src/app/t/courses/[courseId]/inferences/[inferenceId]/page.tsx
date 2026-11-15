@@ -11,14 +11,14 @@ import { setTeacherActionStatusAction } from "@/server/actions/teacher";
 import { requireCourseTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { EVENT, track } from "@/server/events";
-import { getInferenceDetail } from "@/server/services/development";
+import { openInferenceAsTeacher } from "@/server/services/student-file";
 
 export const metadata: Metadata = { title: "Inferencia" };
 
 export default async function TeacherInferencePage({ params }: { params: Promise<{ courseId: string; inferenceId: string }> }) {
   const { courseId, inferenceId } = await params;
   const { user } = await requireCourseTeacher(courseId);
-  const inference = await getInferenceDetail(inferenceId, courseId, "teacher");
+  const inference = await openInferenceAsTeacher({ id: user.id, role: user.role }, inferenceId, courseId);
   if (!inference) notFound();
   const base = `/t/courses/${courseId}`;
   await track(EVENT.teacherInsightOpened, {
