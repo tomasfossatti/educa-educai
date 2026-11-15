@@ -17,6 +17,7 @@
     "metrics": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/metrics.ts",
     "postinstall": "prisma generate",
     "test:e2e": "playwright test",
+    "test:staging": "playwright test --config playwright.staging.config.ts",
     "test:load": "playwright test --config playwright.load.config.ts",
     "retention": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/retention.ts",
     "eval:dudas": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/measure-precision.ts"
