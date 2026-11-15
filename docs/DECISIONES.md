@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Backups del proveedor y prueba de restauración con scripts propios
+El backup diario de producción lo hace el proveedor de la base; no se copia a GitHub ni a otro lado, porque los datos reales no salen de producción. Para probar la restauración hay dos scripts (`backup-db.sh` y `restore-check.sh`) que restauran en una base vacía, comparan filas por tabla y levantan la app contra esa base. El CI los corre en cada PR con datos sintéticos, así no se rompen sin que nadie lo note. Se agregó `/api/health` (base alcanzable, última migración, versión) para el chequeo de salud del proveedor y de la restauración.
+
 ### 2026-11-15 · Tope semanal de IA por estudiante y alertas de consumo
 Tope de 2 USD por semana y por estudiante (`AI_WEEKLY_STUDENT_CAP_USD`), con semana de lunes a domingo en hora argentina. Con el chat en Opus 5.5 alcanza para unas 40 preguntas con material y el análisis de esas conversaciones. Al llegar al tope se frenan el chat, el quiz y las subidas cuyo análisis lo pasaría, antes de llamar al modelo; el análisis de lo ya conversado sigue, porque su costo sale de conversaciones que pasaron por el tope. El estudiante ve un aviso desde el 80%. Las alertas (80% y 100% por estudiante, y del consumo total de la instalación, 25 USD por semana por defecto) se registran una vez por semana y umbral en `ProductEvent`, van al log y a un webhook opcional (`AI_ALERT_WEBHOOK_URL`, Slack o Discord) con el id del estudiante y sin nombre ni contenido. No hizo falta migración. Los montos son de partida y los ajusta Tomás.
 

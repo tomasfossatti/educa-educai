@@ -42,6 +42,13 @@ jobs:
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+      # Backup y prueba de restauración con los datos sintéticos que dejaron los tests.
+      - name: Backup y restauración
+        run: |
+          scripts/backup-db.sh "$RUNNER_TEMP/ci.dump"
+          RESTORE_ADMIN_URL=postgresql://educai:educai@localhost:5432/postgres \
+          RESTORE_COMPARE_URL="$DATABASE_URL" \
+          scripts/restore-check.sh "$RUNNER_TEMP/ci.dump"
 
   e2e:
     runs-on: ubuntu-latest
