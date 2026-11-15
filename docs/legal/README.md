@@ -15,7 +15,7 @@ El spec pide que el aviso de consentimiento y el convenio del piloto los revise 
 1. **Quién es el responsable de la base.** ¿La universidad es responsable y Educai encargado del tratamiento, o son corresponsables? De eso depende quién inscribe la base ante la Agencia de Acceso a la Información Pública y quién firma qué con los proveedores.
 2. **Transferencia internacional.** Las conversaciones se procesan con la API de Anthropic y la app corre en un proveedor de hosting, ambos con servidores fuera de Argentina. ¿Alcanza con el consentimiento del estudiante o hacen falta cláusulas contractuales con cada proveedor (art. 12)?
 3. **Plazos de conservación.** Hoy la app no borra nada por su cuenta (salvo sesiones e intentos de login). Hay una propuesta en `tratamiento-de-datos.md` para que la validen.
-4. **Borrado de la cuenta completa y copia de los datos.** El estudiante puede borrar cada conversación y retirar el consentimiento, pero no puede borrar su cuenta entera ni descargar sus datos desde la app. ¿Hace falta para el piloto o alcanza con un pedido por correo que se resuelva a mano?
+4. **Copia de los datos.** El estudiante puede borrar cada conversación, retirar el consentimiento y borrar su cuenta entera, pero no puede descargar una copia de sus datos desde la app. ¿Hace falta para el piloto o alcanza con un pedido por correo que se resuelva a mano?
 5. **Estudiantes menores de 18.** El piloto es universitario, pero puede haber estudiantes de 17 años en primer año. ¿Hace falta un consentimiento distinto?
 6. **Texto del aviso.** ¿El texto actual alcanza para que el consentimiento sea libre, expreso e informado (art. 5 y 6)? Si hay que cambiarlo, el texto vive en `src/lib/texts.ts` y cada cambio sube la versión del aviso.
 

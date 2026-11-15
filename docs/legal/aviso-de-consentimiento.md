@@ -42,7 +42,7 @@ Son puntos para que el abogado decida si van en el aviso, en una política de pr
 - Cuánto tiempo se guardan los datos.
 - Que el docente puede abrir la ficha con nombre y que cada apertura queda registrada (el aviso dice que el estudiante ve la lista de accesos, pero no que el docente ve su nombre).
 - Que el uso de la IA tiene un tope semanal por estudiante.
-- Que se puede pedir el acceso, la rectificación y la supresión de los datos, y ante quién reclamar (la Agencia de Acceso a la Información Pública).
+- Que se puede pedir el acceso, la rectificación y la supresión de los datos (incluido el borrado de la cuenta, que ya existe en "Tu contexto"), y ante quién reclamar (la Agencia de Acceso a la Información Pública).
 
 ## Cómo se cambia el texto
 
