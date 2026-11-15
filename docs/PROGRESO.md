@@ -5,12 +5,12 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 ## Estado actual
 
 - Etapa en curso: 6. Abiertas: 1 (revisar la lista de esquema), 2 (prueba con IA real), 4 (medición de precisión con IA real) y 6 (producción). La 3 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
-- Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio; `npm run test:staging` en verde). IA guionada hasta que la cuenta de DeepSeek tenga saldo.
-- IA real: DeepSeek de forma provisoria (`AI_PROVIDER=deepseek`). La clave está guardada como secreto de red de la sesión, pero la cuenta no tiene saldo (la API responde 402).
+- Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio). IA real con la cadena de respaldo gratuita (Groq y OpenRouter); `npm run test:staging` en verde con IA real.
+- IA real: cadena de proveedores gratuitos (`AI_PROVIDER=fallback`: Groq, Gemini, OpenRouter). DeepSeek queda en la cadena para cuando tenga saldo. Planes gratuitos: solo datos sintéticos.
 - Pasos que dependen de Tomás:
-  1. Cargar saldo en la cuenta de DeepSeek. Con eso Claude Code corre la prueba real (etapa 2) y, después de la revisión de etiquetas, la medición de precisión (etapa 4).
-  2. Para staging con IA real: en Vercel, proyecto `educai-staging` → Settings → Environment Variables, agregar `DEEPSEEK_API_KEY` como variable sensible. Claude Code cambia después `AI_PROVIDER` a `deepseek`.
-  3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1) y la muestra de `docs/informes/etiquetas-muestra.md` (etapa 4).
+  1. Revisar la muestra de etiquetas: la medición preliminar con Gemini dio 95,8% de precisión y la etapa 4 se cierra con esa revisión.
+  2. Rotar las claves de Groq y OpenRouter, que quedaron escritas en el chat, y cargar las nuevas en Vercel y en la sesión.
+  3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1).
   4. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
 
 ## Etapas
