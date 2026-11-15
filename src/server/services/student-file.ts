@@ -1,6 +1,7 @@
 import "server-only";
 import { assertCanViewStudentFile, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { logAccess } from "@/server/services/access-log";
 
 /**
  * Ficha de un estudiante en una cátedra. Es una sola función para el docente y para el estudiante:
@@ -8,7 +9,22 @@ import { db } from "@/server/db";
  */
 export async function loadStudentFile(viewer: Viewer, studentId: string, courseId: string) {
   await assertCanViewStudentFile(viewer, studentId, courseId);
+  await logAccess(viewer, studentId, courseId, "STUDENT_FILE");
   return buildStudentFile(studentId, courseId);
+}
+
+/**
+ * Lo que la carpeta del proyecto personal vincula con una cátedra: solo los hechos que la IA asoció
+ * a esa cátedra, con sus fuentes (V5). Nunca la carpeta ni sus conversaciones.
+ */
+export async function loadProjectLinks(viewer: Viewer, studentId: string, courseId: string) {
+  await assertCanViewStudentFile(viewer, studentId, courseId);
+  await logAccess(viewer, studentId, courseId, "PROJECT_LINKS");
+  return db.folderContext.findMany({
+    where: { folder: { studentId, kind: "PROJECT" }, layer: "FACTS", archivedAt: null, courseIds: { has: courseId } },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, content: true, sourceIds: true, createdAt: true },
+  });
 }
 
 async function buildStudentFile(studentId: string, courseId: string) {

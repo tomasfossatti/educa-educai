@@ -43,6 +43,7 @@ model User {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   sessions       Session[]
+  accessLogs     AccessLog[]     @relation("AccessViewer")
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
   productEvents  ProductEvent[]
@@ -101,6 +102,7 @@ model StudentProfile {
   interventionLinks InterventionTarget[]
   aiUsageEvents     AIUsageEvent[]        @relation("AIUsageStudent")
   folders           Folder[]
+  accessedBy        AccessLog[]           @relation("AccessSubject")
 }
 
 model TeacherProfile {
@@ -555,6 +557,12 @@ enum Polarity {
   MIXED
 }
 
+enum SignalStatus {
+  PENDING
+  CONFIRMED
+  DISCARDED
+}
+
 model Signal {
   id               String             @id @default(cuid())
   evidenceId       String
@@ -569,6 +577,11 @@ model Signal {
   polarity         Polarity
   description      String
   rationale        String?
+  /// Confianza del modelo en la señal. Las de confianza baja se descartan antes de guardar.
+  confidence       Confidence?
+  /// Confirmación del estudiante: solo lo confirmado (o lo no respondido en 7 días con confianza alta) cuenta para el docente.
+  studentStatus    SignalStatus       @default(PENDING)
+  respondedAt      DateTime?
   curriculumItemId String?
   curriculumItem   CurriculumItem?    @relation(fields: [curriculumItemId], references: [id], onDelete: SetNull)
   createdAt        DateTime           @default(now())
@@ -1021,6 +1034,8 @@ model FolderContext {
   content         String
   /// Ids de las conversaciones o evidencias de las que sale (para el borrado en cascada y la trazabilidad).
   sourceIds       String[]
+  /// Cátedras con las que la IA vinculó este hecho (carpeta del proyecto): el docente de A ve solo lo vinculado a A (V5).
+  courseIds       String[]
   editedByStudent Boolean      @default(false)
   archivedAt      DateTime?
   createdAt       DateTime     @default(now())
@@ -1069,4 +1084,27 @@ model MaterialChunk {
 
   @@index([courseId])
   @@index([materialId, page])
+}
+
+// ───────────────────────────── Registro de accesos ─────────────────────────────
+
+enum AccessView {
+  STUDENT_FILE
+  EVIDENCE
+  CONVERSATION
+  PROJECT_LINKS
+}
+
+/// Cada apertura de una ficha o de una evidencia de un estudiante por otra persona. El estudiante ve la lista (V9).
+model AccessLog {
+  id        String         @id @default(cuid())
+  viewerId  String
+  viewer    User           @relation("AccessViewer", fields: [viewerId], references: [id], onDelete: Cascade)
+  studentId String
+  student   StudentProfile @relation("AccessSubject", fields: [studentId], references: [userId], onDelete: Cascade)
+  courseId  String?
+  view      AccessView
+  createdAt DateTime       @default(now())
+
+  @@index([studentId, createdAt])
 }
