@@ -9,6 +9,7 @@ import { AccessDenied, requireStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { respondToSignal } from "@/server/services/doubts";
 import { askInFolder, MAX_UPLOAD_BYTES, startFolderConversation, uploadExternalConversation } from "@/server/services/folder-chat";
+import { deleteContextItem, editContextItem } from "@/server/services/folder-context";
 import { deleteExperienceCascade } from "@/server/services/privacy";
 import { createQuiz, QuizError, submitQuiz } from "@/server/services/quiz";
 
@@ -108,4 +109,22 @@ export async function submitQuizAction(_prev: ActionState | null, formData: Form
   }
   refresh();
   return { ok: true };
+}
+
+export async function editContextAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const v = await viewer();
+  try {
+    await editContextItem(v, text(formData, "contextId"), text(formData, "content"));
+  } catch (error) {
+    if (error instanceof AccessDenied) notFound();
+    return { error: error instanceof Error ? error.message : String(error) };
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function deleteContextAction(contextId: string): Promise<void> {
+  const v = await viewer();
+  await deleteContextItem(v, contextId).catch(denyAsNotFound);
+  refresh();
 }

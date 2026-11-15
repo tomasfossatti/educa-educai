@@ -64,6 +64,13 @@ describe.skipIf(!TEST_DB)("reglas de visibilidad, etapa 3", () => {
     expect(await db.folder.count({ where: { studentId: ana.id } })).toBe(2);
   });
 
+  it("pedidos simultáneos no duplican carpetas ni fallan", async () => {
+    const s = await f.student({ name: "Concurrente" });
+    await db.enrollment.create({ data: { courseId, studentId: s.id } });
+    await Promise.all(Array.from({ length: 5 }, () => folders.ensureStudentFolders(s.id)));
+    expect(await db.folder.count({ where: { studentId: s.id } })).toBe(2);
+  });
+
   describe("V7: el estudiante ve su propia ficha, con el mismo contenido que el docente", () => {
     it("permitido, e idéntico a lo que ve el docente", async () => {
       const { experience } = await f.conversation({ studentId: ana.id, folderId: anaFolderId, courseId });

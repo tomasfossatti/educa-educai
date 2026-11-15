@@ -11,7 +11,7 @@ import { TEXT } from "@/lib/texts";
 import { requireEnrolledStudent, requireStudent } from "@/server/auth/guards";
 import { destroySession } from "@/server/auth/session";
 import { db } from "@/server/db";
-import { queueInterpretation, retryInterpretation } from "@/server/engine/trigger";
+import { onConversationClosed, queueInterpretation, retryInterpretation } from "@/server/engine/trigger";
 import { EVENT, track } from "@/server/events";
 import { setAnalysisConsent } from "@/server/services/consent";
 import { ensureStudentFolders } from "@/server/services/folders";
@@ -236,6 +236,7 @@ export async function closeConversationAction(conversationId: string): Promise<v
     db.aIConversation.update({ where: { id: conversation.id }, data: { status: "CLOSED", closedAt } }),
     db.experience.update({ where: { id: conversation.experienceId }, data: { completedAt: closedAt } }),
   ]);
+  await onConversationClosed(conversation.id, "Conversación cerrada");
   // Las conversaciones de la carpeta del proyecto no tienen cátedra: no se interpretan contra un programa.
   if (!conversation.courseId) {
     refresh();

@@ -14,7 +14,9 @@ export type AIOperation =
   | "interpret.infer"
   | "interpret.feedback"
   | "folder.chat"
-  | "quiz.generate";
+  | "quiz.generate"
+  | "context.facts"
+  | "context.summary";
 
 export type Effort = "low" | "medium" | "high";
 

@@ -3,7 +3,8 @@ import { z } from "zod";
 import { generateStructured } from "@/server/ai";
 import { AccessDenied, assertFolderOwner, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
-import { queueInterpretation } from "@/server/engine/trigger";
+import { onConversationClosed, queueInterpretation } from "@/server/engine/trigger";
+import { contextForPrompt } from "@/server/services/folder-context";
 import { searchMaterial, type MaterialHit } from "@/server/services/material";
 
 /** Lo que se guarda en Message.citations para una respuesta del chat de carpeta. */
@@ -92,9 +93,10 @@ export async function askInFolder(viewer: Viewer, conversationId: string, questi
     .map((m) => ({ role: m.role === "STUDENT" ? ("user" as const) : ("assistant" as const), content: m.content }));
   messages.push({ role: "user", content: `${fragmentsBlock(hits)}\n\nPREGUNTA: ${text}` });
 
+  const studentContext = await contextForPrompt(conversation.folder.id, viewer.id);
   const result = await generateStructured({
     operation: "folder.chat",
-    system: SYSTEM,
+    system: studentContext ? `${SYSTEM}\n\n${studentContext}` : SYSTEM,
     messages,
     schema: answerSchema,
     context: { actorUserId: viewer.id, studentId: viewer.id, courseId: conversation.folder.courseId },
@@ -155,6 +157,7 @@ export async function uploadExternalConversation(viewer: Viewer, folderId: strin
   await db.message.createMany({
     data: messages.map((m, i) => ({ conversationId: conversation.id, role: m.role, content: m.content, createdAt: new Date(closedAt.getTime() + i) })),
   });
+  await onConversationClosed(conversation.id, `Conversación subida: ${title}`);
   if (folder.courseId) {
     await queueInterpretation({ experienceId: experience.id, courseId: folder.courseId, studentId: viewer.id, source: "AI_CONVERSATION" });
   }

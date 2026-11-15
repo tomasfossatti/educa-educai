@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Contexto de carpeta: dónde vive el resumen y cuándo se construye
+El resumen cruza carpetas, así que se guarda una sola fila SUMMARY activa en la carpeta del proyecto y entra al prompt de todas las carpetas. Los hechos se actualizan al cerrar cada conversación (o al recibir una subida) y el resumen se renueva como máximo una vez por día. Es análisis, así que se construye solo con el consentimiento activo. El archivado es condicional en la base, para no pisar una edición del estudiante que llegue mientras corre el proceso. El estudiante puede borrar; el proceso nunca borra.
+
+### 2026-11-15 · Carpetas sin duplicados ante pedidos simultáneos
+Se crean con `ON CONFLICT DO NOTHING`, y la carpeta del proyecto tiene un índice único parcial. La migración une duplicados si los hubiera, sin borrar datos.
+
 ### 2026-11-15 · Quiz y dominio por tema
 La fórmula se portó tal cual de `deeptutor/learning/mastery.py` (con atribución en `THIRD_PARTY_NOTICES.md`). Con menos de cinco intentos se usan los últimos pesos y cada acierto se acota a 0..1, como en el original. El acierto de un intento es la fracción de respuestas correctas del quiz. Las preguntas sin fragmento válido como fuente se descartan, y si quedan menos de tres no hay quiz (no se inventa). Las respuestas correctas no llegan al navegador hasta entregar.
 

@@ -138,6 +138,12 @@ export async function submitQuiz(viewer: Viewer, quizId: string, answers: (numbe
       create: { studentId: viewer.id, curriculumItemId: quiz.curriculumItemId, score, attempts: history.length, lastEvidenceAt: now },
       update: { score, attempts: history.length, lastEvidenceAt: now },
     });
+    const folder = await tx.folder.findFirst({ where: { studentId: viewer.id, courseId: quiz.courseId }, select: { id: true } });
+    if (folder) {
+      await tx.folderContext.create({
+        data: { folderId: folder.id, layer: "TRACE", content: `Quiz de ${quiz.curriculumItem.title}: ${correct} de ${questions.length}`, sourceIds: [quiz.id] },
+      });
+    }
     return { correct, total: questions.length, mastery: score };
   });
 }
