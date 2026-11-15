@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Gemini (plan gratuito) mientras DeepSeek no tenga saldo
+Tomás pidió usar una API gratuita de Google hasta cargar saldo en DeepSeek. Gemini expone una API compatible con OpenAI, así que el proveedor de DeepSeek pasó a ser uno genérico (`openai-compatible.ts`) y DeepSeek y Gemini son dos configuraciones (`AI_PROVIDER=gemini`, modelo `gemini-3.5-flash`). Se probó contra la API real: modo JSON, `reasoning_effort`, streaming con uso y un chat con cita del material. El razonamiento interno de Gemini no viene en `completion_tokens`, así que se cuenta como salida desde `total_tokens`. El costo es 0 en el plan gratuito, cuyo límite son las solicitudes por minuto y por día. En ese plan Google puede usar lo enviado para mejorar sus productos: solo datos sintéticos, nunca estudiantes reales.
+
 ### 2026-11-15 · Sin revisión de abogado ni revisión de seguridad externa (decisión de Tomás)
 Tomás decidió quitar de la etapa 6 la revisión del abogado (aviso de consentimiento y convenio) y la revisión de seguridad hecha por una persona. Los documentos de `docs/legal/` y `docs/seguridad/` quedan como referencia y siguen al día con el código. Lo que queda sin una mirada externa: el texto del aviso y las bases legales del tratamiento (incluida la transferencia internacional si se usa DeepSeek con estudiantes reales), y la verificación de permisos por alguien distinto de quien escribió el código. Lo cubren, hasta donde puede el código, los tests V1 a V15, el test de cobertura de permisos y los intentos por URL de Playwright.
 

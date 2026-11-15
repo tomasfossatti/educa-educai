@@ -29,8 +29,11 @@ async function main() {
   process.env.DATABASE_URL = TEST_DB;
   if (dryRun) {
     process.env.AI_PROVIDER = "scripted";
-  } else if (process.env.AI_PROVIDER !== "anthropic" || !(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN)) {
-    throw new Error("Para medir con el modelo real: AI_PROVIDER=anthropic y ANTHROPIC_API_KEY. Para probar el circuito: --dry-run.");
+  } else {
+    const { aiMode } = await import("@/server/ai");
+    if (aiMode() !== "live") {
+      throw new Error("Para medir con un modelo real: AI_PROVIDER=anthropic, deepseek o gemini, con su clave. Para probar el circuito: --dry-run.");
+    }
   }
 
   const { db } = await import("@/server/db");
@@ -120,7 +123,7 @@ async function main() {
   const report = [
     `# Precisión de la detección de dudas`,
     ``,
-    `${new Date().toISOString().slice(0, 10)} · ${dryRun ? "**Prueba del circuito con el proveedor guionado: los números no miden al modelo.**" : `Modelo real (${modelFor("interpret.signals")})`}`,
+    `${new Date().toISOString().slice(0, 10)} · ${dryRun ? "**Prueba del circuito con el proveedor guionado: los números no miden al modelo.**" : `Modelo real (${process.env.AI_PROVIDER}, ${modelFor("interpret.signals")})${process.env.PRECISION_NOTE ? ` · **${process.env.PRECISION_NOTE}**` : ""}`}`,
     ``,
     `- Conversaciones: ${rows.length} de ${fixture.conversations.length}`,
     `- Dudas detectadas correctas: ${tp} · incorrectas: ${fp} · no detectadas: ${fn}`,
@@ -133,8 +136,9 @@ async function main() {
     ``,
   ].join("\n");
   mkdirSync("docs/informes", { recursive: true });
-  writeFileSync("docs/informes/precision-etapa-4.md", report);
-  console.log(`\nPrecisión ${pct(precision)} · cobertura ${pct(recall)} · costo ${costUsd.toFixed(4)} USD. Informe en docs/informes/precision-etapa-4.md`);
+  const out = process.env.PRECISION_REPORT ?? "docs/informes/precision-etapa-4.md";
+  writeFileSync(out, report);
+  console.log(`\nPrecisión ${pct(precision)} · cobertura ${pct(recall)} · costo ${costUsd.toFixed(4)} USD. Informe en ${out}`);
   await db.$disconnect();
   if (!dryRun && precision < TARGET) process.exit(1);
 }

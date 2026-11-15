@@ -15,7 +15,8 @@
 - Base: Neon `educai-staging` (plan gratuito, región São Paulo `gru1`), conectada al proyecto. Vercel inyecta `DATABASE_URL` (con pooler) para la app y `DATABASE_URL_UNPOOLED` para las migraciones, que corren en el build solo en el entorno `production` del proyecto.
 - Funciones en `gru1`, junto a la base. Node 22.
 - Contraseña de sitio: `SITE_PASSWORD` (variable sensible del proyecto; copia en `.secrets/staging/SITE_PASSWORD`). El navegador la pide con cualquier usuario. `/api/health` queda abierto para el chequeo. Sin la variable, la app no pide nada (local, CI y producción).
-- IA: proveedor guionado hasta cargar la clave del proveedor real.
+- IA: proveedor guionado hasta cargar la clave del proveedor real. Para pasar a Gemini: variable sensible `GEMINI_API_KEY` en el proyecto y `AI_PROVIDER=gemini`.
+- Pruebas con IA real desde la nube de Claude Code: la clave la inyecta el proxy, así que el código necesita `GEMINI_API_KEY=proxy-injected` (o `DEEPSEEK_API_KEY`) y `NODE_USE_ENV_PROXY=1` para que `fetch` de Node salga por el proxy.
 - Prueba de humo: `npm run test:staging` recorre con la interfaz el flujo docente → material → estudiante con consentimiento → pregunta con cita, y el chequeo de salud. Lee la contraseña de `.secrets/staging/SITE_PASSWORD` o de `STAGING_SITE_PASSWORD`. Crea cuentas sintéticas con correos `@test.educai`.
 - Límite propio de Vercel: un pedido no puede superar 4,5 MB, así que en staging el material de la cátedra se sube en archivos de hasta ese tamaño (en local y en producción el límite es 20 MB).
 

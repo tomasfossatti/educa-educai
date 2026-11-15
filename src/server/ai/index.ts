@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { db } from "@/server/db";
 import { AnthropicProvider } from "./anthropic";
 import { DeepSeekProvider } from "./deepseek";
+import { GeminiProvider } from "./gemini";
 import { assertStudentBudget, checkBudgetAlerts, STUDENT_INITIATED } from "./budget";
 import { OPERATION_CONFIG, modelFor } from "./config";
 import { estimateCostUsd } from "./pricing";
@@ -30,6 +31,9 @@ function createProvider(): LLMProvider {
   }
   if (explicit === "deepseek") {
     return new DeepSeekProvider();
+  }
+  if (explicit === "gemini") {
+    return new GeminiProvider();
   }
   if (explicit === "scripted") {
     // Proveedor determinista para desarrollo y tests: nunca en producción.
