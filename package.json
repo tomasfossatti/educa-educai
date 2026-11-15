@@ -15,7 +15,8 @@
     "db:seed": "tsx --conditions=react-server --tsconfig tsconfig.json prisma/seed/index.ts",
     "db:reset": "prisma migrate reset --force --skip-seed && npm run db:seed",
     "metrics": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/metrics.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "eval:dudas": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/measure-precision.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
