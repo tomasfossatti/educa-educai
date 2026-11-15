@@ -9,6 +9,15 @@
 | Staging | PostgreSQL gestionado del proveedor | Real, con la clave de staging | Sintéticos, con seed permitido | Automático al fusionar a `main` |
 | Producción | PostgreSQL gestionado, con backups diarios | Real, con la clave de producción | Reales, sin seed | Automático tras aprobación de Tomás |
 
+## Staging
+
+- Proyecto `educai-staging` en Vercel, conectado a este repositorio. Solo se construye `main`: cada fusión despliega staging; las demás ramas no generan despliegues (paso de construcción ignorado).
+- Base: Neon `educai-staging` (plan gratuito, región São Paulo `gru1`), conectada al proyecto. Vercel inyecta `DATABASE_URL` (con pooler) para la app y `DATABASE_URL_UNPOOLED` para las migraciones, que corren en el build solo en el entorno `production` del proyecto.
+- Funciones en `gru1`, junto a la base. Node 22.
+- Contraseña de sitio: `SITE_PASSWORD` (variable sensible del proyecto; copia en `.secrets/staging/SITE_PASSWORD`). El navegador la pide con cualquier usuario. `/api/health` queda abierto para el chequeo. Sin la variable, la app no pide nada (local, CI y producción).
+- IA: proveedor guionado hasta cargar la clave del proveedor real.
+- Límite propio de Vercel: un pedido no puede superar 4,5 MB, así que en staging el material de la cátedra se sube en archivos de hasta ese tamaño (en local y en producción el límite es 20 MB).
+
 ## Flujo de cambios
 
 1. Claude Code trabaja en una rama y abre un PR.
