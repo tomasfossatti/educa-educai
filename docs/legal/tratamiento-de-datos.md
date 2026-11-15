@@ -61,7 +61,7 @@ Lo que la app hace hoy:
 - Backups de producción: 14 días como mínimo, según el plan del proveedor.
 - Todo lo demás se guarda hasta que el estudiante lo borra (conversaciones, hechos de contexto o la cuenta entera) o indefinidamente. No hay borrado automático al terminar la cursada. Un dato borrado sigue en los backups hasta que vencen (14 días).
 
-Propuesta para que decidan Tomás y el abogado (no implementada):
+Propuesta para que decidan Tomás y el abogado. El mecanismo ya existe (`src/server/services/retention.ts`): cada plazo es una variable de entorno, vacía por defecto, y `npm run retention` muestra qué se borraría antes de aplicarlo con `--apply`. Borra las conversaciones vencidas con todo lo derivado, los quizzes y el dominio, y el registro de accesos, y desvincula el costo de IA de la persona:
 
 | Datos | Plazo propuesto | Qué pasa al vencer |
 | --- | --- | --- |
@@ -92,6 +92,6 @@ Propuesta para que decidan Tomás y el abogado (no implementada):
 ## Brechas conocidas
 
 1. No hay descarga de una copia de los datos desde la app. Si el abogado la pide para el piloto, se suma al spec y se implementa; mientras tanto, se resolvería a mano con un pedido por correo.
-2. No hay plazos de conservación automáticos.
+2. Los plazos de conservación no están fijados. El mecanismo está listo y apagado (`npm run retention`, variables `RETENTION_*`): cuando el abogado y Tomás decidan los plazos, se cargan en el proveedor y se aplica.
 3. El aviso de consentimiento no menciona a los proveedores ni la transferencia internacional (ver `aviso-de-consentimiento.md`).
 4. Al retirar el consentimiento, lo ya analizado se conserva para el estudiante. El docente deja de verlo, pero sigue en la base hasta que el estudiante lo borre.

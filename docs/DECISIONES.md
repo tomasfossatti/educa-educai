@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Plazos de conservación: mecanismo listo, apagado por defecto
+Los plazos son una decisión legal, así que el código no trae ninguno: cada uno es una variable vacía y, sin decisión, no se borra nada. El borrado reutiliza el mismo que usa el estudiante (V10) para no dejar evidencia ni contexto huérfanos, y se aplica a mano con una prueba previa que solo cuenta. Un plazo menor a 30 días se ignora como error de configuración.
+
 ### 2026-11-15 · Endurecimiento antes de la revisión de seguridad
 Se sumó el test estático que pedía `PRUEBAS.md` (cada página, ruta y acción llama a un control de permisos), un flujo de Playwright que intenta abrir datos ajenos cambiando ids en la URL, control propio en `/s/join` y `/t/new`, un límite de 200 MB descomprimidos para DOCX y PPTX, y el borrado de las invitaciones con el correo al borrar la cuenta. El test estático confirma que hay un control, no que sea el correcto: eso lo siguen cubriendo los tests V1 a V15.
 

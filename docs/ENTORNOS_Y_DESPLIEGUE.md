@@ -47,6 +47,10 @@
    Si la consola tiene `pg_dump` y el usuario puede crear bases, alcanza con `scripts/backup-db.sh /tmp/prod.dump && RESTORE_ADMIN_URL=<url del servidor con la base postgres> RESTORE_COMPARE_URL=$DATABASE_URL scripts/restore-check.sh /tmp/prod.dump`, y después `rm /tmp/prod.dump*`.
 4. Borrar la base restaurada y anotar en `docs/PROGRESO.md` la fecha, cuánto tardó y el resultado.
 
+## Plazos de conservación
+
+Los plazos los deciden Tomás y el abogado (`docs/legal/tratamiento-de-datos.md`). Se cargan como variables `RETENTION_CONVERSATION_DAYS`, `RETENTION_ACCESS_LOG_DAYS` y `RETENTION_AI_USAGE_DAYS` (mínimo 30 días; vacías, no se borra nada). `npm run retention` muestra cuánto se borraría y `npm run retention -- --apply` lo aplica. Mientras no haya un cron en el proveedor, se corre a mano una vez por mes y se anota en `PROGRESO.md`. Un dato borrado sigue en los backups hasta que vencen.
+
 ## Observabilidad
 
 - Logs estructurados sin contenido de conversaciones ni datos personales.
