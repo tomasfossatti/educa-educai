@@ -2,14 +2,8 @@ import type { AIOperation, Effort } from "./types";
 
 export function defaultModel(): string {
   if (process.env.AI_MODEL?.trim()) return process.env.AI_MODEL.trim();
-  const provider = (process.env.AI_PROVIDER || "").toLowerCase();
-  if (provider === "google" || provider === "gemini" || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
-    return "gemini-2.5-flash";
-  }
   return "claude-opus-5-5";
 }
-
-export const DEFAULT_MODEL = "gemini-2.5-flash";
 
 /**
  * Configuración por operación. Cada responsabilidad del motor tiene su propio
@@ -23,14 +17,6 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "interpret.evaluate": { effort: "medium", maxTokens: 12000 },
   "interpret.infer": { effort: "medium", maxTokens: 16000 },
   "interpret.feedback": { effort: "low", maxTokens: 8000 },
-  "pagelm.chat": { effort: "low", maxTokens: 4000 },
-  "pagelm.quiz": { effort: "medium", maxTokens: 8000 },
-  "pagelm.flashcards": { effort: "medium", maxTokens: 8000 },
-  "pagelm.notes": { effort: "medium", maxTokens: 8000 },
-  "pagelm.podcast": { effort: "medium", maxTokens: 8000 },
-  "deepstudent.agent": { effort: "medium", maxTokens: 8000 },
-  "getit.feynman": { effort: "medium", maxTokens: 4000 },
-  "getit.evaluate": { effort: "medium", maxTokens: 4000 },
 };
 
 /**

@@ -2,7 +2,6 @@ import "server-only";
 import type { z } from "zod";
 import { db } from "@/server/db";
 import { AnthropicProvider } from "./anthropic";
-import { GoogleProvider } from "./google";
 import { OPERATION_CONFIG, modelFor } from "./config";
 import { estimateCostUsd } from "./pricing";
 import { ScriptedProvider } from "./scripted";
@@ -24,9 +23,6 @@ let provider: LLMProvider | null = null;
 
 function createProvider(): LLMProvider {
   const explicit = process.env.AI_PROVIDER?.toLowerCase();
-  if (explicit === "google" || explicit === "gemini") {
-    return new GoogleProvider();
-  }
   if (explicit === "anthropic") {
     return new AnthropicProvider();
   }
@@ -38,15 +34,8 @@ function createProvider(): LLMProvider {
     return new ScriptedProvider();
   }
 
-  // Auto-detección: si hay clave de Gemini/Google configurada, usar Google
-  if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
-    return new GoogleProvider();
-  }
-  if (process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) {
-    return new AnthropicProvider();
-  }
-
-  return new GoogleProvider();
+  // Sin AI_PROVIDER: Anthropic (si falta la clave, isConfigured() lo informa).
+  return new AnthropicProvider();
 }
 
 export function getProvider(): LLMProvider {
