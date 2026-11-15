@@ -17,6 +17,7 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "interpret.evaluate": { effort: "medium", maxTokens: 12000 },
   "interpret.infer": { effort: "medium", maxTokens: 16000 },
   "interpret.feedback": { effort: "low", maxTokens: 8000 },
+  "folder.chat": { effort: "low", maxTokens: 4000 },
 };
 
 /**

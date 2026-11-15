@@ -69,7 +69,7 @@ export default async function ContextPage() {
               label="Analizar mis conversaciones y entregas para generar evidencia y feedback"
               hint={
                 profile.consentAnalysisAt
-                  ? `Activo desde ${formatDate(profile.consentAnalysisAt)}. Si lo desactivás, lo ya generado se conserva pero no se analiza nada nuevo.`
+                  ? `Activo desde ${formatDate(profile.consentAnalysisAt)}. Si lo desactivás, desde ese momento no se analiza nada nuevo y tu docente deja de ver tus conversaciones. Lo ya generado sigue visible para vos.`
                   : "Desactivado: tus experiencias se guardan pero no se analizan."
               }
             />

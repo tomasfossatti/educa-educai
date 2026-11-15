@@ -7,6 +7,7 @@ import { z } from "zod";
 import { parseActivityPrompts } from "@/domain/activity";
 import { CONSENT_VERSION, CURRENT_COURSE_COOKIE } from "@/lib/constants";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
+import { TEXT } from "@/lib/texts";
 import { requireEnrolledStudent, requireStudent } from "@/server/auth/guards";
 import { destroySession } from "@/server/auth/session";
 import { db } from "@/server/db";
@@ -27,6 +28,20 @@ const contextSchema = z.object({
   difficulties: declaredField,
   workPreferences: declaredField,
 });
+
+const profileSchema = z.object({
+  career: z.string().min(2, "Contanos qué carrera cursás.").max(120),
+  studyYear: z.coerce.number().int().min(1).max(10).optional(),
+  projectDescription: z.string().min(3, "Contanos brevemente tu proyecto.").max(600),
+});
+
+function readProfile(formData: FormData) {
+  return {
+    career: text(formData, "career"),
+    studyYear: text(formData, "studyYear") || undefined,
+    projectDescription: text(formData, "projectDescription"),
+  };
+}
 
 function readContext(formData: FormData) {
   return {
@@ -72,8 +87,20 @@ async function enrollWithCode(studentId: string, rawCode: string): Promise<{ cou
 export async function completeOnboardingAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const { user } = await requireStudent({ allowIncompleteOnboarding: true });
   const parsed = contextSchema.safeParse(readContext(formData));
-  if (!parsed.success) return { error: "Revisá los campos marcados.", fieldErrors: fieldErrorsFrom(parsed.error) };
-  const consent = formData.get("consent") === "on";
+  const profileParsed = profileSchema.safeParse(readProfile(formData));
+  const consentChoice = text(formData, "consent");
+  if (!parsed.success || !profileParsed.success || (consentChoice !== "yes" && consentChoice !== "no")) {
+    return {
+      error: "Revisá los campos marcados.",
+      fieldErrors: {
+        ...(parsed.success ? {} : fieldErrorsFrom(parsed.error)),
+        ...(profileParsed.success ? {} : fieldErrorsFrom(profileParsed.error)),
+        ...(consentChoice === "yes" || consentChoice === "no" ? {} : { consent: TEXT.consent.required }),
+      },
+    };
+  }
+  // Consentimiento expreso: solo cuenta si el estudiante eligió "Acepto".
+  const consent = consentChoice === "yes";
   const shareContext = formData.get("shareContext") === "on";
 
   let courseId: string | null = null;
@@ -88,6 +115,9 @@ export async function completeOnboardingAction(_prev: ActionState | null, formDa
     where: { userId: user.id },
     data: {
       ...contextData(parsed.data),
+      career: profileParsed.data.career,
+      studyYear: profileParsed.data.studyYear ?? null,
+      projectDescription: profileParsed.data.projectDescription,
       consentAnalysisAt: consent ? new Date() : null,
       consentVersion: consent ? CONSENT_VERSION : null,
       shareContextWithTeachers: shareContext,

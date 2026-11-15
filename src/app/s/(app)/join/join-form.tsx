@@ -4,13 +4,13 @@ import { Field, Input } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
 import { joinCourseAction } from "@/server/actions/student";
 
-export function JoinForm() {
+export function JoinForm({ defaultCode }: { defaultCode?: string }) {
   const { state, pending, onSubmit } = useActionForm(joinCourseAction);
   return (
     <form method="post" onSubmit={onSubmit} className="space-y-4">
       <FormMessage state={state} />
       <Field label="Código" htmlFor="joinCode" error={state?.fieldErrors?.joinCode}>
-        <Input id="joinCode" name="joinCode" required maxLength={8} className="uppercase tracking-widest" autoCapitalize="characters" />
+        <Input id="joinCode" name="joinCode" defaultValue={defaultCode} required maxLength={8} className="uppercase tracking-widest" autoCapitalize="characters" />
       </Field>
       <PendingButton pending={pending} pendingText="Buscando…">
         Unirme

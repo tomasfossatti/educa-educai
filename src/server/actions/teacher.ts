@@ -7,6 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { activityPromptsSchema } from "@/domain/activity";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
+import { extractEmails } from "@/lib/emails";
 import { TEXT } from "@/lib/texts";
 import { isAIConfigured } from "@/server/ai";
 import { requireCourseTeacher, requireTeacher } from "@/server/auth/guards";
@@ -251,10 +252,17 @@ export async function setActivityStatusAction(activityId: string, status: "PUBLI
 export async function inviteStudentsAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const courseId = text(formData, "courseId");
   await requireCourseTeacher(courseId);
-  const emails = [...new Set(text(formData, "emails").split(/[\s,;]+/).map((e) => e.trim().toLowerCase()).filter(Boolean))];
+  let raw = text(formData, "emails");
+  const file = formData.get("csv");
+  if (file instanceof File && file.size > 0) {
+    if (file.size > 1024 * 1024) return { error: "El CSV supera 1 MB.", fieldErrors: { csv: "Máximo 1 MB." } };
+    raw = `${raw}\n${await file.text()}`;
+  }
+  // Acepta emails sueltos o un CSV con otras columnas (nombre, legajo…): se toman solo los emails.
+  const emails = extractEmails(raw);
   const invalid = emails.filter((e) => !z.email().safeParse(e).success);
   if (emails.length === 0 || invalid.length > 0) {
-    return { error: invalid.length ? `Emails inválidos: ${invalid.join(", ")}` : "Ingresá al menos un email.", fieldErrors: { emails: "Revisá la lista." } };
+    return { error: invalid.length ? `Emails inválidos: ${invalid.join(", ")}` : "Ingresá al menos un email o subí un CSV.", fieldErrors: { emails: "Revisá la lista." } };
   }
   if (emails.length > 200) return { error: "Máximo 200 emails por vez." };
   await db.courseInvite.createMany({ data: emails.map((email) => ({ courseId, email })), skipDuplicates: true });

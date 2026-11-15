@@ -8,6 +8,7 @@ import { requireCourseTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { getCourseOverview } from "@/server/services/attention";
 import { InviteForm } from "./invite-form";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = { title: "Estudiantes" };
 
@@ -25,6 +26,8 @@ export default async function StudentsPage({ params }: { params: Promise<{ cours
   const meta = new Map(enrollments.map((e) => [e.studentId, e]));
   const students = [...overview.students].sort((a, b) => a.name.localeCompare(b.name));
   const base = `/t/courses/${courseId}`;
+  const h = await headers();
+  const joinLink = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}/s/join?code=${course.joinCode}`;
 
   return (
     <>
@@ -32,7 +35,8 @@ export default async function StudentsPage({ params }: { params: Promise<{ cours
       <div className="space-y-10">
         <Section title="Incorporar estudiantes">
           <p className="text-sm text-ink-2">
-            Compartí el código <span className="rounded bg-subtle px-1.5 py-0.5 font-mono tracking-widest text-ink">{course.joinCode}</span> o invitá por email.
+            Compartí el código <span className="rounded bg-subtle px-1.5 py-0.5 font-mono tracking-widest text-ink">{course.joinCode}</span>, el enlace{" "}
+            <span className="break-all font-mono text-xs text-ink">{joinLink}</span> o invitá por email o CSV.
           </p>
           <InviteForm courseId={courseId} />
           {invites.length > 0 && (

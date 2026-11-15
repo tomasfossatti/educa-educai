@@ -4,11 +4,12 @@ import { JoinForm } from "./join-form";
 
 export const metadata: Metadata = { title: "Unirme a una materia" };
 
-export default function JoinPage() {
+export default async function JoinPage({ searchParams }: { searchParams: Promise<{ code?: string }> }) {
+  const { code } = await searchParams;
   return (
     <div className="max-w-md">
       <PageHeader title="Unirme a una materia" description="Ingresá el código de 6 caracteres que te compartió tu docente." />
-      <JoinForm />
+      <JoinForm defaultCode={typeof code === "string" ? code.slice(0, 8) : undefined} />
     </div>
   );
 }

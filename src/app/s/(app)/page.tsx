@@ -8,6 +8,7 @@ import { AutoRefresh, SubmitButton } from "@/components/ui/client";
 import { Card, EmptyState, List, ListItem, Notice, Section } from "@/components/ui/layout";
 import { truncate } from "@/domain/text-guards";
 import { acceptInviteAction, selectCourseAction } from "@/server/actions/student";
+import { FoldersSection } from "@/components/student/folders-section";
 import { requireStudent } from "@/server/auth/guards";
 import { getCurrentCourseId, getPendingInvites, getStudentCourses, getStudentHome } from "@/server/services/student-home";
 
@@ -50,6 +51,7 @@ export default async function StudentHome() {
             <p className="text-muted">Bienvenido a Educai.</p>
           </div>
           {inviteNotice}
+          <FoldersSection studentId={user.id} />
           <EmptyState title="Todavía no estás en ninguna materia" action={<ButtonLink href="/s/join" variant="primary">Unirme con un código</ButtonLink>}>
             Sumate con el código que te compartió tu docente para empezar.
           </EmptyState>
@@ -81,6 +83,8 @@ export default async function StudentHome() {
       </div>
 
       {inviteNotice}
+
+      <FoldersSection studentId={user.id} />
 
       {/* Tarjeta heroica de la materia activa del día (hairline card refinada) */}
       <section className="relative rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs">
