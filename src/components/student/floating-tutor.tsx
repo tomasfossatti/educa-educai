@@ -54,6 +54,8 @@ export function FloatingTutor({
     }
   }, [messages, isOpen]);
 
+  const sendQuestionRef = useRef<(text: string) => void>(() => {});
+
   useEffect(() => {
     function handleOpenEvent(e: Event) {
       const customEvent = e as CustomEvent<{
@@ -65,7 +67,7 @@ export function FloatingTutor({
       }>;
       setIsOpen(true);
       if (customEvent.detail?.initialQuestion) {
-        sendQuestion(customEvent.detail.initialQuestion);
+        sendQuestionRef.current(customEvent.detail.initialQuestion);
       }
     }
 
@@ -139,6 +141,10 @@ export function FloatingTutor({
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    sendQuestionRef.current = sendQuestion;
+  });
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();

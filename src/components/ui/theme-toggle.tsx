@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -10,14 +10,14 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ showLabel = false, className }: ThemeToggleProps) {
-  const [isDark, setIsDark] = useState<boolean>(true);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const hasDarkClass = document.documentElement.classList.contains("dark");
-    setIsDark(hasDarkClass);
-  }, []);
+  // false en el servidor y en la hidratación, true ya en el cliente
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const [override, setIsDark] = useState<boolean | null>(null);
+  const isDark = override ?? (mounted ? document.documentElement.classList.contains("dark") : true);
 
   const toggleTheme = () => {
     const nextDark = !isDark;

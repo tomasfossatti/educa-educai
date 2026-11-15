@@ -76,8 +76,10 @@ export function DeepStudentWorkbench() {
     try {
       const savedTopic = localStorage.getItem("deepstudent_topic");
       const savedNotes = localStorage.getItem("deepstudent_notes");
-      if (savedTopic) setTopic(savedTopic);
-      if (savedNotes) setNotes(savedNotes);
+      queueMicrotask(() => {
+        if (savedTopic) setTopic(savedTopic);
+        if (savedNotes) setNotes(savedNotes);
+      });
     } catch {
       // Ignorar
     }
