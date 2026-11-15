@@ -1,0 +1,598 @@
+{
+  "description": "30 conversaciones sintéticas etiquetadas a mano para medir la precisión de la detección de dudas (etapa 4). expectedDoubts lista los temas del programa en los que el estudiante muestra una duda; vacío = sin dudas.",
+  "course": {
+    "name": "Estrategia y Validación de Negocios",
+    "topics": [
+      "Segmentación de mercado",
+      "Propuesta de valor",
+      "Problema vs. solución",
+      "Hipótesis falsables",
+      "Métricas de validación"
+    ]
+  },
+  "conversations": [
+    {
+      "id": "c01",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "No entiendo qué hace que una hipótesis sea falsable. ¿No alcanza con que sea una buena idea?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "Pensá: ¿qué resultado te diría que tu idea estaba equivocada?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Ni idea, para mí si la idea es buena no puede estar equivocada. Sigo sin ver la diferencia entre hipótesis y opinión."
+        }
+      ],
+      "expectedDoubts": [
+        "Hipótesis falsables"
+      ]
+    },
+    {
+      "id": "c02",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Segmentar es lo mismo que elegir a todos los que podrían comprar? Para mí mi mercado es toda la ciudad."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Todos tienen el mismo problema y lo resuelven igual?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Supongo que sí, no entiendo para qué dividirlos si todos pueden comprar viandas."
+        }
+      ],
+      "expectedDoubts": [
+        "Segmentación de mercado"
+      ]
+    },
+    {
+      "id": "c03",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Una hipótesis falsable dice qué resultado la refutaría: por ejemplo, si menos de 20 de 200 oficinistas se suscriben en dos semanas, la descarto."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Y qué métrica usarías?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "La tasa de conversión a suscripción paga en dos semanas, con umbral del 10% y plazo de 14 días."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c04",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Qué métrica tengo que mirar para validar? ¿Los likes en Instagram sirven?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué comportamiento te muestra que alguien realmente quiere el producto?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No sé, los likes muestran interés, ¿no? No entiendo por qué no sirven como métrica."
+        }
+      ],
+      "expectedDoubts": [
+        "Métricas de validación"
+      ]
+    },
+    {
+      "id": "c05",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi problema es que no existe una app de viandas saludables en mi barrio."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Eso describe un problema del cliente o una solución que falta?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Es el problema, porque no está la app. No me queda claro cuál sería la diferencia."
+        }
+      ],
+      "expectedDoubts": [
+        "Problema vs. solución"
+      ]
+    },
+    {
+      "id": "c06",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "La propuesta de valor es la lista de funcionalidades de mi app, ¿no?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué gana el cliente con eso?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No entiendo la pregunta, gana las funcionalidades. No sé cómo escribir la propuesta de otra manera."
+        }
+      ],
+      "expectedDoubts": [
+        "Propuesta de valor"
+      ]
+    },
+    {
+      "id": "c07",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi segmento son oficinistas de 25 a 40 años que almuerzan en la oficina y no tienen tiempo de cocinar, porque comparten el mismo problema y lo resuelven pidiendo delivery caro."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Y por qué no estudiantes?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Porque los estudiantes resuelven el almuerzo de otra forma y tienen menos presupuesto; elegí el segmento con el dolor más claro."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c08",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi hipótesis es que a la gente le van a gustar las viandas. ¿Está bien?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Cómo sabrías si es falsa?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No sé cómo probarlo. Tampoco entiendo qué número tendría que medir ni cuánto tendría que dar."
+        }
+      ],
+      "expectedDoubts": [
+        "Hipótesis falsables",
+        "Métricas de validación"
+      ]
+    },
+    {
+      "id": "c09",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Tengo dos grupos: oficinistas y estudiantes. ¿Tengo que elegir uno? No entiendo por qué no los dos."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Tienen el mismo problema?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Creo que sí, comen al mediodía los dos. Me cuesta ver por qué segmentar me ayudaría."
+        }
+      ],
+      "expectedDoubts": [
+        "Segmentación de mercado"
+      ]
+    },
+    {
+      "id": "c10",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Distingo el problema de la solución: el problema es que los oficinistas gastan mucho en delivery y comen mal; la app es una solución posible entre otras."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Cuáles otras?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Un comedor compartido o un servicio de viandas semanal por WhatsApp; primero valido el problema y después la solución."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c11",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "No sé qué diferencia hay entre propuesta de valor y slogan."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué promete cada uno?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Para mí son lo mismo, una frase linda que vende. No entiendo qué tiene que tener la propuesta."
+        }
+      ],
+      "expectedDoubts": [
+        "Propuesta de valor"
+      ]
+    },
+    {
+      "id": "c12",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Cuántas encuestas necesito para validar? Hice 10 y todos dijeron que sí comprarían."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Decir que comprarían es lo mismo que comprar?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No veo la diferencia. Si dicen que sí, la métrica da bien, ¿no?"
+        }
+      ],
+      "expectedDoubts": [
+        "Métricas de validación"
+      ]
+    },
+    {
+      "id": "c13",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Para validar voy a medir preventas: si 30 de 150 contactos pagan una seña en 10 días, sigo."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Por qué preventas y no encuestas?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Porque pagar muestra comportamiento real; una encuesta mide intención y suele sobreestimar."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c14",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Escribí: 'el negocio va a funcionar si lo hacemos bien'. ¿Es una hipótesis falsable?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué resultado la haría falsa?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Ninguno, si lo hacemos bien funciona. No entiendo cómo reescribirla para que se pueda refutar."
+        }
+      ],
+      "expectedDoubts": [
+        "Hipótesis falsables"
+      ]
+    },
+    {
+      "id": "c15",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi problema es que falta una app y mi propuesta de valor es la app."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué le pasa hoy al cliente sin la app?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No sé, que no tiene la app. Me confunde separar el problema, la solución y lo que ofrezco."
+        }
+      ],
+      "expectedDoubts": [
+        "Problema vs. solución",
+        "Propuesta de valor"
+      ]
+    },
+    {
+      "id": "c16",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Hola, ¿me ayudás a ordenar el cronograma del trabajo práctico?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "Claro, ¿qué entregas tenés?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "El jueves la entrega de segmentación y el lunes la de métricas; quiero repartir el tiempo."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c17",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "El profesor dijo que mi segmento es muy amplio pero no entiendo cómo achicarlo."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué tienen en común las personas que más sufren el problema?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No sé, todos tienen hambre. No me doy cuenta qué criterio usar para segmentar."
+        }
+      ],
+      "expectedDoubts": [
+        "Segmentación de mercado"
+      ]
+    },
+    {
+      "id": "c18",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi propuesta de valor: almuerzos saludables listos en 5 minutos para oficinistas, más baratos que el delivery y sin pensar el menú cada día."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué parte es la más valiosa para ellos?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Ahorrar tiempo de decisión y dinero; lo confirmé en 12 entrevistas donde fue lo más mencionado."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c19",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "No entiendo qué es un umbral en una métrica."
+        },
+        {
+          "role": "TUTOR",
+          "content": "Es el valor a partir del cual decidís seguir o no."
+        },
+        {
+          "role": "STUDENT",
+          "content": "¿Y cómo sé qué valor poner? Me parece arbitrario y no entiendo para qué sirve."
+        }
+      ],
+      "expectedDoubts": [
+        "Métricas de validación"
+      ]
+    },
+    {
+      "id": "c20",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Una hipótesis necesita plazo? No entiendo por qué."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué pasa si esperás indefinidamente un resultado?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Que en algún momento va a dar bien. Igual no me queda claro por qué ponerle fecha."
+        }
+      ],
+      "expectedDoubts": [
+        "Hipótesis falsables"
+      ]
+    },
+    {
+      "id": "c21",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Ya entendí la diferencia: el problema existe aunque no haya solución; la solución es una de varias formas de resolverlo."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Podés dar un ejemplo?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Problema: los oficinistas comen mal por falta de tiempo; soluciones: viandas, comedor, app de recetas rápidas."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c22",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi propuesta de valor es 'calidad y buen precio'. El docente dijo que es genérica y no entiendo por qué."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Cualquier competidor podría decir lo mismo?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Sí, pero es lo que ofrezco. No sé cómo hacerla más específica."
+        }
+      ],
+      "expectedDoubts": [
+        "Propuesta de valor"
+      ]
+    },
+    {
+      "id": "c23",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "No sé a quién encuestar ni qué medir. ¿A cualquier persona?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Quién tiene el problema que querés resolver?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Todos, supongo. Y después no sé qué número mirar para decidir. Estoy perdido con las dos cosas."
+        }
+      ],
+      "expectedDoubts": [
+        "Segmentación de mercado",
+        "Métricas de validación"
+      ]
+    },
+    {
+      "id": "c24",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Voy a medir retención: porcentaje de suscriptores que renuevan la segunda semana, umbral 60%, plazo un mes."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Por qué retención y no ventas totales?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Porque las ventas totales esconden si la gente vuelve; la retención muestra valor sostenido."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c25",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Por qué el docente insiste en validar el problema primero? Yo ya sé que la app es buena."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Cómo sabés que el problema existe para otros?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Porque a mí me pasa. No entiendo para qué validar el problema si la solución ya está pensada."
+        }
+      ],
+      "expectedDoubts": [
+        "Problema vs. solución"
+      ]
+    },
+    {
+      "id": "c26",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Gracias por la explicación de la clase pasada, me sirvió mucho."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¡Qué bueno! ¿Querés repasar algo?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "No por ahora, después del parcial vuelvo con preguntas de métricas."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c27",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi hipótesis: 'los oficinistas prefieren comida saludable'. ¿Es falsable?"
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Qué observarías si fuera falsa?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Que no la prefieren... pero no sé cómo observarlo. No entiendo cómo hacerla medible."
+        }
+      ],
+      "expectedDoubts": [
+        "Hipótesis falsables"
+      ]
+    },
+    {
+      "id": "c28",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Segmentar por edad está bien? Puse de 18 a 65 años."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Ese rango comparte el mismo problema?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Creo que sí. No entiendo qué otro criterio podría usar además de la edad."
+        }
+      ],
+      "expectedDoubts": [
+        "Segmentación de mercado"
+      ]
+    },
+    {
+      "id": "c29",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "Mi segmento son padres que trabajan y necesitan viandas para sus hijos en edad escolar; los elegí porque el problema aparece todos los días y hoy lo resuelven cocinando de noche."
+        },
+        {
+          "role": "TUTOR",
+          "content": "¿Cómo lo vas a verificar?"
+        },
+        {
+          "role": "STUDENT",
+          "content": "Con 15 entrevistas y una prueba de preventa en dos escuelas durante dos semanas."
+        }
+      ],
+      "expectedDoubts": []
+    },
+    {
+      "id": "c30",
+      "messages": [
+        {
+          "role": "STUDENT",
+          "content": "¿Las métricas de vanidad son malas siempre? No entiendo cuáles son."
+        },
+        {
+          "role": "TUTOR",
+          "content": "Son las que crecen sin decir nada del negocio, como seguidores."
+        },
+        {
+          "role": "STUDENT",
+          "content": "Entonces no sé cuáles sí sirven. Me confunde cómo elegir una métrica útil."
+        }
+      ],
+      "expectedDoubts": [
+        "Métricas de validación"
+      ]
+    }
+  ]
+}
