@@ -42,8 +42,21 @@ function deepseekPrice(): Price {
   };
 }
 
+/**
+ * Gemini en el plan gratuito no cobra: el costo es 0 salvo que se configure un plan pago con
+ * GEMINI_PRICE_*. El límite real del plan gratuito son las solicitudes por minuto y por día.
+ */
+function geminiPrice(): Price {
+  const num = (key: string) => {
+    const v = Number(process.env[key]);
+    return Number.isFinite(v) && v >= 0 && process.env[key]?.trim() ? v : 0;
+  };
+  return { input: num("GEMINI_PRICE_INPUT"), output: num("GEMINI_PRICE_OUTPUT"), cacheRead: num("GEMINI_PRICE_CACHE_HIT"), cacheWrite: 0 };
+}
+
 function priceFor(model: string): Price | null {
   if (model.startsWith("deepseek")) return deepseekPrice();
+  if (model.startsWith("gemini")) return geminiPrice();
   const key = Object.keys(PRICES)
     .filter((k) => model === k || model.startsWith(`${k}-`))
     .sort((a, b) => b.length - a.length)[0];

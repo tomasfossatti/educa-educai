@@ -3,6 +3,8 @@ import type { z } from "zod";
 import { db } from "@/server/db";
 import { AnthropicProvider } from "./anthropic";
 import { DeepSeekProvider } from "./deepseek";
+import { FallbackProvider } from "./fallback";
+import { GeminiProvider } from "./gemini";
 import { assertStudentBudget, checkBudgetAlerts, STUDENT_INITIATED } from "./budget";
 import { OPERATION_CONFIG, modelFor } from "./config";
 import { estimateCostUsd } from "./pricing";
@@ -30,6 +32,12 @@ function createProvider(): LLMProvider {
   }
   if (explicit === "deepseek") {
     return new DeepSeekProvider();
+  }
+  if (explicit === "gemini") {
+    return new GeminiProvider();
+  }
+  if (explicit === "fallback") {
+    return new FallbackProvider();
   }
   if (explicit === "scripted") {
     // Proveedor determinista para desarrollo y tests: nunca en producción.
@@ -89,7 +97,7 @@ async function recordUsage(params: {
         courseId: params.context.courseId ?? null,
         runId: params.context.runId ?? null,
         operation: params.operation,
-        provider: getProvider().name,
+        provider: params.usage.provider ?? getProvider().name,
         model: params.usage.model,
         inputTokens: params.usage.inputTokens,
         outputTokens: params.usage.outputTokens,
