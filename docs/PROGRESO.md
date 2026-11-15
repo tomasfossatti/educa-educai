@@ -5,8 +5,14 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 ## Estado actual
 
 - Etapa en curso: 6. Abiertas por pasos que dependen de Tomás: 1 (revisar la lista de esquema), 2 (prueba con Claude real y staging), 4 (medición de precisión con modelo real) y 6 (producción, abogado y revisión de seguridad). La 3 y la 5 están cerradas.
-- Último PR fusionado: #27 (paquete para la revisión de seguridad).
-- Bloqueos que necesitan a Tomás: revisar la lista de esquema en `DECISIONES.md`; checklist de `CUENTAS_Y_SECRETOS.md` (clave de Anthropic, cuenta y token de staging, protección de `main`); revisar la muestra de `docs/informes/etiquetas-muestra.md`; crear producción con backup diario y hacer la prueba de restauración (`ENTORNOS_Y_DESPLIEGUE.md`); webhook de alertas de consumo; revisión del abogado (`docs/legal/`) y revisión de seguridad (`docs/seguridad/`).
+- Último PR fusionado: #31 (propuesta de aviso y cierre de la sesión).
+- Bloqueos que necesitan a Tomás, con el paso exacto:
+  1. Base de staging: en Vercel, Storage → Create Database → Neon → plan Free → nombre `educai-staging`, región São Paulo (`gru1`). La API no deja crearla sin esa autorización del panel. Con la base creada, Claude Code arma el proyecto de staging, carga los secretos y corre los flujos contra staging.
+  2. Clave de Anthropic de desarrollo cargada como variable `ANTHROPIC_API_KEY` del entorno de Claude Code (etapas 2 y 4).
+  3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1) y la muestra de `docs/informes/etiquetas-muestra.md` (etapa 4).
+  4. Producción: instancia de al menos 2 CPU, PostgreSQL con backup diario y 14 días de retención, entorno `production` protegido, y la prueba de restauración de `ENTORNOS_Y_DESPLIEGUE.md`.
+  5. Webhook de alertas de consumo (`AI_ALERT_WEBHOOK_URL`) y confirmar los montos del tope (2 USD por estudiante por semana, alerta a los 25 USD semanales).
+  6. Abogado: `docs/legal/` (seis preguntas, propuesta de aviso y plazos de conservación). Revisión de seguridad: `docs/seguridad/README.md`.
 
 ## Etapas
 
@@ -63,6 +69,8 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 ## Bitácora de sesiones
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
+
+- 2026-11-15 (continuación) · Endurecimiento previo a la revisión de seguridad (#28): test estático de cobertura de permisos (lo pedía `PRUEBAS.md`), intentos de acceso por URL con Playwright, control propio en `/s/join` y `/t/new`, límite de 200 MB descomprimidos para DOCX y PPTX, y borrado de invitaciones al borrar la cuenta. Descarga de los datos propios y corrección de un texto que decía que las conversaciones las veía solo el estudiante (#29). Mecanismo de plazos de conservación, apagado hasta que se fijen (#30). Propuesta de aviso para el abogado (#31). Staging quedó a un clic: la cuenta de Vercel tiene la integración de Neon, pero crear la base pide autorización en el panel. Gasto de IA: 0 USD.
 
 - 2026-11-15 · Etapa 6, todo lo que no depende de Tomás: análisis con Sonnet 5.5 (#21), tope semanal de IA por estudiante con alertas (#22), prueba de carga con 60 estudiantes (#23), backups y prueba de restauración en local y en el CI (#24), documentos para el abogado (#25), corrección de permisos (#26) y paquete de seguridad (#27). Hallazgos: el docente podía seguir leyendo evidencia y mensajes de origen de un estudiante que retiró el consentimiento en las vistas heredadas (V11, corregido con test); con carga, `refresh()` mostraba una página de error después de cerrar una conversación (corregido); el `pg_dump` del CI era más nuevo que el servidor (corregido). Se marcaron dos casillas de la etapa 2 que #7 ya cumplía. Gasto de IA: 0 USD (solo proveedor guionado).
 
