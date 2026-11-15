@@ -57,7 +57,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 - [ ] Producción con backups diarios y restauración probada
 - [ ] Aviso de consentimiento y convenio revisados por un abogado (Ley 25.326)
 - [ ] Revisión de seguridad hecha por una persona
-- [ ] Tope de costo por estudiante y alerta de consumo
+- [x] Tope de costo por estudiante y alerta de consumo (2 USD por semana y estudiante, aviso al 80%, alertas por log y webhook; falta que Tomás cree el webhook y lo cargue en `AI_ALERT_WEBHOOK_URL`)
 - [ ] Prueba de carga con 60 estudiantes simulados
 
 ## Bitácora de sesiones

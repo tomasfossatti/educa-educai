@@ -17,3 +17,9 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: AI_WEEKLY_STUDENT_CAP_USD
+        value: "2"
+      - key: AI_WEEKLY_TOTAL_ALERT_USD
+        value: "25"
+      - key: AI_ALERT_WEBHOOK_URL
+        sync: false

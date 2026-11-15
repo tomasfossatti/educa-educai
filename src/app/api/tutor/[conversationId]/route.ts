@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { AIError, streamChat } from "@/server/ai";
+import { assertStudentBudget, budgetResetLabel } from "@/server/ai/budget";
 import { dailyTutorMessageLimit } from "@/server/ai/config";
+import { TEXT } from "@/lib/texts";
 import { getSessionUser } from "@/server/auth/session";
 import { db } from "@/server/db";
 import { buildTutorSystemPrompt, getOwnConversation } from "@/server/services/conversations";
@@ -40,6 +42,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ con
   });
   if (sentToday >= dailyTutorMessageLimit()) {
     return jsonError(429, "Llegaste al límite diario de mensajes con el tutor. Podés seguir mañana.");
+  }
+
+  try {
+    await assertStudentBudget(user.id);
+  } catch (error) {
+    if (error instanceof AIError && error.kind === "budget_exceeded") return jsonError(429, TEXT.budget.exceeded(budgetResetLabel()));
+    throw error;
   }
 
   const history = conversation.messages.slice(-HISTORY_LIMIT).map((m) => ({

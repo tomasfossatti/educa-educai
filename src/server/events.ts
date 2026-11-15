@@ -20,6 +20,7 @@ export const EVENT = {
   loopInsightToAction: "loop.insight_to_action",
   loopActionToEvidence: "loop.action_to_evidence",
   engineRunFinished: "engine.run_finished",
+  aiBudgetAlert: "ai.budget_alert",
 } as const;
 
 export type EventName = (typeof EVENT)[keyof typeof EVENT];
