@@ -6,6 +6,8 @@ import { KeyValue, PageHeader, Section } from "@/components/ui/layout";
 import { formatDate, plural } from "@/lib/format";
 import { updatePrivacyAction } from "@/server/actions/student";
 import { requireStudent } from "@/server/auth/guards";
+import { buttonClass } from "@/components/ui/button";
+import { TEXT } from "@/lib/texts";
 import { getStudentDataSummary } from "@/server/services/privacy";
 import { ContextForm, DeleteAccountForm } from "./forms";
 
@@ -43,7 +45,7 @@ export default async function ContextPage() {
         <Section title="Qué sabe Educai sobre vos" description="Todo lo que se guarda proviene de lo que hiciste dentro de Educai.">
           <dl className="divide-y divide-line rounded-lg border border-line bg-surface px-4">
             <KeyValue label="Conversaciones con el tutor">
-              {summary.conversations} ({summary.messages} mensajes tuyos) · Origen: tus sesiones de estudio · Visibles: solo vos
+              {summary.conversations} ({summary.messages} mensajes tuyos) · Origen: tus sesiones de estudio · Visibles: vos y, si diste consentimiento, el docente de esa materia
             </KeyValue>
             <KeyValue label="Entregas de actividades">{summary.submissions} · Visibles: vos y el docente de la materia</KeyValue>
             <KeyValue label="Evidencias">
@@ -82,6 +84,13 @@ export default async function ContextPage() {
               Guardar permisos
             </SubmitButton>
           </form>
+        </Section>
+
+        <Section title={TEXT.myData.title} description={TEXT.myData.description}>
+          {/* Enlace común, no <Link>: es una descarga, no una navegación de la app. */}
+          <a href="/s/context/export" download className={buttonClass("secondary", "sm")}>
+            {TEXT.myData.button}
+          </a>
         </Section>
 
         <Section title="Eliminar mi cuenta" description="Borra tu cuenta y todos tus datos: contexto, conversaciones, entregas, evidencia e inferencias. No se puede deshacer.">
