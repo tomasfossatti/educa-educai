@@ -8,7 +8,7 @@ import { AIError } from "@/server/ai";
 import { AccessDenied, requireStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { respondToSignal } from "@/server/services/doubts";
-import { askInFolder, MAX_UPLOAD_BYTES, startFolderConversation, uploadExternalConversation } from "@/server/services/folder-chat";
+import { askInFolder, MAX_UPLOAD_BYTES, startFolderConversation, startThread, uploadExternalConversation } from "@/server/services/folder-chat";
 import { deleteContextItem, editContextItem } from "@/server/services/folder-context";
 import { deleteExperienceCascade } from "@/server/services/privacy";
 import { createQuiz, QuizError, submitQuiz } from "@/server/services/quiz";
@@ -32,10 +32,11 @@ export async function startFolderConversationAction(folderId: string): Promise<v
 export async function askInFolderAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const v = await viewer();
   const conversationId = text(formData, "conversationId");
+  const threadId = text(formData, "threadId") || undefined;
   const question = text(formData, "question");
   if (!question) return { error: TEXT.chat.emptyQuestion, fieldErrors: { question: TEXT.chat.emptyQuestion } };
   try {
-    await askInFolder(v, conversationId, question.slice(0, 4000));
+    await askInFolder(v, conversationId, question.slice(0, 4000), threadId);
   } catch (error) {
     if (error instanceof AIError) return { error: TEXT.chat.aiUnavailable };
     denyAsNotFound(error);
@@ -127,4 +128,18 @@ export async function deleteContextAction(contextId: string): Promise<void> {
   const v = await viewer();
   await deleteContextItem(v, contextId).catch(denyAsNotFound);
   refresh();
+}
+
+export async function startThreadAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const v = await viewer();
+  const conversationId = text(formData, "conversationId");
+  const folderId = text(formData, "folderId");
+  let threadId: string;
+  try {
+    threadId = (await startThread(v, conversationId, text(formData, "anchor"))).id;
+  } catch (error) {
+    if (error instanceof AccessDenied) notFound();
+    return { error: error instanceof Error ? error.message : String(error) };
+  }
+  redirect(`/s/folders/${folderId}/c/${conversationId}?hilo=${threadId}`);
 }

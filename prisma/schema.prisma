@@ -287,27 +287,28 @@ enum ConversationStatus {
 }
 
 model AIConversation {
-  id                String             @id @default(cuid())
-  experienceId      String             @unique
-  experience        Experience         @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  id                String               @id @default(cuid())
+  experienceId      String               @unique
+  experience        Experience           @relation(fields: [experienceId], references: [id], onDelete: Cascade)
   courseId          String?
-  course            Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course            Course?              @relation(fields: [courseId], references: [id], onDelete: Cascade)
   studentId         String
-  student           StudentProfile     @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  student           StudentProfile       @relation(fields: [studentId], references: [userId], onDelete: Cascade)
   activityId        String?
-  activity          Activity?          @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  activity          Activity?            @relation(fields: [activityId], references: [id], onDelete: SetNull)
   focusItemId       String?
-  focusItem         CurriculumItem?    @relation(fields: [focusItemId], references: [id], onDelete: SetNull)
+  focusItem         CurriculumItem?      @relation(fields: [focusItemId], references: [id], onDelete: SetNull)
   suggestedActionId String?
   /// Toda conversación pertenece a una carpeta (chat propio o subida de otra IA).
   folderId          String?
-  folder            Folder?            @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  origin            ConversationOrigin @default(CHAT)
+  folder            Folder?              @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  origin            ConversationOrigin   @default(CHAT)
   title             String
-  status            ConversationStatus @default(ACTIVE)
-  createdAt         DateTime           @default(now())
+  status            ConversationStatus   @default(ACTIVE)
+  createdAt         DateTime             @default(now())
   closedAt          DateTime?
   messages          Message[]
+  threads           ConversationThread[]
 
   @@index([studentId, courseId])
   @@index([folderId])
@@ -325,14 +326,17 @@ enum MessageRole {
 }
 
 model Message {
-  id             String         @id @default(cuid())
+  id             String              @id @default(cuid())
   conversationId String
-  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation   AIConversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   role           MessageRole
   content        String
   /// Fragmentos del material citados en la respuesta: [{ chunkId, materialId, fileName, page }].
   citations      Json?
-  createdAt      DateTime       @default(now())
+  /// Hilo corto sobre un fragmento seleccionado (null = conversación principal).
+  threadId       String?
+  thread         ConversationThread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  createdAt      DateTime            @default(now())
 
   @@index([conversationId, createdAt])
 }
@@ -1154,4 +1158,17 @@ model MasteryRecord {
   updatedAt        DateTime       @updatedAt
 
   @@id([studentId, curriculumItemId])
+}
+
+/// Pregunta sobre un fragmento seleccionado (de una respuesta o del material) sin perder la conversación principal.
+model ConversationThread {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  /// Texto que el estudiante seleccionó.
+  anchor         String
+  createdAt      DateTime       @default(now())
+  messages       Message[]
+
+  @@index([conversationId])
 }

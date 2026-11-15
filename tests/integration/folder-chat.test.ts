@@ -80,6 +80,51 @@ describe.skipIf(!TEST_DB)("chat de carpeta y subidas (integración)", () => {
     await expect(chat.askInFolder(bruno, conv.id, "hola")).rejects.toBeInstanceOf(guards.AccessDenied);
   });
 
+  it("pregunta sobre un fragmento: hilo aparte con el fragmento como foco, sin mezclar el historial", async () => {
+    const conv = await chat.startFolderConversation(ana, anaSubject);
+    await chat.askInFolder(ana, conv.id, "¿Qué hace falsable a una hipótesis?");
+    const thread = await chat.startThread(ana, conv.id, "  define el resultado   que la refutaría ");
+    expect(thread.anchor).toBe("define el resultado que la refutaría");
+
+    // Capturamos lo que recibe el modelo para comprobar el foco y el historial del hilo.
+    const ai = await import("@/server/ai");
+    const { ScriptedProvider } = await import("@/server/ai/scripted");
+    const base = new ScriptedProvider();
+    let lastCall: { messages: { content: string }[] } | null = null;
+    ai.setProviderForTesting({
+      name: "scripted",
+      isConfigured: () => true,
+      streamChat: (c) => base.streamChat(c),
+      async generateStructured(call) {
+        if (call.operation === "folder.chat") lastCall = call;
+        return base.generateStructured(call);
+      },
+    });
+    try {
+      const reply = await chat.askInFolder(ana, conv.id, "¿Me das un ejemplo?", thread.id);
+      expect(reply.threadId).toBe(thread.id);
+    } finally {
+      ai.setProviderForTesting(null);
+    }
+    const sent = lastCall!.messages;
+    expect(sent).toHaveLength(1); // el historial del hilo arranca vacío: no trae la conversación principal
+    expect(sent[0].content).toContain("FRAGMENTO SELECCIONADO (la pregunta es sobre esto): «define el resultado que la refutaría»");
+
+    const main = await db.message.count({ where: { conversationId: conv.id, threadId: null } });
+    const inThread = await db.message.count({ where: { threadId: thread.id } });
+    expect([main, inThread]).toEqual([2, 2]);
+  });
+
+  it("solo el dueño abre hilos y pregunta en ellos", async () => {
+    const conv = await chat.startFolderConversation(ana, anaSubject);
+    await expect(chat.startThread(bruno, conv.id, "un fragmento")).rejects.toBeInstanceOf(guards.AccessDenied);
+    const thread = await chat.startThread(ana, conv.id, "un fragmento");
+    await expect(chat.askInFolder(bruno, conv.id, "hola", thread.id)).rejects.toBeInstanceOf(guards.AccessDenied);
+    const other = await chat.startFolderConversation(ana, anaSubject);
+    await expect(chat.askInFolder(ana, other.id, "hola", thread.id)).rejects.toBeInstanceOf(guards.AccessDenied);
+    await expect(chat.startThread(ana, conv.id, " a ")).rejects.toThrow(/más largo/);
+  });
+
   it("sube una conversación de otra IA a la carpeta y la deja en cola para analizar", async () => {
     const conv = await chat.uploadExternalConversation(ana, anaSubject, {
       title: "Charla con ChatGPT",

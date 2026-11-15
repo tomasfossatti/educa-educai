@@ -140,6 +140,16 @@ export const TEXT = {
     inactiveTitle: "Sin actividad en las últimas dos semanas",
     noInactive: "Todos los estudiantes con consentimiento tuvieron actividad.",
   },
+  thread: {
+    askAbout: "Preguntar sobre esto",
+    opening: "Abriendo…",
+    title: "Pregunta sobre un fragmento",
+    hint: "Seleccioná texto de una respuesta o de un fragmento del material para preguntar sobre eso sin perder esta conversación.",
+    close: "Cerrar hilo",
+    list: "Hilos sobre fragmentos",
+    placeholder: "¿Qué querés saber de este fragmento?",
+    showSource: "Ver fragmento",
+  },
   chat: {
     placeholder: "Escribí tu pregunta…",
     send: "Enviar",

@@ -72,26 +72,44 @@ export function resolveCitations(answer: string, sources: number[], hits: Materi
   };
 }
 
-/** Responde una pregunta en el chat de la carpeta, buscando en el material de su cátedra. */
-export async function askInFolder(viewer: Viewer, conversationId: string, question: string) {
+export const MAX_ANCHOR_CHARS = 2000;
+
+/** Abre un hilo corto sobre un fragmento seleccionado, dentro de una conversación propia. */
+export async function startThread(viewer: Viewer, conversationId: string, anchor: string) {
+  const conversation = await ownedConversation(viewer, conversationId);
+  const text = anchor.replace(/\s+/g, " ").trim();
+  if (text.length < 3) throw new Error("Seleccioná un fragmento un poco más largo.");
+  return db.conversationThread.create({ data: { conversationId: conversation.id, anchor: text.slice(0, MAX_ANCHOR_CHARS) } });
+}
+
+/**
+ * Responde una pregunta en el chat de la carpeta, buscando en el material de su cátedra.
+ * Con `threadId`, la pregunta es sobre un fragmento seleccionado: el historial es el del hilo
+ * y el fragmento va como foco (y como parte de la búsqueda en el material).
+ */
+export async function askInFolder(viewer: Viewer, conversationId: string, question: string, threadId?: string) {
   const conversation = await ownedConversation(viewer, conversationId);
   const text = question.trim();
   if (!text) throw new Error("La pregunta está vacía.");
+  const thread = threadId ? await db.conversationThread.findFirst({ where: { id: threadId, conversationId: conversation.id } }) : null;
+  if (threadId && !thread) throw new AccessDenied();
 
-  await db.message.create({ data: { conversationId, role: "STUDENT", content: text } });
+  await db.message.create({ data: { conversationId, role: "STUDENT", content: text, threadId: thread?.id ?? null } });
   const history = await db.message.findMany({
-    where: { conversationId },
+    where: { conversationId, threadId: thread?.id ?? null },
     orderBy: { createdAt: "desc" },
     take: HISTORY_MESSAGES,
     select: { role: true, content: true },
   });
 
-  const hits = conversation.folder.courseId ? await searchMaterial(conversation.folder.courseId, text) : [];
+  const searchText = thread ? `${thread.anchor} ${text}` : text;
+  const hits = conversation.folder.courseId ? await searchMaterial(conversation.folder.courseId, searchText) : [];
   const messages = history
     .reverse()
     .slice(0, -1)
     .map((m) => ({ role: m.role === "STUDENT" ? ("user" as const) : ("assistant" as const), content: m.content }));
-  messages.push({ role: "user", content: `${fragmentsBlock(hits)}\n\nPREGUNTA: ${text}` });
+  const focus = thread ? `FRAGMENTO SELECCIONADO (la pregunta es sobre esto): «${thread.anchor}»\n\n` : "";
+  messages.push({ role: "user", content: `${focus}${fragmentsBlock(hits)}\n\nPREGUNTA: ${text}` });
 
   const studentContext = await contextForPrompt(conversation.folder.id, viewer.id);
   const result = await generateStructured({
@@ -104,7 +122,7 @@ export async function askInFolder(viewer: Viewer, conversationId: string, questi
 
   const citations = result.noSource ? { noSource: true, items: [] } : resolveCitations(result.answer, result.sources, hits);
   return db.message.create({
-    data: { conversationId, role: "TUTOR", content: result.answer, citations: citations as unknown as object },
+    data: { conversationId, role: "TUTOR", content: result.answer, citations: citations as unknown as object, threadId: thread?.id ?? null },
   });
 }
 
