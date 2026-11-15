@@ -39,7 +39,10 @@ export function StudentFileView({ file, projectLinks }: { file: StudentFile; pro
         <ul className="grid gap-2 sm:grid-cols-2">
           {file.topics.map((topic) => (
             <li key={topic.id} className="flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2 text-sm">
-              <span className="truncate text-ink">{topic.title}</span>
+              <span className="min-w-0">
+                <span className="block truncate text-ink">{topic.title}</span>
+                <span className="block text-xs text-muted">{t.mastery(topic.mastery, topic.attempts)}</span>
+              </span>
               <Badge tone={topic.doubts > 0 ? "attention" : "muted"}>{t.doubts(topic.doubts)}</Badge>
             </li>
           ))}

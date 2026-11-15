@@ -28,7 +28,7 @@ export async function loadProjectLinks(viewer: Viewer, studentId: string, course
 }
 
 async function buildStudentFile(studentId: string, courseId: string) {
-  const [profile, topics, evidence, conversations] = await Promise.all([
+  const [profile, topics, evidence, conversations, mastery] = await Promise.all([
     db.studentProfile.findUniqueOrThrow({
       where: { userId: studentId },
       select: { userId: true, career: true, studyYear: true, projectDescription: true, user: { select: { name: true } } },
@@ -59,7 +59,9 @@ async function buildStudentFile(studentId: string, courseId: string) {
       take: 20,
       select: { id: true, title: true, origin: true, createdAt: true },
     }),
+    db.masteryRecord.findMany({ where: { studentId, curriculumItem: { courseId } }, select: { curriculumItemId: true, score: true, attempts: true } }),
   ]);
+  const masteryByTopic = new Map(mastery.map((m) => [m.curriculumItemId, m]));
 
   return {
     student: {
@@ -69,7 +71,13 @@ async function buildStudentFile(studentId: string, courseId: string) {
       studyYear: profile.studyYear,
       projectDescription: profile.projectDescription,
     },
-    topics: topics.map((t) => ({ id: t.id, title: t.title, doubts: t._count.signals })),
+    topics: topics.map((t) => ({
+      id: t.id,
+      title: t.title,
+      doubts: t._count.signals,
+      mastery: masteryByTopic.get(t.id)?.score ?? null,
+      attempts: masteryByTopic.get(t.id)?.attempts ?? 0,
+    })),
     evidence: evidence.map((e) => ({
       id: e.id,
       content: e.content,

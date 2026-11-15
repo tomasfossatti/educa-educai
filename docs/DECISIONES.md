@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Quiz y dominio por tema
+La fórmula se portó tal cual de `deeptutor/learning/mastery.py` (con atribución en `THIRD_PARTY_NOTICES.md`). Con menos de cinco intentos se usan los últimos pesos y cada acierto se acota a 0..1, como en el original. El acierto de un intento es la fracción de respuestas correctas del quiz. Las preguntas sin fragmento válido como fuente se descartan, y si quedan menos de tres no hay quiz (no se inventa). Las respuestas correctas no llegan al navegador hasta entregar.
+
+### 2026-11-15 · Flujos de punta a punta con Playwright en el repo y en el CI
+`tests/e2e` corre sobre el build de producción con el proveedor guionado y una base propia, creando datos sintéticos en cada test. El CI suma un job `e2e`.
+
 ### 2026-11-15 · Cierre por inactividad sin tareas programadas
 El spec procesa una conversación al cerrarla o a los 20 minutos de inactividad. El plan gratuito de Render no tiene tareas programadas, así que el cierre por inactividad se hace de forma oportunista: al cargar el panel del docente y el inicio del estudiante se cierran y encolan las conversaciones cuyo último mensaje tiene más de 20 minutos. Es idempotente (cierre condicional). Si más adelante hay un cron, llama a la misma función.
 

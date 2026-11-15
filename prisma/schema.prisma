@@ -103,6 +103,8 @@ model StudentProfile {
   aiUsageEvents     AIUsageEvent[]        @relation("AIUsageStudent")
   folders           Folder[]
   accessedBy        AccessLog[]           @relation("AccessSubject")
+  quizAttempts      QuizAttempt[]
+  masteryRecords    MasteryRecord[]
 }
 
 model TeacherProfile {
@@ -244,6 +246,8 @@ model CurriculumItem {
   interventions    Intervention[]
   suggestedActions SuggestedAction[]
   focusedChats     AIConversation[]
+  quizAttempts     QuizAttempt[]
+  masteryRecords   MasteryRecord[]
 
   @@index([courseId, status])
 }
@@ -1107,4 +1111,47 @@ model AccessLog {
   createdAt DateTime       @default(now())
 
   @@index([studentId, createdAt])
+}
+
+// ───────────────────────────── Quiz y dominio por tema ─────────────────────────────
+
+enum QuizStatus {
+  OPEN
+  SUBMITTED
+}
+
+/// Un quiz de 3 a 5 preguntas sobre un tema, generado desde el material. Las respuestas correctas
+/// viven solo en el servidor; la corrección la hace el código.
+model QuizAttempt {
+  id               String         @id @default(cuid())
+  studentId        String
+  student          StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  courseId         String
+  curriculumItemId String
+  curriculumItem   CurriculumItem @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+  /// [{ prompt, options[], correctIndex, explanation, source? { fileName, page } }]
+  questions        Json
+  /// Índice elegido por pregunta (null si no respondió).
+  answers          Json?
+  correct          Int?
+  total            Int
+  status           QuizStatus     @default(OPEN)
+  createdAt        DateTime       @default(now())
+  submittedAt      DateTime?
+
+  @@index([studentId, curriculumItemId, submittedAt])
+}
+
+/// Dominio de un estudiante en un tema (0 a 1), recalculado con cada intento de quiz.
+model MasteryRecord {
+  studentId        String
+  student          StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  curriculumItemId String
+  curriculumItem   CurriculumItem @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
+  score            Float
+  attempts         Int
+  lastEvidenceAt   DateTime
+  updatedAt        DateTime       @updatedAt
+
+  @@id([studentId, curriculumItemId])
 }

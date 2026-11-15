@@ -31,6 +31,18 @@ export function ClassOverviewSection({ overview, courseId }: { overview: ClassOv
           {clean > 0 && <p className="text-xs text-muted">{t.topicsWithoutDoubts(clean)}</p>}
         </div>
         <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-ink">{t.masteryTitle}</h3>
+          <p className="text-xs text-muted">{t.masteryLegend}</p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {overview.topics.map((x) => (
+              <li key={x.topicId} className="rounded-lg border border-line px-3 py-2 text-sm">
+                <span className="block truncate text-ink">{x.title}</span>
+                <span className="block text-xs text-muted">{t.masteryBuckets(x.mastery.low, x.mastery.mid, x.mastery.high, x.mastery.none)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="space-y-2">
           <h3 className="text-sm font-semibold text-ink">{t.inactiveTitle}</h3>
           {overview.alerts.inactive.length === 0 ? (
             <p className="text-sm text-muted">{t.noInactive}</p>

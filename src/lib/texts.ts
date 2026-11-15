@@ -80,6 +80,8 @@ export const TEXT = {
     noProjectLinks: "Todavía no hay nada de tu proyecto vinculado con esta materia.",
     topics: "Estado por tema",
     doubts: (n: number) => (n === 0 ? "sin dudas" : `${n} ${n === 1 ? "duda" : "dudas"}`),
+    mastery: (score: number | null, attempts: number) =>
+      score === null ? "sin quiz" : `dominio ${Math.round(score * 100)}% (${attempts} ${attempts === 1 ? "intento" : "intentos"})`,
     evidence: "Evidencia",
     noEvidence: "Todavía no hay evidencia.",
     activity: "Actividad reciente",
@@ -90,6 +92,23 @@ export const TEXT = {
     noConsent: "Este estudiante no dio consentimiento (o lo retiró): no podés ver su ficha ni sus conversaciones, y no cuenta en los porcentajes.",
     uploaded: "subida",
   },
+  quiz: {
+    practiceTitle: "Practicar un tema",
+    practiceDescription: "Un quiz corto armado con el material de la cátedra. Cada intento actualiza tu dominio del tema.",
+    start: "Hacer quiz",
+    starting: "Armando el quiz…",
+    mastery: (score: number) => `Dominio ${Math.round(score * 100)}%`,
+    noMastery: "Sin intentos",
+    title: (topic: string) => `Quiz: ${topic}`,
+    source: (file: string, page: number) => `Fuente: ${file}, pág. ${page}`,
+    submit: "Entregar",
+    submitting: "Corrigiendo…",
+    result: (correct: number, total: number) => `${correct} de ${total} correctas`,
+    yourAnswer: "Tu respuesta",
+    correctAnswer: "Correcta",
+    backToFolder: "Volver a la carpeta",
+    capNote: "Con uno o dos intentos el dominio tiene un tope (50% y 80%): hace falta más evidencia para darlo por dominado.",
+  },
   classView: {
     title: "La clase esta semana",
     participation: (consented: number, enrolled: number, conversed: number) =>
@@ -97,6 +116,10 @@ export const TEXT = {
     topicsWithoutDoubts: (n: number) => `${n} ${n === 1 ? "tema con conversaciones no muestra" : "temas con conversaciones no muestran"} dudas esta semana.`,
     topicsTitle: "Temas que no se entienden",
     noTopics: "Todavía no hay conversaciones sobre los temas del programa esta semana.",
+    masteryTitle: "Dominio por tema",
+    masteryBuckets: (low: number, mid: number, high: number, none: number) =>
+      `${low} bajo · ${mid} medio · ${high} alto · ${none} sin intentos`,
+    masteryLegend: "Bajo: menos de 40%. Medio: 40% a 69%. Alto: 70% o más. Solo estudiantes con consentimiento.",
     inactiveTitle: "Sin actividad en las últimas dos semanas",
     noInactive: "Todos los estudiantes con consentimiento tuvieron actividad.",
   },

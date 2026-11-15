@@ -198,6 +198,21 @@ function folderChat(message: string) {
   };
 }
 
+/** Quiz: tres preguntas sobre el primer fragmento, todas citándolo. */
+function quizGenerate(message: string) {
+  const first = /^\[1\] (.+?), página (\d+):\n([\s\S]*?)(?:\n\[2\]|\nTEMA:)/m.exec(message);
+  const fact = first ? quote(first[3].trim(), 80) : "el tema";
+  return {
+    questions: [1, 2, 3].map((n) => ({
+      prompt: `Pregunta ${n} sobre: «${fact}»`,
+      options: ["Lo que dice el material", "Una opción incorrecta", "Otra opción incorrecta", "Ninguna"],
+      correctIndex: 0,
+      explanation: "Es lo que afirma el fragmento citado. (Proveedor de prueba.)",
+      source: first ? 1 : null,
+    })),
+  };
+}
+
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
   "interpret.observe": observe,
@@ -206,6 +221,7 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "interpret.infer": infer,
   "interpret.feedback": feedback,
   "folder.chat": folderChat,
+  "quiz.generate": quizGenerate,
 };
 
 export class ScriptedProvider implements LLMProvider {

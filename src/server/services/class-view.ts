@@ -24,7 +24,7 @@ export async function getClassOverview(viewer: Viewer, courseId: string, opts: {
   const consenting = new Set(enrollments.filter((e) => e.student.consentAnalysisAt).map((e) => e.studentId));
   const consentingIds = [...consenting];
 
-  const [topics, evidence, signals, conversed, lastConversations] = await Promise.all([
+  const [topics, evidence, signals, conversed, lastConversations, mastery] = await Promise.all([
     db.curriculumItem.findMany({ where: { courseId, status: "ACCEPTED" }, orderBy: { position: "asc" }, select: { id: true, title: true } }),
     // Quién conversó sobre cada tema: evidencia vinculada al tema dentro de la ventana.
     db.evidenceCurriculumItem.findMany({
@@ -47,6 +47,7 @@ export async function getClassOverview(viewer: Viewer, courseId: string, opts: {
       select: { studentId: true },
     }),
     db.aIConversation.groupBy({ by: ["studentId"], where: { courseId, studentId: { in: consentingIds } }, _max: { createdAt: true } }),
+    db.masteryRecord.findMany({ where: { studentId: { in: consentingIds }, curriculumItem: { courseId } }, select: { curriculumItemId: true, score: true } }),
   ]);
 
   const conversedByTopic = new Map<string, Set<string>>();
@@ -63,8 +64,18 @@ export async function getClassOverview(viewer: Viewer, courseId: string, opts: {
     doubtByTopic.set(s.curriculumItemId, set);
   }
 
+  const masteryByTopic = new Map<string, number[]>();
+  for (const m of mastery) masteryByTopic.set(m.curriculumItemId, [...(masteryByTopic.get(m.curriculumItemId) ?? []), m.score]);
+
   const topicRows = topics
     .map((t) => {
+      const scores = masteryByTopic.get(t.id) ?? [];
+      const masteryDistribution = {
+        low: scores.filter((s) => s < 0.4).length,
+        mid: scores.filter((s) => s >= 0.4 && s < 0.7).length,
+        high: scores.filter((s) => s >= 0.7).length,
+        none: consenting.size - scores.length,
+      };
       const conversedIds = [...(conversedByTopic.get(t.id) ?? [])];
       // Solo cuenta como duda si además conversó del tema en la ventana (mismo denominador).
       const doubtIds = [...(doubtByTopic.get(t.id) ?? [])].filter((id) => conversedIds.includes(id));
@@ -77,6 +88,7 @@ export async function getClassOverview(viewer: Viewer, courseId: string, opts: {
         conversed: conversedIds.length,
         percent: doubtPercent(doubtIds.length, conversedIds.length),
         sentence: doubtSentence(t.title, doubtIds.length, conversedIds.length),
+        mastery: masteryDistribution,
       };
     })
     .sort((a, b) => b.percent - a.percent || b.withDoubt - a.withDoubt);
