@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Backups del proveedor y prueba de restauración con scripts propios
+El backup diario de producción lo hace el proveedor de la base; no se copia a GitHub ni a otro lado, porque los datos reales no salen de producción. Para probar la restauración hay dos scripts (`backup-db.sh` y `restore-check.sh`) que restauran en una base vacía, comparan filas por tabla y levantan la app contra esa base. El CI los corre en cada PR con datos sintéticos, así no se rompen sin que nadie lo note. Se agregó `/api/health` (base alcanzable, última migración, versión) para el chequeo de salud del proveedor y de la restauración.
+
 ### 2026-11-15 · Prueba de carga con Playwright y criterios medidos en el servidor
 La prueba de carga (`npm run test:load`) usa Playwright con 60 contextos de navegador en lugar de k6, porque las acciones de Next no tienen una API HTTP estable para guionar a mano. Como los navegadores comparten la máquina, los criterios se miden en el servidor: login ≤ 5 s, páginas ≤ 1,5 s y preguntas ≤ 1 s más la demora de la IA (p95), cero errores e integridad de datos. Se recomienda una instancia de al menos 2 CPU para producción (detalle en `docs/informes/carga-etapa-6.md`). El proveedor guionado acepta `SCRIPTED_AI_LATENCY_MS` para simular la demora del modelo.
 
