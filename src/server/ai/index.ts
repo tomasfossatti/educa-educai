@@ -2,6 +2,7 @@ import "server-only";
 import type { z } from "zod";
 import { db } from "@/server/db";
 import { AnthropicProvider } from "./anthropic";
+import { DeepSeekProvider } from "./deepseek";
 import { assertStudentBudget, checkBudgetAlerts, STUDENT_INITIATED } from "./budget";
 import { OPERATION_CONFIG, modelFor } from "./config";
 import { estimateCostUsd } from "./pricing";
@@ -26,6 +27,9 @@ function createProvider(): LLMProvider {
   const explicit = process.env.AI_PROVIDER?.toLowerCase();
   if (explicit === "anthropic") {
     return new AnthropicProvider();
+  }
+  if (explicit === "deepseek") {
+    return new DeepSeekProvider();
   }
   if (explicit === "scripted") {
     // Proveedor determinista para desarrollo y tests: nunca en producción.

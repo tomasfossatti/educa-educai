@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · DeepSeek como proveedor de IA provisorio
+Tomás decidió usar la API de DeepSeek mientras no haya clave de Anthropic. Se sumó `src/server/ai/deepseek.ts` detrás de la misma interfaz (`AI_PROVIDER=deepseek`), sin dependencias nuevas: modo JSON con el esquema en el prompt y validación con zod, el PDF del programa convertido a texto, `reasoning_effort` low para el chat y high para el análisis, y costo con la tarifa de caché. Modelo `deepseek-flash` y precios configurables por variable; por defecto, la tarifa pico más alta publicada, para que el tope de gasto se active antes. Anthropic sigue disponible y es el valor por defecto. Riesgo: según su política de privacidad, DeepSeek procesa los datos en China; con datos sintéticos no importa, con estudiantes reales es una transferencia internacional que habría que resolver antes del piloto.
+
 ### 2026-11-15 · Plazos de conservación: mecanismo listo, apagado por defecto
 Los plazos son una decisión legal, así que el código no trae ninguno: cada uno es una variable vacía y, sin decisión, no se borra nada. El borrado reutiliza el mismo que usa el estudiante (V10) para no dejar evidencia ni contexto huérfanos, y se aplica a mano con una prueba previa que solo cuenta. Un plazo menor a 30 días se ignora como error de configuración.
 
