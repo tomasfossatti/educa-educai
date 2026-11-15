@@ -1,0 +1,18 @@
+{
+  "name": "educai",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/educai",
+  "remoteUser": "node",
+  "postCreateCommand": "npm i -g @anthropic-ai/claude-code && npm ci && npx prisma generate",
+  "forwardPorts": [3000, 5432],
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://educai:educai@db:5432/educai",
+    "SESSION_COOKIE_SECURE": "false"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["Prisma.prisma", "dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  }
+}

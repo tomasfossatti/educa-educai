@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: educai
+          POSTGRES_PASSWORD: educai
+          POSTGRES_DB: educai_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U educai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://educai:educai@localhost:5432/educai_test
+      SESSION_COOKIE_SECURE: "false"
+      SESSION_SECRET: ci-only-secret-not-used-anywhere-else
+      AI_PROVIDER: scripted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run db:migrate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
