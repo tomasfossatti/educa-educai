@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Staging en Vercel con Neon y contraseña de sitio
+La cuenta de Vercel de Tomás ya tenía la integración de Neon, así que staging va ahí en lugar de Render (el spec admite "Render u otro servicio con PostgreSQL gestionado"): base en São Paulo, despliegue automático solo desde `main` y migraciones en el build. Como el registro de la app está abierto, staging pide una contraseña de sitio (`SITE_PASSWORD`, en `src/proxy.ts`) para que nadie de afuera cree cuentas y gaste IA real; sin la variable no cambia nada. Vercel limita cada pedido a 4,5 MB, lo que en staging achica el tamaño máximo del material.
+
 ### 2026-11-15 · Plazos de conservación: mecanismo listo, apagado por defecto
 Los plazos son una decisión legal, así que el código no trae ninguno: cada uno es una variable vacía y, sin decisión, no se borra nada. El borrado reutiliza el mismo que usa el estudiante (V10) para no dejar evidencia ni contexto huérfanos, y se aplica a mano con una prueba previa que solo cuenta. Un plazo menor a 30 días se ignora como error de configuración.
 
