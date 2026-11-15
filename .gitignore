@@ -44,3 +44,11 @@ next-env.d.ts
 # agents skills
 .agents/
 
+
+
+# Educai: secretos y entornos locales
+.env.local
+.env.*.local
+.env.production*
+.secrets/
+docs/informes/*.tmp
