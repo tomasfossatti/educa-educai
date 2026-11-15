@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     serverActions: {
-      // Permite subir el programa de la materia en PDF (hasta 8 MB).
-      bodySizeLimit: "10mb",
+      // Programa de la materia (hasta 8 MB) y material de la cátedra (hasta 20 MB).
+      bodySizeLimit: "21mb",
     },
   },
   async rewrites() {

@@ -7,12 +7,14 @@ import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { activityPromptsSchema } from "@/domain/activity";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
+import { TEXT } from "@/lib/texts";
 import { isAIConfigured } from "@/server/ai";
 import { requireCourseTeacher, requireTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { computeAndStoreSnapshot } from "@/server/engine/snapshot";
 import { EVENT, track } from "@/server/events";
 import { startCurriculumExtraction } from "@/server/services/curriculum";
+import { ingestMaterial, MaterialError } from "@/server/services/material";
 
 const JOIN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -429,4 +431,28 @@ export async function setTeacherActionStatusAction(actionId: string, status: "DO
     data: { status: z.enum(["DONE", "DISMISSED"]).parse(status), completedAt: new Date() },
   });
   refresh();
+}
+
+// ───────────── Material de la cátedra ─────────────
+
+export async function uploadMaterialAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const courseId = text(formData, "courseId");
+  const { user } = await requireCourseTeacher(courseId);
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: TEXT.material.noFile, fieldErrors: { file: TEXT.material.noFile } };
+  try {
+    const result = await ingestMaterial({
+      courseId,
+      uploadedById: user.id,
+      fileName: file.name,
+      mimeType: file.type,
+      data: new Uint8Array(await file.arrayBuffer()),
+    });
+    refresh();
+    if (result.status === "FAILED") return { error: result.error, fieldErrors: { file: result.error } };
+    return { ok: true, message: TEXT.material.uploaded(result.fileName, result.pageCount ?? 0) };
+  } catch (error) {
+    if (error instanceof MaterialError) return { error: error.message, fieldErrors: { file: error.message } };
+    throw error;
+  }
 }

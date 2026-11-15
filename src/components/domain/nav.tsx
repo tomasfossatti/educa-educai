@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
+import { TEXT } from "@/lib/texts";
 
 function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
   return (
@@ -64,6 +65,7 @@ export function TeacherNav({ courseId }: { courseId: string }) {
       <NavLink href={`${base}/students`} label="Estudiantes" active={section.startsWith("/students")} />
       <NavLink href={`${base}/activities`} label="Actividades" active={section.startsWith("/activities")} />
       <NavLink href={`${base}/curriculum`} label="Currícula" active={section.startsWith("/curriculum")} />
+      <NavLink href={`${base}/material`} label={TEXT.material.nav} active={section.startsWith("/material")} />
     </>
   );
 }
