@@ -98,7 +98,16 @@ export function factories(db: PrismaClient) {
   }
 
   /** Evidencia y señal derivadas de una conversación, como las dejaría el motor. */
-  async function evidenceFrom(opts: { experienceId: string; studentId: string; courseId: string; topicId: string; excerpt: string }) {
+  async function evidenceFrom(opts: {
+    experienceId: string;
+    studentId: string;
+    courseId: string;
+    topicId: string;
+    excerpt: string;
+    confidence?: "LOW" | "MEDIUM" | "HIGH";
+    studentStatus?: "PENDING" | "CONFIRMED" | "DISCARDED";
+    at?: Date;
+  }) {
     const run = await db.interpretationRun.create({
       data: {
         courseId: opts.courseId,
@@ -120,7 +129,7 @@ export function factories(db: PrismaClient) {
         source: "AI_CONVERSATION",
         observation: "El estudiante pregunta por el tema",
         content: opts.excerpt,
-        occurredAt: new Date(),
+        occurredAt: opts.at ?? new Date(),
         provenance: { origin: "test" },
         curriculumLinks: { create: [{ curriculumItemId: opts.topicId }] },
       },
@@ -135,6 +144,9 @@ export function factories(db: PrismaClient) {
         dimension: "COMPREHENSION",
         polarity: "DIFFICULTY",
         description: "Duda sobre el tema",
+        confidence: opts.confidence ?? "HIGH",
+        studentStatus: opts.studentStatus ?? "PENDING",
+        createdAt: opts.at ?? new Date(),
       },
     });
     return { run, evidence, signal };

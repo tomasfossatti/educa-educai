@@ -110,3 +110,11 @@ export async function assertFolderOwner(viewer: Viewer, folderId: string) {
   if (!folder) throw new AccessDenied();
   return folder;
 }
+
+/** Solo el docente de la cátedra (V1, V12). Ni otros docentes de la institución (V15), ni estudiantes, ni el admin (V14). */
+export async function assertCourseTeacher(viewer: Viewer, courseId: string) {
+  if (viewer.role !== "TEACHER") throw new AccessDenied();
+  const course = await db.course.findFirst({ where: { id: courseId, teacherId: viewer.id } });
+  if (!course) throw new AccessDenied();
+  return course;
+}
