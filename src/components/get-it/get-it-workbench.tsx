@@ -156,7 +156,10 @@ export function GetItWorkbench() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("getit_concepts");
-      if (saved) setConcepts(JSON.parse(saved));
+      if (saved) {
+        const parsed: ConceptNode[] = JSON.parse(saved);
+        queueMicrotask(() => setConcepts(parsed));
+      }
     } catch {
       // Ignorar
     }

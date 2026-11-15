@@ -10,10 +10,12 @@ import {
   type UsageInfo,
 } from "./types";
 
+type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
+
 function toContents(messages: LLMMessage[]) {
   return messages.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
+    parts: [{ text: m.content }] as GeminiPart[],
   }));
 }
 
@@ -54,7 +56,7 @@ export class GoogleProvider implements LLMProvider {
               mimeType: "application/pdf",
               data: att.base64,
             },
-          } as any);
+          });
         }
       }
 
