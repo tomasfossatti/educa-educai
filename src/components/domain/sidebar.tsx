@@ -8,11 +8,13 @@ import {
   AlertCircle,
   Users,
   BookOpen,
+  FileText,
   LogOut,
 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { TEXT } from "@/lib/texts";
 import { logoutAction } from "@/server/actions/auth";
 
 interface SidebarProps {
@@ -155,6 +157,16 @@ export function Sidebar({
               >
                 <BookOpen className="size-4 text-primary shrink-0" />
                 <span>Currícula</span>
+              </ButtonLink>
+
+              <ButtonLink
+                href={`/t/courses/${teacherCourseId}/material`}
+                variant={pathname.startsWith(`/t/courses/${teacherCourseId}/material`) ? "secondary" : "ghost"}
+                size="sm"
+                className="w-full justify-start gap-3"
+              >
+                <FileText className="size-4 text-primary shrink-0" />
+                <span>{TEXT.material.nav}</span>
               </ButtonLink>
             </div>
           )}

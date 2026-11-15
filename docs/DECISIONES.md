@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Búsqueda en el material: texto completo en español, embeddings después
+Anthropic no ofrece embeddings y sumar otro proveedor (por ejemplo Voyage) requiere una cuenta y una clave que hoy no hay. La búsqueda usa el texto completo de PostgreSQL en español (`to_tsvector('spanish')` con índice GIN), en la misma base. La columna `embedding vector(1024)` ya existe y se completa cuando haya proveedor, para pasar a búsqueda híbrida sin migrar datos.
+
+### 2026-11-15 · Página citable en formatos sin páginas
+PDF cita la página y PPTX la diapositiva. DOCX y TXT no tienen páginas: se agrupan en secciones de unos 3000 caracteres y se cita la sección. Extracción con `unpdf` (MIT), `mammoth` (BSD) y `jszip` (MIT).
+
 ### 2026-11-15 · Etapa 3: esquema de carpetas y material
 Se implementó la lista de la etapa 1 en la parte que usa la etapa 3: `Folder`, `FolderContext`, `Material`, `MaterialChunk` (con `embedding vector(1024)` nulo e índice de texto completo en español), `ConversationOrigin`, `Message.citations`, `Role.ADMIN` y en `StudentProfile` `consentWithdrawnAt`, `career`, `studyYear` y `projectDescription`. `AIConversation.courseId` y `Experience.courseId` pasan a opcionales por la carpeta del proyecto. `folderId` queda opcional en la base hasta que todo el código cree conversaciones con carpeta; la migración asigna las existentes a la carpeta de su materia. Todo es aditivo. `MasteryRecord`, `ClassSession` y `AccessLog` llegan con las etapas 4 y 5.
 
