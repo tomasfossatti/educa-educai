@@ -17,11 +17,11 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ### Etapa 2: auditoría de educa-educai
 - [ ] La app corre en local y en un entorno de prueba con PostgreSQL
-- [ ] `render.yaml` usa migraciones, sin `db push --accept-data-loss` ni seed en cada build
+- [x] `render.yaml` usa migraciones, sin `db push --accept-data-loss` ni seed en cada build
 - [ ] Sin usuarios de demo con contraseña pública fuera del entorno local
 - [ ] Límite de intentos de login
 - [ ] Tests existentes en verde y prueba real de punta a punta con Claude
-- [ ] Informe de qué se conserva, qué se corrige y qué se descarta
+- [x] Informe de qué se conserva, qué se corrige y qué se descarta (`docs/informes/etapa-2.md`)
 
 ### Etapa 3: cátedra, material y carpetas
 - [ ] El docente crea la cátedra, carga material, aprueba temas e invita estudiantes
