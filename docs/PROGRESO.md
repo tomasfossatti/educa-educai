@@ -43,7 +43,7 @@ Cómo se comprobó (etapa 3): tests de integración contra Postgres (`visibility
 - [x] Ficha por estudiante con evidencia y registro en `AccessLog`
 - [x] Mi ficha idéntica a la del docente, con la lista de accesos
 - [x] Tests de V1 a V6, V9, V12, V14 y V15
-- [ ] 30 conversaciones etiquetadas, al menos 80% de las dudas detectadas son correctas (las 30 están en `tests/fixtures/dudas` y el script en `npm run eval:dudas`; falta que Tomás revise la muestra de `docs/informes/etiquetas-muestra.md` y la clave de Anthropic para medir)
+- [ ] 30 conversaciones etiquetadas, al menos 80% de las dudas detectadas son correctas. Medición preliminar con Gemini (`gemini-3.5-flash-lite`): **precisión 95,8%, cobertura 100%** (`docs/informes/precision-preliminar-gemini.md`). Se cierra cuando Tomás revise la muestra de `docs/informes/etiquetas-muestra.md`, para que la vara no la ponga la misma IA.
 
 ### Etapa 5: quiz, dominio, contexto y slides
 - [x] Quiz por tema con cálculo de dominio

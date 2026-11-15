@@ -33,6 +33,8 @@ export interface LLMAttachment {
 
 export interface UsageInfo {
   model: string;
+  /** Proveedor que respondió, si no es el configurado (cadena de respaldo). */
+  provider?: string;
   inputTokens: number;
   outputTokens: number;
   cacheReadTokens: number;

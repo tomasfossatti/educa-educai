@@ -22,8 +22,12 @@ export interface OpenAICompatibleConfig {
   label: string;
   baseUrl: string;
   apiKeyEnv: string;
-  /** Nivel de reasoning_effort para el esfuerzo de Educai, o null para no mandarlo. */
-  effort: (effort: string) => string | null;
+  /** Nivel de reasoning_effort para el esfuerzo de Educai y el modelo efectivo, o null para no mandarlo. */
+  effort: (effort: string, model: string) => string | null;
+  /** Espera máxima ante un límite por minuto; en una cadena de respaldo conviene 0 (saltar al siguiente). */
+  maxWaitMs?: number;
+  /** Modelo a usar en lugar del que llega en la llamada (en la cadena de respaldo, cada proveedor tiene el suyo). */
+  model?: (operation: string) => string;
 }
 
 interface CompatUsage {
@@ -90,7 +94,7 @@ async function errorFromResponse(label: string, response: Response): Promise<AIE
  * Hace el pedido y, ante un límite por minuto con una demora corta, espera y reintenta (hasta 3
  * veces). Un cupo diario agotado o una demora larga cortan enseguida, con un mensaje que lo dice.
  */
-async function fetchWithRateLimit(label: string, doFetch: () => Promise<Response>): Promise<Response> {
+async function fetchWithRateLimit(label: string, doFetch: () => Promise<Response>, maxWait = maxWaitMs()): Promise<Response> {
   for (let attempt = 0; ; attempt++) {
     const response = await doFetch();
     if (response.ok) return response;
@@ -98,7 +102,7 @@ async function fetchWithRateLimit(label: string, doFetch: () => Promise<Response
     if (!(error instanceof RateLimited)) throw error;
     if (error.daily) throw new AIError("rate_limited", `Se agotó el cupo diario de ${label}. Se renueva mañana.`);
     const wait = error.waitMs ?? 5_000;
-    if (attempt >= 3 || wait > maxWaitMs()) {
+    if (attempt >= 3 || wait > maxWait) {
       throw new AIError("rate_limited", `${label} está limitando solicitudes. Intentá de nuevo en unos minutos.`, true);
     }
     await new Promise((r) => setTimeout(r, wait + 250));
@@ -152,8 +156,13 @@ export class OpenAICompatibleProvider implements LLMProvider {
     return { "content-type": "application/json", authorization: `Bearer ${key}` };
   }
 
-  private effort(effort: string): { reasoning_effort?: string } {
-    const level = this.config.effort(effort);
+  /** Modelo efectivo: el propio del proveedor si lo tiene configurado, o el que llega en la llamada. */
+  private modelFor(call: { model: string; operation: string }): string {
+    return this.config.model ? this.config.model(call.operation) : call.model;
+  }
+
+  private effort(effort: string, model: string): { reasoning_effort?: string } {
+    const level = this.config.effort(effort, model);
     return level ? { reasoning_effort: level } : {};
   }
 
@@ -168,14 +177,14 @@ export class OpenAICompatibleProvider implements LLMProvider {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
-          model: call.model,
+          model: this.modelFor(call),
           max_tokens: call.maxTokens,
-          ...this.effort(call.effort),
+          ...this.effort(call.effort, this.modelFor(call)),
           response_format: { type: "json_object" },
           messages: [{ role: "system", content: `${call.system}\n\n${schemaInstruction(call.schema as z.ZodType<unknown>)}` }, ...messages],
         }),
         signal: AbortSignal.timeout(180_000),
-      }));
+      }), this.config.maxWaitMs);
     } catch (error) {
       if (error instanceof AIError) throw error;
       throw new AIError("provider", `No se pudo conectar con ${this.config.label}: ${error instanceof Error ? error.message : String(error)}`, true);
@@ -192,7 +201,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
     }
     const result = call.schema.safeParse(parsed);
     if (!result.success) throw new AIError("invalid_output", `La salida de ${this.config.label} no cumplió el schema esperado.`, true);
-    return { data: result.data, usage: toUsage(call.model, body.usage) };
+    return { data: result.data, usage: { ...toUsage(this.modelFor(call), body.usage), provider: this.name } };
   }
 
   streamChat(call: ChatCall): ChatStream {
@@ -205,18 +214,20 @@ export class OpenAICompatibleProvider implements LLMProvider {
       return { textStream: (async function* () {})(), done: failed };
     }
     const label = this.config.label;
+    const model = this.modelFor(call);
+    const providerName = this.name;
     const request = fetchWithRateLimit(label, () => fetch(this.url(), {
       method: "POST",
       headers,
       body: JSON.stringify({
-        model: call.model,
+        model,
         max_tokens: call.maxTokens,
-        ...this.effort(call.effort),
+        ...this.effort(call.effort, model),
         stream: true,
         stream_options: { include_usage: true },
         messages: [{ role: "system", content: call.system }, ...call.messages],
       }),
-    }));
+    }), this.config.maxWaitMs);
 
     let text = "";
     let usage: CompatUsage | undefined;
@@ -255,7 +266,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
             }
           }
         }
-        resolveDone({ text, usage: toUsage(call.model, usage) });
+        resolveDone({ text, usage: { ...toUsage(model, usage), provider: providerName } });
       } catch (error) {
         const aiError = error instanceof AIError ? error : new AIError("provider", error instanceof Error ? error.message : String(error), true);
         rejectDone(aiError);
