@@ -32,6 +32,12 @@ if command -v docker >/dev/null && [ -f docker-compose.yml ]; then
   docker compose up -d db || echo "No pude levantar la base con docker compose; usá la que tengas en DATABASE_URL."
 fi
 
+# Prisma solo lee .env: exportamos .env.local para los comandos de abajo.
+set -a
+# shellcheck disable=SC1091
+. ./.env.local
+set +a
+
 npm ci
 npx prisma generate
 npm run db:migrate
