@@ -13,7 +13,8 @@ export type AIOperation =
   | "interpret.evaluate"
   | "interpret.infer"
   | "interpret.feedback"
-  | "folder.chat";
+  | "folder.chat"
+  | "quiz.generate";
 
 export type Effort = "low" | "medium" | "high";
 

@@ -10,6 +10,7 @@ import { db } from "@/server/db";
 import { respondToSignal } from "@/server/services/doubts";
 import { askInFolder, MAX_UPLOAD_BYTES, startFolderConversation, uploadExternalConversation } from "@/server/services/folder-chat";
 import { deleteExperienceCascade } from "@/server/services/privacy";
+import { createQuiz, QuizError, submitQuiz } from "@/server/services/quiz";
 
 async function viewer() {
   const { user } = await requireStudent();
@@ -76,4 +77,35 @@ export async function deleteFolderConversationAction(conversationId: string): Pr
   if (!conversation) notFound();
   await deleteExperienceCascade(conversation.experienceId, v.id, conversation.courseId);
   redirect(conversation.folderId ? `/s/folders/${conversation.folderId}` : "/s");
+}
+
+export async function startQuizAction(folderId: string, topicId: string): Promise<void> {
+  const v = await viewer();
+  let quizId: string;
+  try {
+    quizId = (await createQuiz(v, folderId, topicId)).id;
+  } catch (error) {
+    if (error instanceof QuizError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(error.message)}`);
+    if (error instanceof AIError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(TEXT.chat.aiUnavailable)}`);
+    denyAsNotFound(error);
+  }
+  redirect(`/s/folders/${folderId}/quiz/${quizId}`);
+}
+
+export async function submitQuizAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const v = await viewer();
+  const quizId = text(formData, "quizId");
+  const total = Number(text(formData, "total"));
+  const answers = Array.from({ length: Number.isFinite(total) ? Math.min(total, 10) : 0 }, (_, i) => {
+    const raw = text(formData, `q${i}`);
+    return raw === "" ? null : Number(raw);
+  });
+  try {
+    await submitQuiz(v, quizId, answers);
+  } catch (error) {
+    if (error instanceof QuizError) return { error: error.message };
+    denyAsNotFound(error);
+  }
+  refresh();
+  return { ok: true };
 }

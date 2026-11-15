@@ -16,6 +16,7 @@
     "db:reset": "prisma migrate reset --force --skip-seed && npm run db:seed",
     "metrics": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/metrics.ts",
     "postinstall": "prisma generate",
+    "test:e2e": "playwright test",
     "eval:dudas": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/measure-precision.ts"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.19.1",
     "@types/react": "^19",

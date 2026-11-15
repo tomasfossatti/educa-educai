@@ -42,3 +42,35 @@ jobs:
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: educai
+          POSTGRES_PASSWORD: educai
+          POSTGRES_DB: educai_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U educai -d educai_e2e"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://educai:educai@localhost:5432/educai_e2e
+      E2E_DATABASE_URL: postgresql://educai:educai@localhost:5432/educai_e2e
+      AI_PROVIDER: scripted
+      ALLOW_SCRIPTED_AI: "true"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
