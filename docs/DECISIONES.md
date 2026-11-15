@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Plazos de conservación: mecanismo listo, apagado por defecto
+Los plazos son una decisión legal, así que el código no trae ninguno: cada uno es una variable vacía y, sin decisión, no se borra nada. El borrado reutiliza el mismo que usa el estudiante (V10) para no dejar evidencia ni contexto huérfanos, y se aplica a mano con una prueba previa que solo cuenta. Un plazo menor a 30 días se ignora como error de configuración.
+
 ### 2026-11-15 · Descarga de los datos propios
 Para el derecho de acceso (art. 14) el estudiante descarga desde "Tu contexto" un JSON con todo lo suyo, sin el hash de la contraseña ni las sesiones; nadie más puede pedir esa copia. Se adelantó a la respuesta del abogado porque solo entrega a cada persona lo suyo y no amplía lo que ve nadie. En la misma pantalla se corrigió un texto que decía que las conversaciones eran visibles "solo" para el estudiante, cuando con consentimiento también las ve el docente de la materia.
 

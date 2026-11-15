@@ -18,6 +18,7 @@
     "postinstall": "prisma generate",
     "test:e2e": "playwright test",
     "test:load": "playwright test --config playwright.load.config.ts",
+    "retention": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/retention.ts",
     "eval:dudas": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/measure-precision.ts"
   },
   "dependencies": {
