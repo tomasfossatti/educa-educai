@@ -4,9 +4,9 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ## Estado actual
 
-- Etapa en curso: 6. Abiertas por bloqueos externos: 1 (revisión del esquema), 2 (prueba con Claude real y staging) y 4 (medición de precisión). La 3 y la 5 están cerradas. Abiertas: 1 (falta la revisión de Tomás de la lista de esquema) y 2 (falta la prueba con Claude real y staging). La 3 está cerrada.
-- Último PR fusionado: #12 (material de la cátedra)
-- Bloqueos que necesitan a Tomás: revisar la lista de entidades y cambios al esquema en `DECISIONES.md`; checklist de `CUENTAS_Y_SECRETOS.md` (clave de Anthropic de desarrollo para la prueba real de la etapa 2, cuenta y token de staging, protección de `main`)
+- Etapa en curso: 6. Abiertas por pasos que dependen de Tomás: 1 (revisar la lista de esquema), 2 (prueba con Claude real y staging), 4 (medición de precisión con modelo real) y 6 (producción, abogado y revisión de seguridad). La 3 y la 5 están cerradas.
+- Último PR fusionado: #27 (paquete para la revisión de seguridad).
+- Bloqueos que necesitan a Tomás: revisar la lista de esquema en `DECISIONES.md`; checklist de `CUENTAS_Y_SECRETOS.md` (clave de Anthropic, cuenta y token de staging, protección de `main`); revisar la muestra de `docs/informes/etiquetas-muestra.md`; crear producción con backup diario y hacer la prueba de restauración (`ENTORNOS_Y_DESPLIEGUE.md`); webhook de alertas de consumo; revisión del abogado (`docs/legal/`) y revisión de seguridad (`docs/seguridad/`).
 
 ## Etapas
 
@@ -18,8 +18,8 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 ### Etapa 2: auditoría de educa-educai
 - [ ] La app corre en local y en un entorno de prueba con PostgreSQL
 - [x] `render.yaml` usa migraciones, sin `db push --accept-data-loss` ni seed en cada build
-- [ ] Sin usuarios de demo con contraseña pública fuera del entorno local
-- [ ] Límite de intentos de login
+- [x] Sin usuarios de demo con contraseña pública fuera del entorno local (#7)
+- [x] Límite de intentos de login (#7)
 - [ ] Tests existentes en verde y prueba real de punta a punta con Claude
 - [x] Informe de qué se conserva, qué se corrige y qué se descarta (`docs/informes/etapa-2.md`)
 
@@ -63,6 +63,8 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 ## Bitácora de sesiones
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
+
+- 2026-11-15 · Etapa 6, todo lo que no depende de Tomás: análisis con Sonnet 5.5 (#21), tope semanal de IA por estudiante con alertas (#22), prueba de carga con 60 estudiantes (#23), backups y prueba de restauración en local y en el CI (#24), documentos para el abogado (#25), corrección de permisos (#26) y paquete de seguridad (#27). Hallazgos: el docente podía seguir leyendo evidencia y mensajes de origen de un estudiante que retiró el consentimiento en las vistas heredadas (V11, corregido con test); con carga, `refresh()` mostraba una página de error después de cerrar una conversación (corregido); el `pg_dump` del CI era más nuevo que el servidor (corregido). Se marcaron dos casillas de la etapa 2 que #7 ya cumplía. Gasto de IA: 0 USD (solo proveedor guionado).
 
 - 2026-11-15 · Etapa 5 completa: quiz y dominio portado de DeepTutor (#17), contexto de carpeta en tres capas (#18), pregunta sobre un fragmento (#19) y slides con PowerPoint. Playwright en el repo y en el CI. Bugs corregidos: el proceso de contexto podía archivar un hecho que el estudiante acababa de editar, y pedidos simultáneos podían duplicar carpetas. Gasto de IA: 0 USD (solo proveedor guionado).
 - 2026-11-15 · Etapa 2: `render.yaml` con migraciones (#6), login con límite de intentos y seed solo local (#7), informe (#8), descarte de PageLM/DeepStudent/Get It, que llamaban a la IA sin sesión, y de Gemini (#9), formularios con `method="post"` (#11; la contraseña quedaba en la URL). Etapa 3 completa: esquema, permisos y tests V7, V8, V10, V11 y V13 (#10), material con archivo y página (#12), chat con citas, subidas, consentimiento explícito e invitaciones por enlace o CSV. Falta la prueba con Claude real (sin clave). Gasto de IA: 0 USD (solo proveedor guionado).
