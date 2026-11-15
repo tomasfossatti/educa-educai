@@ -31,7 +31,7 @@ Cada ejecución crea sus propios usuarios con contraseñas aleatorias, dentro de
 
 - Un archivo `tests/integration/visibilidad.test.ts` con un caso por regla, nombrado igual que en el spec (`V1`, `V2`, etc.).
 - Cada caso arma el escenario mínimo con las fábricas y verifica tanto el resultado permitido como el rechazo, incluyendo que el rechazo no filtre información en el mensaje de error.
-- Un caso extra recorre todas las rutas y acciones del servidor, y falla si encuentra alguna que consulte Prisma con datos de estudiantes sin pasar por `guards.ts`.
+- Un caso extra recorre todas las rutas y acciones del servidor, y falla si encuentra alguna que consulte Prisma con datos de estudiantes sin pasar por `guards.ts` (`tests/unit/guard-coverage.test.ts`: exige que cada página, ruta y acción llame a un control).
 - Las etapas 3 y 4 no se cierran hasta que sus reglas tienen tests en verde (ver criterios en el spec).
 
 ## Calidad de la detección de dudas

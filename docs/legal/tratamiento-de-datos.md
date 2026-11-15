@@ -86,12 +86,12 @@ Propuesta para que decidan Tomás y el abogado (no implementada):
 | --- | --- |
 | Acceso (art. 14) | Desde la app: su ficha, sus conversaciones, sus dudas, el contexto de cada carpeta y la lista de accesos a su ficha. No hay descarga de una copia completa |
 | Rectificación (art. 16) | Edita su perfil y los hechos de contexto de cada carpeta; confirma o descarta cada duda detectada; responde a una conclusión o marca que falta contexto |
-| Supresión (art. 16) | Borra cada conversación, con todo lo derivado de ella (evidencia, dudas, conclusiones, hechos de contexto), y los porcentajes se recalculan; borra hechos de contexto. También puede borrar su cuenta completa desde "Tu contexto", escribiendo su correo para confirmar: se borran la cuenta, el perfil, las conversaciones, todo lo derivado, los accesos registrados y las métricas de uso. El registro de costo de IA queda sin vínculo con la persona, y la invitación a la cátedra (con su correo) se conserva |
+| Supresión (art. 16) | Borra cada conversación, con todo lo derivado de ella (evidencia, dudas, conclusiones, hechos de contexto), y los porcentajes se recalculan; borra hechos de contexto. También puede borrar su cuenta completa desde "Tu contexto", escribiendo su correo para confirmar: se borran la cuenta, el perfil, las conversaciones, todo lo derivado, los accesos registrados y las métricas de uso. También se borran las invitaciones con su correo. El registro de costo de IA queda sin vínculo con la persona |
 | Oposición al análisis | No acepta el consentimiento o lo retira cuando quiera; desde ese momento no se analiza nada nuevo y el docente pierde acceso |
 
 ## Brechas conocidas
 
-1. No hay descarga de una copia de los datos desde la app. Si el abogado la pide para el piloto, se suma al spec y se implementa; mientras tanto, se resolvería a mano con un pedido por correo. Al borrar la cuenta queda la invitación con el correo del estudiante; habría que borrarla también.
+1. No hay descarga de una copia de los datos desde la app. Si el abogado la pide para el piloto, se suma al spec y se implementa; mientras tanto, se resolvería a mano con un pedido por correo.
 2. No hay plazos de conservación automáticos.
 3. El aviso de consentimiento no menciona a los proveedores ni la transferencia internacional (ver `aviso-de-consentimiento.md`).
 4. Al retirar el consentimiento, lo ya analizado se conserva para el estudiante. El docente deja de verlo, pero sigue en la base hasta que el estudiante lo borre.

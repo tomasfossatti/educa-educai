@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Endurecimiento antes de la revisión de seguridad
+Se sumó el test estático que pedía `PRUEBAS.md` (cada página, ruta y acción llama a un control de permisos), un flujo de Playwright que intenta abrir datos ajenos cambiando ids en la URL, control propio en `/s/join` y `/t/new`, un límite de 200 MB descomprimidos para DOCX y PPTX, y el borrado de las invitaciones con el correo al borrar la cuenta. El test estático confirma que hay un control, no que sea el correcto: eso lo siguen cubriendo los tests V1 a V15.
+
 ### 2026-11-15 · Documentos para el abogado en docs/legal
 Describen lo que la app hace hoy, verificado contra el código, en lugar de una política redactada de antemano: aviso de consentimiento, tratamiento de datos y puntos para el convenio. Las brechas (sin descarga de datos, sin plazos de conservación automáticos, el aviso no nombra a los proveedores) quedan señaladas y no se implementan hasta que el abogado y Tomás decidan, porque cambian el alcance.
 

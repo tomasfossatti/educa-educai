@@ -47,3 +47,15 @@ export async function getStudentDataSummary(studentId: string) {
   ]);
   return { conversations, messages, submissions, evidence, inferences, reviews, interventions, usage };
 }
+
+/**
+ * Borra la cuenta de un estudiante y todo lo que cuelga de ella (en cascada desde User), más sus
+ * métricas de uso y las invitaciones con su correo. El registro de costo de IA queda sin vínculo.
+ */
+export async function deleteStudentAccount(studentId: string, email: string): Promise<void> {
+  await db.$transaction([
+    db.productEvent.deleteMany({ where: { OR: [{ userId: studentId }, { studentId }] } }),
+    db.courseInvite.deleteMany({ where: { email: email.toLowerCase() } }),
+    db.user.delete({ where: { id: studentId } }),
+  ]);
+}
