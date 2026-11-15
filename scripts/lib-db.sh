@@ -21,14 +21,14 @@ with_database() {
 }
 
 # Cantidad de filas de cada tabla de la app, una por línea ("Tabla<TAB>n"), ordenadas por nombre.
+# Una sola consulta (query_to_xml), para no abrir una conexión por tabla.
 table_counts() {
-  local url
-  url=$(libpq_url "$1")
-  local tables
-  tables=$(psql "$url" -At -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename")
-  for t in $tables; do
-    printf '%s\t%s\n' "$t" "$(psql "$url" -At -c "SELECT count(*) FROM \"$t\"")"
-  done
+  psql "$(libpq_url "$1")" -At -F $'\t' -c "
+    SELECT table_name,
+           (xpath('/row/c/text()', query_to_xml(format('SELECT count(*) AS c FROM %I.%I', table_schema, table_name), false, true, '')))[1]::text::bigint
+    FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+    ORDER BY table_name"
 }
 
 # Usa pg_dump, pg_restore y psql de la misma versión mayor que el servidor, si están instalados

@@ -45,8 +45,14 @@ jobs:
       # Backup y prueba de restauración con los datos sintéticos que dejaron los tests.
       - name: Backup y restauración
         run: |
-          # Cliente de PostgreSQL de la misma versión que el servidor (el del runner es más nuevo).
-          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-16 > /dev/null
+          # Herramientas de PostgreSQL 16, como el servidor: las del runner son más nuevas y generan
+          # sentencias que el 16 no entiende. Se usan las de la misma imagen del servicio, con Docker.
+          mkdir -p "$RUNNER_TEMP/pg16"
+          for t in pg_dump pg_restore psql; do
+            printf '#!/bin/sh\nexec docker run --rm -i --network host -v "%s:%s" pgvector/pgvector:pg16 %s "$@"\n' "$RUNNER_TEMP" "$RUNNER_TEMP" "$t" > "$RUNNER_TEMP/pg16/$t"
+            chmod +x "$RUNNER_TEMP/pg16/$t"
+          done
+          export PG_BIN="$RUNNER_TEMP/pg16"
           scripts/backup-db.sh "$RUNNER_TEMP/ci.dump"
           RESTORE_ADMIN_URL=postgresql://educai:educai@localhost:5432/postgres \
           RESTORE_COMPARE_URL="$DATABASE_URL" \
