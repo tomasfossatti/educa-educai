@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { text, type ActionState } from "@/lib/forms";
 import { TEXT } from "@/lib/texts";
 import { AIError } from "@/server/ai";
+import { budgetResetLabel } from "@/server/ai/budget";
 import { AccessDenied, requireStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { respondToSignal } from "@/server/services/doubts";
@@ -16,6 +17,11 @@ import { createQuiz, QuizError, submitQuiz } from "@/server/services/quiz";
 async function viewer() {
   const { user } = await requireStudent();
   return { id: user.id, role: user.role };
+}
+
+/** Mensaje para el estudiante cuando falla la IA: el tope semanal tiene su propio aviso. */
+function aiErrorMessage(error: AIError): string {
+  return error.kind === "budget_exceeded" ? TEXT.budget.exceeded(budgetResetLabel()) : TEXT.chat.aiUnavailable;
 }
 
 function denyAsNotFound(error: unknown): never {
@@ -38,7 +44,7 @@ export async function askInFolderAction(_prev: ActionState | null, formData: For
   try {
     await askInFolder(v, conversationId, question.slice(0, 4000), threadId);
   } catch (error) {
-    if (error instanceof AIError) return { error: TEXT.chat.aiUnavailable };
+    if (error instanceof AIError) return { error: aiErrorMessage(error) };
     denyAsNotFound(error);
   }
   refresh();
@@ -60,6 +66,7 @@ export async function uploadConversationAction(_prev: ActionState | null, formDa
     await uploadExternalConversation(v, folderId, { title: text(formData, "title"), text: body });
   } catch (error) {
     if (error instanceof AccessDenied) notFound();
+    if (error instanceof AIError && error.kind === "budget_exceeded") return { error: TEXT.budget.uploadTooLarge(budgetResetLabel()) };
     return { error: error instanceof Error ? error.message : String(error) };
   }
   refresh();
@@ -88,7 +95,7 @@ export async function startQuizAction(folderId: string, topicId: string): Promis
     quizId = (await createQuiz(v, folderId, topicId)).id;
   } catch (error) {
     if (error instanceof QuizError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(error.message)}`);
-    if (error instanceof AIError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(TEXT.chat.aiUnavailable)}`);
+    if (error instanceof AIError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(aiErrorMessage(error))}`);
     denyAsNotFound(error);
   }
   redirect(`/s/folders/${folderId}/quiz/${quizId}`);

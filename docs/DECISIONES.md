@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Tope semanal de IA por estudiante y alertas de consumo
+Tope de 2 USD por semana y por estudiante (`AI_WEEKLY_STUDENT_CAP_USD`), con semana de lunes a domingo en hora argentina. Con el chat en Opus 5.5 alcanza para unas 40 preguntas con material y el análisis de esas conversaciones. Al llegar al tope se frenan el chat, el quiz y las subidas cuyo análisis lo pasaría, antes de llamar al modelo; el análisis de lo ya conversado sigue, porque su costo sale de conversaciones que pasaron por el tope. El estudiante ve un aviso desde el 80%. Las alertas (80% y 100% por estudiante, y del consumo total de la instalación, 25 USD por semana por defecto) se registran una vez por semana y umbral en `ProductEvent`, van al log y a un webhook opcional (`AI_ALERT_WEBHOOK_URL`, Slack o Discord) con el id del estudiante y sin nombre ni contenido. No hizo falta migración. Los montos son de partida y los ajusta Tomás.
+
 ### 2026-11-15 · Modelo económico para el análisis
 El spec pide que la extracción de evidencia use un modelo más económico que el chat. El motor (`interpret.*`) y el contexto de carpeta (`context.*`) pasan a Claude Sonnet 5.5 (2/10 USD por millón contra 4/20 de Opus 5.5); chat, quiz, slides y programa siguen en Opus 5.5. Se descartó Haiku 5.5, que es mucho más barato pero no admite el respaldo del servidor ante rechazos y todavía no hay medición de precisión con modelo real. Se cambia con `AI_EXTRACTION_MODEL` o por operación con `AI_MODEL_<OPERACION>`; `AI_MODEL` ya no pisa el análisis.
 

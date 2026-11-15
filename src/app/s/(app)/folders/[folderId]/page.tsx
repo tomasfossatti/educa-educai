@@ -12,6 +12,7 @@ import { db } from "@/server/db";
 import { listFolderContext } from "@/server/services/folder-context";
 import { ContextSection } from "./context-section";
 import { UploadConversationForm } from "./upload-form";
+import { BudgetNotice } from "@/components/student/budget-notice";
 
 export const metadata: Metadata = { title: TEXT.folders.sectionTitle };
 
@@ -54,6 +55,7 @@ export default async function FolderPage({
           </form>
         }
       />
+      <BudgetNotice studentId={user.id} />
       {!folder.courseId && <Notice>{TEXT.folders.projectNoMaterial}</Notice>}
       <Section title={TEXT.folders.conversations}>
         {conversations.length === 0 ? (

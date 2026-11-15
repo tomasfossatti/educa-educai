@@ -14,6 +14,7 @@ import { listConversationDoubts } from "@/server/services/doubts";
 import type { MessageCitations } from "@/server/services/folder-chat";
 import { AskForm } from "./ask-form";
 import { SelectionAsk } from "./selection-ask";
+import { BudgetNotice } from "@/components/student/budget-notice";
 
 export const metadata: Metadata = { title: "Conversación" };
 
@@ -89,6 +90,7 @@ export default async function FolderConversationPage({
     <div className="shell space-y-6">
       <PageHeader title={conversation.title} description={conversation.folder?.name} />
       <TextLink href={`/s/folders/${folderId}`}>{t.backToFolder}</TextLink>
+      {conversation.origin === "CHAT" && conversation.status === "ACTIVE" && <BudgetNotice studentId={user.id} />}
       {conversation.messages.length === 0 ? (
         <EmptyState title={t.empty} />
       ) : (

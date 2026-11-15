@@ -210,4 +210,12 @@ export const TEXT = {
     missing: "Elegí un archivo .txt o pegá el texto.",
     onlyTxt: "Solo se aceptan archivos .txt.",
   },
+  budget: {
+    warning: (pct: number, resets: string) =>
+      `Usaste el ${pct}% de tu cupo semanal de IA. Cuando llegues al 100%, el chat y el quiz se pausan hasta el ${resets}.`,
+    exceeded: (resets: string) =>
+      `Llegaste al tope semanal de uso de la IA. Podés seguir leyendo tus conversaciones, tu ficha y el material; el chat y el quiz vuelven el ${resets}.`,
+    uploadTooLarge: (resets: string) =>
+      `Analizar esta conversación superaría tu cupo semanal de IA. Probá con una parte más corta o subila desde el ${resets}.`,
+  },
 } as const;

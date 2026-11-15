@@ -2,6 +2,7 @@ import "server-only";
 import type { z } from "zod";
 import { db } from "@/server/db";
 import { AnthropicProvider } from "./anthropic";
+import { assertStudentBudget, checkBudgetAlerts, STUDENT_INITIATED } from "./budget";
 import { OPERATION_CONFIG, modelFor } from "./config";
 import { estimateCostUsd } from "./pricing";
 import { ScriptedProvider } from "./scripted";
@@ -96,6 +97,7 @@ async function recordUsage(params: {
         errorType: params.errorType ?? null,
       },
     });
+    if (cost && cost > 0) await checkBudgetAlerts(params.context);
   } catch (error) {
     // La instrumentación nunca debe romper el flujo del usuario.
     console.error("[ai] no se pudo registrar AIUsageEvent", error);
@@ -116,6 +118,10 @@ export async function generateStructured<T>(params: {
 }): Promise<T> {
   const model = modelFor(params.operation);
   const config = OPERATION_CONFIG[params.operation];
+  // Tope semanal por estudiante: corta antes de gastar (no se registra como llamada fallida).
+  if (params.context.studentId && STUDENT_INITIATED.has(params.operation)) {
+    await assertStudentBudget(params.context.studentId);
+  }
   const started = Date.now();
   try {
     const { data, usage } = await getProvider().generateStructured({

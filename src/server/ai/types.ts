@@ -79,7 +79,7 @@ export interface UsageContext {
   runId?: string | null;
 }
 
-export type AIErrorKind = "not_configured" | "refusal" | "invalid_output" | "rate_limited" | "provider";
+export type AIErrorKind = "not_configured" | "refusal" | "invalid_output" | "rate_limited" | "provider" | "budget_exceeded";
 
 export class AIError extends Error {
   constructor(

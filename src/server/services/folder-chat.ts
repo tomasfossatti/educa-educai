@@ -1,7 +1,8 @@
 import "server-only";
 import { z } from "zod";
 import { generateStructured } from "@/server/ai";
-import { AccessDenied, assertFolderOwner, type Viewer } from "@/server/auth/guards";
+import { assertStudentBudget, estimateUploadAnalysisUsd } from "@/server/ai/budget";
+import { AccessDenied, assertFolderOwner, hasActiveConsent, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { onConversationClosed, queueInterpretation } from "@/server/engine/trigger";
 import { contextForPrompt } from "@/server/services/folder-context";
@@ -154,6 +155,11 @@ export async function uploadExternalConversation(viewer: Viewer, folderId: strin
   if (new TextEncoder().encode(input.text).byteLength > MAX_UPLOAD_BYTES) throw new Error("La conversación supera los 2 MB.");
   const messages = parseExternalConversation(input.text);
   if (messages.length === 0) throw new Error("La conversación está vacía.");
+  // Una subida se analiza entera al recibirla: si ese análisis pasaría el tope semanal, no se acepta.
+  if (folder.courseId) {
+    const profile = await db.studentProfile.findUnique({ where: { userId: viewer.id }, select: { consentAnalysisAt: true } });
+    if (hasActiveConsent(profile)) await assertStudentBudget(viewer.id, estimateUploadAnalysisUsd(input.text.length));
+  }
 
   const title = input.title?.trim() || "Conversación subida";
   const closedAt = new Date();
