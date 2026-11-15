@@ -135,7 +135,7 @@ Cada regla es un caso verificable y tiene que existir como test antes de cerrar 
 | V7 | Estudiante | Ver su propia ficha | Permitido, con el mismo contenido que ve el docente |
 | V8 | Estudiante | Ver datos de otro estudiante | Rechazado |
 | V9 | Estudiante | Ver quién abrió su ficha y cuándo | Permitido |
-| V10 | Estudiante | Borrar una conversación | Se borra la conversación y todo lo derivado, y los porcentajes se recalculan |
+| V10 | Estudiante | Borrar una conversación | Se borran la conversación y todo lo derivado, y los porcentajes se recalculan |
 | V11 | Estudiante | Retirar el consentimiento | Se deja de analizar desde ese momento y el docente pierde acceso a sus conversaciones |
 | V12 | Chat del docente | Pedir datos de un estudiante de otra cátedra | La herramienta lo rechaza aunque el pedido esté bien formulado |
 | V13 | Chat del estudiante | Consultar datos de otro estudiante | La herramienta lo rechaza |
@@ -288,7 +288,7 @@ Seis etapas en orden, y cada una se cierra cuando se cumplen todos sus criterios
 - [ ] Detección de dudas por tema con confirmación del estudiante.
 - [ ] Vista macro con porcentajes, denominador y participación.
 - [ ] Ficha por estudiante con evidencia, y registro en `AccessLog`.
-- [ ] Mi ficha del estudiante, idéntica a la del docente, con la lista de accesos.
+- [ ] Mi ficha del estudiante idéntica a la del docente, con la lista de accesos.
 - [ ] Tests de las reglas V1 a V6, V9, V12, V14 y V15.
 - [ ] Prueba con 30 conversaciones etiquetadas a mano: al menos 80% de las dudas detectadas son correctas.
 
@@ -309,7 +309,7 @@ Seis etapas en orden, y cada una se cierra cuando se cumplen todos sus criterios
 
 ## Fuera de alcance y expansión
 
-El piloto deja afuera todo lo que no hace falta para probar que el docente cambia su clase con el dato, y el modelo queda listo para sumar cátedras de a una.
+El piloto deja afuera todo lo que no hace falta para probar que el docente cambie su clase con el dato, y el modelo queda listo para sumar cátedras de a una.
 
 ### Fuera del piloto
 
