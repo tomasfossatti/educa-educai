@@ -935,3 +935,16 @@ model ProductEvent {
   @@index([name, createdAt])
   @@index([courseId, name])
 }
+
+// ───────────────────────────── Seguridad ─────────────────────────────
+
+/// Intentos fallidos de login, para limitar la fuerza bruta por email y por IP.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+}
