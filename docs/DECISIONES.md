@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Modelo económico para el análisis
+El spec pide que la extracción de evidencia use un modelo más económico que el chat. El motor (`interpret.*`) y el contexto de carpeta (`context.*`) pasan a Claude Sonnet 5.5 (2/10 USD por millón contra 4/20 de Opus 5.5); chat, quiz, slides y programa siguen en Opus 5.5. Se descartó Haiku 5.5, que es mucho más barato pero no admite el respaldo del servidor ante rechazos y todavía no hay medición de precisión con modelo real. Se cambia con `AI_EXTRACTION_MODEL` o por operación con `AI_MODEL_<OPERACION>`; `AI_MODEL` ya no pisa el análisis.
+
 ### 2026-11-15 · Slides de la clase
 Se agregó `ClassSession` (fecha, temas, objetivo, borrador y aprobación). El borrador sale del material de los temas y de las dudas frecuentes de la clase (vista macro de dos semanas). Las slides sin fragmento válido se descartan, y sin material no hay borrador. Editar o regenerar saca la aprobación. La aprobación es lo que muestra la próxima clase en el inicio del estudiante. PowerPoint con `pptxgenjs` (MIT): portada, una slide por punto, fuente al pie y notas del docente.
 

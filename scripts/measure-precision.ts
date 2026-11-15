@@ -12,6 +12,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { modelFor } from "@/server/ai/config";
 
 const dryRun = process.argv.includes("--dry-run");
 const TEST_DB = process.env.TEST_DATABASE_URL;
@@ -119,7 +120,7 @@ async function main() {
   const report = [
     `# Precisión de la detección de dudas`,
     ``,
-    `${new Date().toISOString().slice(0, 10)} · ${dryRun ? "**Prueba del circuito con el proveedor guionado: los números no miden al modelo.**" : `Modelo real (${process.env.AI_MODEL_INTERPRET_SIGNALS || process.env.AI_MODEL || "modelo por defecto"})`}`,
+    `${new Date().toISOString().slice(0, 10)} · ${dryRun ? "**Prueba del circuito con el proveedor guionado: los números no miden al modelo.**" : `Modelo real (${modelFor("interpret.signals")})`}`,
     ``,
     `- Conversaciones: ${rows.length} de ${fixture.conversations.length}`,
     `- Dudas detectadas correctas: ${tp} · incorrectas: ${fp} · no detectadas: ${fn}`,
