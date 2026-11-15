@@ -54,7 +54,7 @@ Cómo se comprobó (etapa 5): cada función tiene tests unitarios y de integraci
 Todo con el proveedor guionado; la calidad de los textos del modelo real queda para cuando haya clave.
 
 ### Etapa 6: preparación del piloto
-- [ ] Producción con backups diarios y restauración probada
+- [ ] Producción con backups diarios y restauración probada (scripts y procedimiento listos, restauración probada en local y en el CI con datos sintéticos: `docs/informes/restauracion-local.md`; falta crear producción, activar el backup diario y hacer la prueba allá, ver `ENTORNOS_Y_DESPLIEGUE.md`)
 - [ ] Aviso de consentimiento y convenio revisados por un abogado (Ley 25.326)
 - [ ] Revisión de seguridad hecha por una persona
 - [x] Tope de costo por estudiante y alerta de consumo (2 USD por semana y estudiante, aviso al 80%, alertas por log y webhook; falta que Tomás cree el webhook y lo cargue en `AI_ALERT_WEBHOOK_URL`)
