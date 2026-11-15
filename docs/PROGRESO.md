@@ -56,7 +56,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 ### Etapa 6: preparación del piloto
 - [ ] Producción con backups diarios y restauración probada
 - [ ] Aviso de consentimiento y convenio revisados por un abogado (Ley 25.326)
-- [ ] Revisión de seguridad hecha por una persona
+- [ ] Revisión de seguridad hecha por una persona (paquete listo en `docs/seguridad/`: mapa de permisos, V1 a V15 con sus tests y puntos a revisar; al prepararlo apareció y se corrigió una brecha de V11 en vistas heredadas; falta la revisión y la firma)
 - [x] Tope de costo por estudiante y alerta de consumo (2 USD por semana y estudiante, aviso al 80%, alertas por log y webhook; falta que Tomás cree el webhook y lo cargue en `AI_ALERT_WEBHOOK_URL`)
 - [x] Prueba de carga con 60 estudiantes simulados (`docs/informes/carga-etapa-6.md`: sin errores ni pérdida de datos; con 2 CPU cumple todos los criterios, con 1 CPU el login simultáneo de los 60 tarda 7 s)
 
