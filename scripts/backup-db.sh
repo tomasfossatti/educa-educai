@@ -10,6 +10,7 @@ cd "$(dirname "$0")/.."
 . scripts/lib-db.sh
 
 : "${DATABASE_URL:?Falta DATABASE_URL}"
+use_matching_pg_tools "$DATABASE_URL"
 out=${1:-backups/educai-$(date -u +%Y%m%dT%H%M%SZ).dump}
 mkdir -p "$(dirname "$out")"
 umask 077

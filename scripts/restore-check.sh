@@ -27,6 +27,7 @@ else
   echo "1/5 Suma de verificación del backup: no hay archivo .sha256 (se sigue igual)"
 fi
 
+use_matching_pg_tools "$admin"
 name="educai_restore_$(date -u +%Y%m%d%H%M%S)"
 target=$(with_database "$admin" "$name")
 app_pid=""

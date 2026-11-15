@@ -30,3 +30,24 @@ table_counts() {
     printf '%s\t%s\n' "$t" "$(psql "$url" -At -c "SELECT count(*) FROM \"$t\"")"
   done
 }
+
+# Usa pg_dump, pg_restore y psql de la misma versión mayor que el servidor, si están instalados
+# (en Debian y Ubuntu, /usr/lib/postgresql/<versión>/bin). Un pg_dump más nuevo que el servidor
+# genera sentencias que el servidor no entiende al restaurar. PG_BIN fuerza una carpeta.
+use_matching_pg_tools() {
+  local url major
+  url=$(libpq_url "$1")
+  if [[ -n ${PG_BIN:-} ]]; then
+    PATH="$PG_BIN:$PATH"
+  else
+    major=$(( $(psql "$url" -At -c "SHOW server_version_num") / 10000 ))
+    [[ -d /usr/lib/postgresql/$major/bin ]] && PATH="/usr/lib/postgresql/$major/bin:$PATH"
+  fi
+  export PATH
+  local server tools
+  server=$(( $(psql "$url" -At -c "SHOW server_version_num") / 10000 ))
+  tools=$(pg_dump --version | grep -oE '[0-9]+' | head -1)
+  if [[ $tools != "$server" ]]; then
+    echo "Aviso: pg_dump $tools y el servidor $server tienen distinta versión mayor; instalá el cliente $server o indicá PG_BIN." >&2
+  fi
+}

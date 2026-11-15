@@ -45,6 +45,8 @@ jobs:
       # Backup y prueba de restauración con los datos sintéticos que dejaron los tests.
       - name: Backup y restauración
         run: |
+          # Cliente de PostgreSQL de la misma versión que el servidor (el del runner es más nuevo).
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-16 > /dev/null
           scripts/backup-db.sh "$RUNNER_TEMP/ci.dump"
           RESTORE_ADMIN_URL=postgresql://educai:educai@localhost:5432/postgres \
           RESTORE_COMPARE_URL="$DATABASE_URL" \
