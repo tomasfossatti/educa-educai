@@ -4,24 +4,24 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ## Estado actual
 
-- Etapa en curso: 1
-- Último PR fusionado: ninguno
-- Bloqueos que necesitan a Tomás: ver checklist de `CUENTAS_Y_SECRETOS.md`
+- Etapa en curso: 1 (falta la revisión de Tomás de la lista de esquema) y 2 en paralelo
+- Último PR fusionado: #1 (kit de autonomía) y #3 (lint)
+- Bloqueos que necesitan a Tomás: revisar la lista de entidades y cambios al esquema en `DECISIONES.md`; checklist de `CUENTAS_Y_SECRETOS.md` (clave de Anthropic de desarrollo para la prueba real de la etapa 2, cuenta y token de staging, protección de `main`)
 
 ## Etapas
 
 ### Etapa 1: especificación en el repositorio
-- [ ] `docs/SPEC.md` exportado en el repositorio
-- [ ] `CLAUDE.md` con las reglas
-- [ ] Lista de entidades nuevas y cambios al esquema, revisada por Tomás
+- [x] `docs/SPEC.md` exportado en el repositorio
+- [x] `CLAUDE.md` con las reglas
+- [ ] Lista de entidades nuevas y cambios al esquema, revisada por Tomás (escrita en `DECISIONES.md`, espera revisión)
 
 ### Etapa 2: auditoría de educa-educai
 - [ ] La app corre en local y en un entorno de prueba con PostgreSQL
-- [ ] `render.yaml` usa migraciones, sin `db push --accept-data-loss` ni seed en cada build
+- [x] `render.yaml` usa migraciones, sin `db push --accept-data-loss` ni seed en cada build
 - [ ] Sin usuarios de demo con contraseña pública fuera del entorno local
 - [ ] Límite de intentos de login
 - [ ] Tests existentes en verde y prueba real de punta a punta con Claude
-- [ ] Informe de qué se conserva, qué se corrige y qué se descarta
+- [x] Informe de qué se conserva, qué se corrige y qué se descarta (`docs/informes/etapa-2.md`)
 
 ### Etapa 3: cátedra, material y carpetas
 - [ ] El docente crea la cátedra, carga material, aprueba temas e invita estudiantes
@@ -55,4 +55,4 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
-- (vacío)
+- 2026-11-15 · Kit de autonomía instalado (#1), lint en verde (#3: 45 errores corregidos, `packages/canvas-mcp` borrado, `.agents/**` fuera del lint), CI con tests de integración. Etapa 1: `bootstrap.sh` corregido y probado (idempotente, migraciones y seed local ok), lista de esquema escrita para revisión. Gasto de IA: 0 USD (solo proveedor guionado).

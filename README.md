@@ -88,7 +88,7 @@ Abrí http://localhost:3000.
 
 ## Usuarios de demostración
 
-Después de `npm run db:seed` (contraseña para todos: `educai-demo-2026`):
+Después de `npm run db:seed` (solo local; la contraseña se genera en cada corrida y se imprime al final, o se fija con `SEED_DEMO_PASSWORD`):
 
 | Rol | Email | Qué muestra |
 | --- | --- | --- |
