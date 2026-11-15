@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Documentos para el abogado en docs/legal
+Describen lo que la app hace hoy, verificado contra el código, en lugar de una política redactada de antemano: aviso de consentimiento, tratamiento de datos y puntos para el convenio. Las brechas (sin borrado de cuenta completa ni descarga de datos, sin plazos de conservación automáticos, el aviso no nombra a los proveedores) quedan señaladas y no se implementan hasta que el abogado y Tomás decidan, porque cambian el alcance.
+
 ### 2026-11-15 · Prueba de carga con Playwright y criterios medidos en el servidor
 La prueba de carga (`npm run test:load`) usa Playwright con 60 contextos de navegador en lugar de k6, porque las acciones de Next no tienen una API HTTP estable para guionar a mano. Como los navegadores comparten la máquina, los criterios se miden en el servidor: login ≤ 5 s, páginas ≤ 1,5 s y preguntas ≤ 1 s más la demora de la IA (p95), cero errores e integridad de datos. Se recomienda una instancia de al menos 2 CPU para producción (detalle en `docs/informes/carga-etapa-6.md`). El proveedor guionado acepta `SCRIPTED_AI_LATENCY_MS` para simular la demora del modelo.
 
