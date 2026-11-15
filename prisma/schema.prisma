@@ -22,6 +22,8 @@ datasource db {
 enum Role {
   STUDENT
   TEACHER
+  /// Administrador del piloto: gestiona cuentas, cátedras y material. Nunca ve conversaciones (V14).
+  ADMIN
 }
 
 model Institution {
@@ -74,6 +76,12 @@ model StudentProfile {
   /// Consentimiento para analizar conversaciones y entregas dentro de Educai.
   consentAnalysisAt        DateTime?
   consentVersion           String?
+  /// Momento en que retiró el consentimiento: desde ahí no se analiza nada nuevo y el docente pierde acceso (V11).
+  consentWithdrawnAt       DateTime?
+  /// Perfil del primer ingreso del piloto.
+  career                   String?
+  studyYear                Int?
+  projectDescription       String?
   shareContextWithTeachers Boolean   @default(false)
   onboardingCompletedAt    DateTime?
 
@@ -92,13 +100,14 @@ model StudentProfile {
   runs              InterpretationRun[]
   interventionLinks InterventionTarget[]
   aiUsageEvents     AIUsageEvent[]        @relation("AIUsageStudent")
+  folders           Folder[]
 }
 
 model TeacherProfile {
-  userId        String         @id
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String          @id
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   institutionId String
-  institution   Institution    @relation(fields: [institutionId], references: [id])
+  institution   Institution     @relation(fields: [institutionId], references: [id])
   courses       Course[]
   reviews       TeacherReview[]
   interventions Intervention[]
@@ -150,6 +159,9 @@ model Course {
   runs             InterpretationRun[]
   aiUsageEvents    AIUsageEvent[]
   productEvents    ProductEvent[]
+  folders          Folder[]
+  materials        Material[]
+  materialChunks   MaterialChunk[]
 
   @@index([teacherId])
 }
@@ -243,8 +255,8 @@ enum ExperienceType {
 
 model Experience {
   id          String         @id @default(cuid())
-  courseId    String
-  course      Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String?
+  course      Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
   studentId   String
   student     StudentProfile @relation(fields: [studentId], references: [userId], onDelete: Cascade)
   type        ExperienceType
@@ -272,8 +284,8 @@ model AIConversation {
   id                String             @id @default(cuid())
   experienceId      String             @unique
   experience        Experience         @relation(fields: [experienceId], references: [id], onDelete: Cascade)
-  courseId          String
-  course            Course             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId          String?
+  course            Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
   studentId         String
   student           StudentProfile     @relation(fields: [studentId], references: [userId], onDelete: Cascade)
   activityId        String?
@@ -281,6 +293,10 @@ model AIConversation {
   focusItemId       String?
   focusItem         CurriculumItem?    @relation(fields: [focusItemId], references: [id], onDelete: SetNull)
   suggestedActionId String?
+  /// Toda conversación pertenece a una carpeta (chat propio o subida de otra IA).
+  folderId          String?
+  folder            Folder?            @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  origin            ConversationOrigin @default(CHAT)
   title             String
   status            ConversationStatus @default(ACTIVE)
   createdAt         DateTime           @default(now())
@@ -288,6 +304,13 @@ model AIConversation {
   messages          Message[]
 
   @@index([studentId, courseId])
+  @@index([folderId])
+}
+
+enum ConversationOrigin {
+  CHAT
+  /// Conversación de otra IA subida como .txt o texto pegado.
+  UPLOAD
 }
 
 enum MessageRole {
@@ -301,6 +324,8 @@ model Message {
   conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   role           MessageRole
   content        String
+  /// Fragmentos del material citados en la respuesta: [{ chunkId, materialId, fileName, page }].
+  citations      Json?
   createdAt      DateTime       @default(now())
 
   @@index([conversationId, createdAt])
@@ -947,4 +972,101 @@ model LoginAttempt {
 
   @@index([email, createdAt])
   @@index([ip, createdAt])
+}
+
+// ───────────────────────────── Carpetas y material ─────────────────────────────
+
+enum FolderKind {
+  SUBJECT
+  PROJECT
+}
+
+enum FolderCreator {
+  LMS
+  MANUAL
+  SYSTEM
+}
+
+/// Carpeta del estudiante: la de una materia (con Course) o la de su proyecto personal (sin Course).
+model Folder {
+  id            String           @id @default(cuid())
+  studentId     String
+  student       StudentProfile   @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  kind          FolderKind
+  name          String
+  createdBy     FolderCreator    @default(SYSTEM)
+  courseId      String?
+  course        Course?          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  conversations AIConversation[]
+  contexts      FolderContext[]
+
+  @@unique([studentId, courseId])
+  @@index([studentId, kind])
+}
+
+enum ContextLayer {
+  TRACE
+  FACTS
+  SUMMARY
+}
+
+/// Contexto de la carpeta en tres capas. El proceso archiva, nunca borra, y respeta lo editado por el estudiante.
+model FolderContext {
+  id              String       @id @default(cuid())
+  folderId        String
+  folder          Folder       @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  layer           ContextLayer
+  content         String
+  /// Ids de las conversaciones o evidencias de las que sale (para el borrado en cascada y la trazabilidad).
+  sourceIds       String[]
+  editedByStudent Boolean      @default(false)
+  archivedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([folderId, layer])
+}
+
+enum MaterialStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+/// Archivo de la cátedra (PDF, DOCX, PPTX o texto). Cada fragmento conoce su archivo y página.
+model Material {
+  id           String          @id @default(cuid())
+  courseId     String
+  course       Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  fileName     String
+  mimeType     String
+  version      Int             @default(1)
+  uploadedById String
+  status       MaterialStatus  @default(PROCESSING)
+  error        String?
+  pageCount    Int?
+  createdAt    DateTime        @default(now())
+  chunks       MaterialChunk[]
+
+  @@index([courseId, status])
+}
+
+model MaterialChunk {
+  id         String                       @id @default(cuid())
+  materialId String
+  material   Material                     @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course                       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  /// Página del PDF, diapositiva del PPTX o sección del DOCX (empieza en 1).
+  page       Int
+  position   Int
+  text       String
+  /// Embedding para búsqueda semántica (pgvector). Nulo hasta que haya proveedor de embeddings.
+  embedding  Unsupported("vector(1024)")?
+  createdAt  DateTime                     @default(now())
+
+  @@index([courseId])
+  @@index([materialId, page])
 }

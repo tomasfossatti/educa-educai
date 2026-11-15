@@ -6,11 +6,20 @@ import { computeAndStoreSnapshot } from "@/server/engine/snapshot";
  * Eliminación de una experiencia del estudiante (conversación o entrega) y todo lo derivado:
  * evidencia, señales, inferencias que se quedan sin respaldo y snapshots que la incluían.
  */
-export async function deleteExperienceCascade(experienceId: string, studentId: string, courseId: string): Promise<void> {
+export async function deleteExperienceCascade(experienceId: string, studentId: string, courseId: string | null): Promise<void> {
   await db.$transaction(async (tx) => {
+    const conversation = await tx.aIConversation.findUnique({ where: { experienceId }, select: { id: true } });
+    const sourceIds = [experienceId, ...(conversation ? [conversation.id] : [])];
+
+    // Los hechos de contexto de carpeta derivados de esta conversación también se borran.
+    await tx.folderContext.deleteMany({ where: { folder: { studentId }, sourceIds: { hasSome: sourceIds } } });
+
     // Las corridas, evidencias, señales, evaluaciones, feedback e inferencias producidas
     // por esta experiencia se eliminan en cascada desde Experience.
     await tx.experience.delete({ where: { id: experienceId } });
+
+    // La carpeta del proyecto no tiene cátedra: no hay inferencias ni snapshots que recalcular.
+    if (!courseId) return;
 
     // Inferencias de otras corridas que usaban esta evidencia como historial: si se quedan
     // sin evidencia que las respalde, dejan de ser trazables y se eliminan.
@@ -21,7 +30,7 @@ export async function deleteExperienceCascade(experienceId: string, studentId: s
     // Los snapshots anteriores pueden resumir evidencia eliminada: se descartan y se recalcula uno nuevo.
     await tx.developmentSnapshot.deleteMany({ where: { studentId, courseId } });
   });
-  await computeAndStoreSnapshot({ studentId, courseId });
+  if (courseId) await computeAndStoreSnapshot({ studentId, courseId });
 }
 
 /** Resumen de "qué sabe Educai sobre mí, de dónde salió y quién puede verlo". */

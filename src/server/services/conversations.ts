@@ -25,8 +25,12 @@ export async function buildTutorSystemPrompt(conversationId: string): Promise<st
     where: { id: conversationId },
     include: { course: true, focusItem: true, activity: true, student: true },
   });
+  if (!conversation.courseId || !conversation.course) {
+    throw new Error("buildTutorSystemPrompt solo aplica a conversaciones de una materia.");
+  }
+  const { courseId, course } = conversation;
   const curriculum = await db.curriculumItem.findMany({
-    where: { courseId: conversation.courseId, status: "ACCEPTED", kind: { in: ["CONCEPT", "OBJECTIVE"] } },
+    where: { courseId, status: "ACCEPTED", kind: { in: ["CONCEPT", "OBJECTIVE"] } },
     orderBy: [{ kind: "asc" }, { position: "asc" }],
     select: { kind: true, title: true, description: true },
   });
@@ -36,7 +40,7 @@ export async function buildTutorSystemPrompt(conversationId: string): Promise<st
     const inferences = await db.inference.findMany({
       where: {
         studentId: conversation.studentId,
-        courseId: conversation.courseId,
+        courseId,
         curriculumItemId: conversation.focusItemId,
         state: "ACTIVE",
         reviewStatus: { not: "INCORRECT" },
@@ -50,7 +54,7 @@ export async function buildTutorSystemPrompt(conversationId: string): Promise<st
 
   const student = conversation.student;
   return buildTutorSystem({
-    courseName: conversation.course.name,
+    courseName: course.name,
     curriculum: curriculum.map((c) => ({ kind: c.kind === "CONCEPT" ? "Concepto" : "Objetivo", title: c.title, description: c.description })),
     focusItem: conversation.focusItem ? { title: conversation.focusItem.title, description: conversation.focusItem.description } : null,
     activity: conversation.activity
