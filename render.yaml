@@ -6,6 +6,7 @@ services:
     # Migraciones versionadas (prisma migrate deploy). Nunca db push ni seed en el build.
     buildCommand: npm ci && npm run db:migrate && npm run build
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "22"

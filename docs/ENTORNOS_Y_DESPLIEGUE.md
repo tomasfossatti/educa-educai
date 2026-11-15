@@ -30,15 +30,28 @@
 
 ## Backups y recuperación
 
-- Backup diario automático en producción, con retención de 14 días como mínimo.
-- Una vez antes del piloto se restaura un backup en una base vacía y se verifica que la app arranca con esos datos.
+- Backup diario automático en producción, con retención de 14 días como mínimo. Lo hace el proveedor de la base: hay que elegir un plan de PostgreSQL que lo incluya.
+- Los backups de producción no salen de producción: ni a GitHub, ni a staging, ni a una computadora del equipo (regla 7 de `CLAUDE.md`).
+- `scripts/backup-db.sh` hace un backup lógico (`pg_dump`, formato custom) con suma de verificación. Sirve para un backup manual antes de una migración y para la prueba de restauración.
+- `scripts/restore-check.sh` restaura un backup en una base vacía y verifica, sin mostrar contenido: suma de verificación, migraciones al día con el código, cantidad de filas por tabla igual a la de origen (si se pasa `RESTORE_COMPARE_URL`) y que la app arranca con esa base (`/api/health` y `/login`). Al terminar borra la base temporal.
+- El CI corre el ciclo completo en cada PR con los datos sintéticos de los tests (job `verificar`, paso "Backup y restauración").
 - Si una migración falla en producción, el procedimiento es restaurar el backup previo y reportar a Tomás. Claude Code no ejecuta restauraciones en producción por su cuenta.
+
+### Prueba de restauración en producción (una vez antes del piloto, la hace Tomás)
+
+1. En el panel del proveedor, confirmar que la base de producción tiene backup diario y que la retención es de 14 días o más.
+2. Restaurar el backup más reciente en una base nueva del mismo proveedor (opción "restaurar en una instancia nueva" o equivalente). La base nueva queda en la cuenta de producción.
+3. Desde la consola del servicio web de producción (shell del proveedor), con la URL de la base nueva:
+   `DATABASE_URL=<url de la base restaurada> npx prisma migrate status` tiene que decir que está al día, y
+   `DATABASE_URL=<url de la base restaurada> PORT=3400 npm start &` seguido de `curl -s localhost:3400/api/health` tiene que devolver `"ok":true`.
+   Si la consola tiene `pg_dump` y el usuario puede crear bases, alcanza con `scripts/backup-db.sh /tmp/prod.dump && RESTORE_ADMIN_URL=<url del servidor con la base postgres> RESTORE_COMPARE_URL=$DATABASE_URL scripts/restore-check.sh /tmp/prod.dump`, y después `rm /tmp/prod.dump*`.
+4. Borrar la base restaurada y anotar en `docs/PROGRESO.md` la fecha, cuánto tardó y el resultado.
 
 ## Observabilidad
 
 - Logs estructurados sin contenido de conversaciones ni datos personales.
 - Métricas de uso de IA por estudiante y por cátedra en `AIUsageEvent`, con alerta al llegar al 80% del tope semanal.
-- Una página de estado interna que muestre versión desplegada, migración aplicada y resultado de la última verificación.
+- `/api/health` devuelve si la app llega a la base, la última migración aplicada y la versión desplegada (`RENDER_GIT_COMMIT`), sin datos de nadie. El proveedor la usa como chequeo de salud (`healthCheckPath` en `render.yaml`).
 
 ## Lista de verificación antes de abrir el piloto
 

@@ -42,6 +42,21 @@ jobs:
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+      # Backup y prueba de restauración con los datos sintéticos que dejaron los tests.
+      - name: Backup y restauración
+        run: |
+          # Herramientas de PostgreSQL 16, como el servidor: las del runner son más nuevas y generan
+          # sentencias que el 16 no entiende. Se usan las de la misma imagen del servicio, con Docker.
+          mkdir -p "$RUNNER_TEMP/pg16"
+          for t in pg_dump pg_restore psql; do
+            printf '#!/bin/sh\nexec docker run --rm -i --network host -v "%s:%s" pgvector/pgvector:pg16 %s "$@"\n' "$RUNNER_TEMP" "$RUNNER_TEMP" "$t" > "$RUNNER_TEMP/pg16/$t"
+            chmod +x "$RUNNER_TEMP/pg16/$t"
+          done
+          export PG_BIN="$RUNNER_TEMP/pg16"
+          scripts/backup-db.sh "$RUNNER_TEMP/ci.dump"
+          RESTORE_ADMIN_URL=postgresql://educai:educai@localhost:5432/postgres \
+          RESTORE_COMPARE_URL="$DATABASE_URL" \
+          scripts/restore-check.sh "$RUNNER_TEMP/ci.dump"
 
   e2e:
     runs-on: ubuntu-latest

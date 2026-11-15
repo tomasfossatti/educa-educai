@@ -56,3 +56,6 @@ docs/informes/*.tmp
 # Playwright
 /test-results/
 /playwright-report/
+
+# backups locales (scripts/backup-db.sh)
+/backups/

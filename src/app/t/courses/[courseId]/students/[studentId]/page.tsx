@@ -69,7 +69,7 @@ export default async function TeacherStudentPage({ params }: { params: Promise<{
           )}
         </Section>
 
-        <DevelopmentView studentId={studentId} courseId={courseId} viewer="teacher" base={base} />
+        {ficha && <DevelopmentView studentId={studentId} courseId={courseId} viewer="teacher" base={base} />}
 
         <Section title="Entregas" description="Producción original y su análisis.">
           {submissions.length === 0 ? (

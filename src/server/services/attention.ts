@@ -26,14 +26,20 @@ export interface AttentionItem {
 
 const PRIORITY_RANK: Record<Priority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 
+/**
+ * La cola de atención, los insights y el resumen de la clase solo cuentan a estudiantes con el
+ * consentimiento activo (V6, V11): sin consentimiento no aparecen ni sus conclusiones ni su evidencia.
+ */
+const CONSENTING = { consentAnalysisAt: { not: null } } as const;
+
 async function loadCourseState(courseId: string) {
   const [enrollments, inferences, interventions, evidenceCounts] = await Promise.all([
     db.enrollment.findMany({
-      where: { courseId, status: "ACTIVE" },
+      where: { courseId, status: "ACTIVE", student: CONSENTING },
       include: { student: { include: { user: { select: { id: true, name: true } } } } },
     }),
     db.inference.findMany({
-      where: { courseId, state: "ACTIVE", reviewStatus: { not: "INCORRECT" } },
+      where: { courseId, state: "ACTIVE", reviewStatus: { not: "INCORRECT" }, student: CONSENTING },
       include: { curriculumItem: { select: { id: true, title: true } } },
       orderBy: { createdAt: "desc" },
     }),
@@ -42,7 +48,7 @@ async function loadCourseState(courseId: string) {
       include: { targets: true },
       orderBy: { occurredAt: "desc" },
     }),
-    db.evidenceObject.groupBy({ by: ["studentId"], where: { courseId }, _count: { _all: true }, _max: { occurredAt: true } }),
+    db.evidenceObject.groupBy({ by: ["studentId"], where: { courseId, student: CONSENTING }, _count: { _all: true }, _max: { occurredAt: true } }),
   ]);
   const names = new Map(enrollments.map((e) => [e.studentId, e.student.user.name]));
   return { enrollments, inferences, interventions, evidenceCounts, names };
@@ -248,7 +254,7 @@ export async function getCourseOverview(courseId: string) {
   const attention = buildAttentionItems(courseId, state);
 
   const signals = await db.signal.findMany({
-    where: { courseId },
+    where: { courseId, student: CONSENTING },
     include: {
       evidence: { select: { experienceId: true, occurredAt: true, source: true, assistanceLevel: true } },
       curriculumItem: { select: { title: true } },
@@ -325,6 +331,7 @@ export async function getCourseInsight(courseId: string, key: string) {
       courseId,
       curriculumItemId: itemId,
       studentId: { in: studentIds },
+      student: CONSENTING,
       state: "ACTIVE",
       reviewStatus: { not: "INCORRECT" },
       ...(kind === "pattern" ? { polarity: "DIFFICULTY" } : {}),

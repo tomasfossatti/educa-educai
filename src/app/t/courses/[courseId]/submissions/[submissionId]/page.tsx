@@ -8,7 +8,7 @@ import { KeyValue, List, ListItem, PageHeader, Section } from "@/components/ui/l
 import { parseActivityPrompts, parseAnswers } from "@/domain/activity";
 import { confidenceLabel, declaredAssistanceLabel } from "@/domain/labels";
 import { formatDateTime } from "@/lib/format";
-import { requireCourseTeacher } from "@/server/auth/guards";
+import { hasActiveConsent, requireCourseTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { supportingEvidenceCounts } from "@/server/services/development";
 
@@ -34,10 +34,14 @@ export default async function TeacherSubmissionPage({ params }: { params: Promis
   if (!submission) notFound();
   const base = `/t/courses/${courseId}`;
   const run = submission.experience.runs[0] ?? null;
-  const [evidence, inferences] = await Promise.all([
-    db.evidenceObject.findMany({ where: { experienceId: submission.experienceId }, include: { experience: { select: { title: true } } } }),
-    run ? db.inference.findMany({ where: { runId: run.id }, include: { curriculumItem: { select: { title: true } } } }) : [],
-  ]);
+  // La entrega se ve siempre; su análisis, solo con consentimiento activo (V6, V11).
+  const analysisVisible = hasActiveConsent(submission.student);
+  const [evidence, inferences] = analysisVisible
+    ? await Promise.all([
+        db.evidenceObject.findMany({ where: { experienceId: submission.experienceId }, include: { experience: { select: { title: true } } } }),
+        run ? db.inference.findMany({ where: { runId: run.id }, include: { curriculumItem: { select: { title: true } } } }) : [],
+      ])
+    : [[], []];
   const counts = await supportingEvidenceCounts(inferences.map((i) => i.id));
   const prompts = parseActivityPrompts(submission.activity.prompts);
   const answers = parseAnswers(submission.answers);
