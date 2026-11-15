@@ -1,7 +1,27 @@
 import "server-only";
-import { assertCanViewStudentFile, type Viewer } from "@/server/auth/guards";
+import { assertCanViewStudentFile, assertCourseTeacher, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { logAccess } from "@/server/services/access-log";
+import { getEvidenceDetail, getInferenceDetail } from "@/server/services/development";
+
+/**
+ * Detalle de una evidencia o de una conclusión abierto por el docente de la cátedra. Devuelve null
+ * si el estudiante no está inscripto o no tiene el consentimiento activo (V3, V6, V11) y registra
+ * cada apertura en AccessLog, que el estudiante ve (V2, V9).
+ */
+export async function openEvidenceAsTeacher(viewer: Viewer, evidenceId: string, courseId: string) {
+  await assertCourseTeacher(viewer, courseId);
+  const evidence = await getEvidenceDetail(evidenceId, courseId, "teacher");
+  if (evidence) await logAccess(viewer, evidence.studentId, courseId, "EVIDENCE");
+  return evidence;
+}
+
+export async function openInferenceAsTeacher(viewer: Viewer, inferenceId: string, courseId: string) {
+  await assertCourseTeacher(viewer, courseId);
+  const inference = await getInferenceDetail(inferenceId, courseId, "teacher");
+  if (inference) await logAccess(viewer, inference.studentId, courseId, "EVIDENCE");
+  return inference;
+}
 
 /**
  * Ficha de un estudiante en una cátedra. Es una sola función para el docente y para el estudiante:

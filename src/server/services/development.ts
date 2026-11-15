@@ -73,18 +73,28 @@ export async function getInferencesByIds(ids: string[], viewer: Viewer) {
   });
 }
 
-/** Detalle de una inferencia con toda su trazabilidad. */
-/** Un docente solo ve estudiantes con inscripción activa en su materia. */
-function activeStudentIn(courseId: string) {
-  return { enrollments: { some: { courseId, status: "ACTIVE" as const } } };
+/**
+ * Estudiantes cuya evidencia puede ver un docente de la materia: inscripción activa y
+ * consentimiento de análisis activo (V3, V6, V11). Sin consentimiento, el docente no ve evidencia,
+ * mensajes de origen ni conclusiones, aunque se hayan generado antes de que lo retirara.
+ */
+export function teacherVisibleStudentIn(courseId: string): Prisma.StudentProfileWhereInput {
+  return { enrollments: { some: { courseId, status: "ACTIVE" } }, consentAnalysisAt: { not: null } };
 }
 
+/** Filtro de estudiante para el detalle: el propio estudiante ve lo suyo; el docente, solo con consentimiento. */
+function detailStudentFilter(courseId: string, viewer: Viewer, studentId?: string) {
+  if (viewer === "teacher") return { ...(studentId ? { studentId } : {}), student: teacherVisibleStudentIn(courseId) };
+  return studentId ? { studentId } : { student: teacherVisibleStudentIn(courseId) };
+}
+
+/** Detalle de una inferencia con toda su trazabilidad. */
 export async function getInferenceDetail(inferenceId: string, courseId: string, viewer: Viewer, studentId?: string) {
   const inference = await db.inference.findFirst({
     where: {
       id: inferenceId,
       courseId,
-      ...(studentId ? { studentId } : { student: activeStudentIn(courseId) }),
+      ...detailStudentFilter(courseId, viewer, studentId),
       ...inferenceVisibility(viewer),
     },
     include: {
@@ -121,7 +131,7 @@ export type InferenceDetail = NonNullable<Awaited<ReturnType<typeof getInference
 /** Detalle de un Evidence Object con su fuente original (solo los mensajes referenciados). */
 export async function getEvidenceDetail(evidenceId: string, courseId: string, viewer: Viewer, studentId?: string) {
   const evidence = await db.evidenceObject.findFirst({
-    where: { id: evidenceId, courseId, ...(studentId ? { studentId } : { student: activeStudentIn(courseId) }) },
+    where: { id: evidenceId, courseId, ...detailStudentFilter(courseId, viewer, studentId) },
     include: {
       student: { include: { user: { select: { id: true, name: true } } } },
       experience: { include: { conversation: { select: { id: true } }, submission: { include: { activity: true } } } },

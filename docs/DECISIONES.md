@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Consentimiento en las vistas del docente heredadas de educa-educai
+Al preparar la revisión de seguridad apareció una brecha de V6 y V11: el detalle de evidencia y de conclusión, la cola de atención, los insights por tema, el resumen de la clase, el snapshot de desarrollo y el análisis de las entregas solo exigían inscripción. Un docente podía seguir leyendo fragmentos y mensajes de origen de un estudiante que había retirado el consentimiento. Ahora esas lecturas exigen consentimiento activo (en el servicio, no en cada página), y abrir una evidencia o una conclusión queda en `AccessLog` (V2). La regla no cambia: se aplica donde faltaba.
+
 ### 2026-11-15 · Backups del proveedor y prueba de restauración con scripts propios
 El backup diario de producción lo hace el proveedor de la base; no se copia a GitHub ni a otro lado, porque los datos reales no salen de producción. Para probar la restauración hay dos scripts (`backup-db.sh` y `restore-check.sh`) que restauran en una base vacía, comparan filas por tabla y levantan la app contra esa base. El CI los corre en cada PR con datos sintéticos, así no se rompen sin que nadie lo note. Se agregó `/api/health` (base alcanzable, última migración, versión) para el chequeo de salud del proveedor y de la restauración.
 
