@@ -12,7 +12,7 @@ export async function GET() {
       WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL
       ORDER BY finished_at DESC, migration_name DESC LIMIT 1`;
     return Response.json(
-      { ok: true, migration: rows[0]?.migration_name ?? null, version: process.env.RENDER_GIT_COMMIT?.slice(0, 7) ?? null },
+      { ok: true, migration: rows[0]?.migration_name ?? null, version: (process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.RENDER_GIT_COMMIT)?.slice(0, 7) ?? null },
       { headers },
     );
   } catch {
