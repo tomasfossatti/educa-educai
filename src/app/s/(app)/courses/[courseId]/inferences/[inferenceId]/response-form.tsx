@@ -9,7 +9,7 @@ import { respondToInferenceAction } from "@/server/actions/student";
 export function StudentResponseForm({ inferenceId }: { inferenceId: string }) {
   const { state, pending, onSubmit, ref } = useActionForm(respondToInferenceAction, { resetOnSuccess: true });
   return (
-    <form ref={ref} onSubmit={onSubmit} className="max-w-xl space-y-4">
+    <form ref={ref} method="post" onSubmit={onSubmit} className="max-w-xl space-y-4">
       <input type="hidden" name="inferenceId" value={inferenceId} />
       <fieldset className="flex flex-wrap gap-4">
         <legend className="sr-only">Tu postura</legend>

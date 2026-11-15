@@ -115,7 +115,7 @@ export function Chat({ conversationId, initialMessages, active }: { conversation
       {error && <Notice tone="error">{error}</Notice>}
 
       {active && (
-        <form onSubmit={send} className="space-y-2 border-t border-line pt-4">
+        <form method="post" onSubmit={send} className="space-y-2 border-t border-line pt-4">
           <label htmlFor="message" className="sr-only">
             Tu mensaje
           </label>

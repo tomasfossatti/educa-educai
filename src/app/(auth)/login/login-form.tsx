@@ -7,7 +7,7 @@ import { loginAction } from "@/server/actions/auth";
 export function LoginForm() {
   const { state, pending, onSubmit } = useActionForm(loginAction);
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form method="post" onSubmit={onSubmit} className="space-y-4">
       <FormMessage state={state} />
       <Field label="Email" htmlFor="email" error={state?.fieldErrors?.email}>
         <Input id="email" name="email" type="email" autoComplete="email" required />

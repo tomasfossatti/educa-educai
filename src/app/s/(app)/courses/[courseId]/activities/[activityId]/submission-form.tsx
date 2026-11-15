@@ -17,7 +17,7 @@ interface Draft {
 export function SubmissionForm({ activityId, prompts, draft }: { activityId: string; prompts: ActivityPrompt[]; draft: Draft | null }) {
   const { state, pending, onSubmit } = useActionForm(saveSubmissionAction);
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form method="post" onSubmit={onSubmit} className="space-y-6">
       <input type="hidden" name="activityId" value={activityId} />
       {prompts.map((p) => (
         <Field key={p.key} label={p.label} htmlFor={`answer_${p.key}`} hint={p.help || undefined} error={state?.fieldErrors?.[`answer_${p.key}`]}>
