@@ -12,6 +12,7 @@
  *
  * Todo lo creado acá queda marcado con origin "seed". Ejecutar: npm run db:seed
  */
+import { randomBytes } from "node:crypto";
 import type { Prisma } from "@prisma/client";
 import { hashPassword } from "@/server/auth/password";
 import { db } from "@/server/db";
@@ -28,8 +29,10 @@ import {
   seedSignal,
   seedSubmission,
 } from "./builders";
+import { seedBlockReason } from "./guard";
 
-export const DEMO_PASSWORD = "educai-demo-2026";
+// Sin contraseña fija en el código: se genera en cada corrida, salvo que se defina SEED_DEMO_PASSWORD.
+const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD || randomBytes(18).toString("base64url");
 const DEMO_DOMAIN = "demo.educai.test";
 const INSTITUTION = "Universidad Demo (datos de demostración)";
 
@@ -68,6 +71,11 @@ async function reset() {
 }
 
 async function main() {
+  const blocked = seedBlockReason(process.env);
+  if (blocked) {
+    console.error(blocked);
+    process.exit(1);
+  }
   try {
     await db.$executeRawUnsafe("DISCARD ALL;");
   } catch {

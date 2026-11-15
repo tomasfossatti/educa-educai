@@ -1,9 +1,11 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { fieldErrorsFrom, text, type ActionState } from "@/lib/forms";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
+import { clearLoginFailures, clientIp, loginRetryAfterMinutes, recordLoginFailure } from "@/server/auth/rate-limit";
 import { createSession, destroySession } from "@/server/auth/session";
 import { db } from "@/server/db";
 
@@ -61,11 +63,21 @@ export async function loginAction(_prev: ActionState | null, formData: FormData)
   const parsed = loginSchema.safeParse({ email: text(formData, "email").toLowerCase(), password: formData.get("password") });
   if (!parsed.success) return { error: "Revisá los campos marcados.", fieldErrors: fieldErrorsFrom(parsed.error) };
 
-  const user = await db.user.findUnique({ where: { email: parsed.data.email } });
+  const { email } = parsed.data;
+  const h = await headers();
+  const ip = clientIp(h.get("x-forwarded-for"), h.get("x-real-ip"));
+  const wait = await loginRetryAfterMinutes(email, ip);
+  if (wait > 0) {
+    return { error: `Demasiados intentos fallidos. Probá de nuevo en ${wait} ${wait === 1 ? "minuto" : "minutos"}.` };
+  }
+
+  const user = await db.user.findUnique({ where: { email } });
   // Mismo mensaje para email inexistente o contraseña incorrecta.
   if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) {
+    await recordLoginFailure(email, ip);
     return { error: "Email o contraseña incorrectos." };
   }
+  await clearLoginFailures(email);
   await createSession(user.id);
   redirect(user.role === "TEACHER" ? "/t" : "/s");
 }
