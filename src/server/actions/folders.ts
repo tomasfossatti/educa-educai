@@ -6,7 +6,10 @@ import { text, type ActionState } from "@/lib/forms";
 import { TEXT } from "@/lib/texts";
 import { AIError } from "@/server/ai";
 import { AccessDenied, requireStudent } from "@/server/auth/guards";
+import { db } from "@/server/db";
+import { respondToSignal } from "@/server/services/doubts";
 import { askInFolder, MAX_UPLOAD_BYTES, startFolderConversation, uploadExternalConversation } from "@/server/services/folder-chat";
+import { deleteExperienceCascade } from "@/server/services/privacy";
 
 async function viewer() {
   const { user } = await requireStudent();
@@ -58,4 +61,19 @@ export async function uploadConversationAction(_prev: ActionState | null, formDa
   }
   refresh();
   return { ok: true, message: TEXT.upload.done };
+}
+
+export async function respondToDoubtAction(signalId: string, status: "CONFIRMED" | "DISCARDED"): Promise<void> {
+  const v = await viewer();
+  await respondToSignal(v, signalId, status === "CONFIRMED" ? "CONFIRMED" : "DISCARDED").catch(denyAsNotFound);
+  refresh();
+}
+
+/** Borra una conversación de una carpeta y todo lo derivado (V10). */
+export async function deleteFolderConversationAction(conversationId: string): Promise<void> {
+  const v = await viewer();
+  const conversation = await db.aIConversation.findFirst({ where: { id: conversationId, studentId: v.id }, select: { experienceId: true, courseId: true, folderId: true } });
+  if (!conversation) notFound();
+  await deleteExperienceCascade(conversation.experienceId, v.id, conversation.courseId);
+  redirect(conversation.folderId ? `/s/folders/${conversation.folderId}` : "/s");
 }

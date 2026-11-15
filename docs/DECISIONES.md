@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Cierre por inactividad sin tareas programadas
+El spec procesa una conversación al cerrarla o a los 20 minutos de inactividad. El plan gratuito de Render no tiene tareas programadas, así que el cierre por inactividad se hace de forma oportunista: al cargar el panel del docente y el inicio del estudiante se cierran y encolan las conversaciones cuyo último mensaje tiene más de 20 minutos. Es idempotente (cierre condicional). Si más adelante hay un cron, llama a la misma función.
+
 ### 2026-11-15 · Aviso de consentimiento alineado con el spec
 El aviso del onboarding decía que las conversaciones completas solo las ve el estudiante, y el consentimiento venía premarcado. Se reescribió según el spec (el docente de la materia ve conversaciones, dudas, perfil y proyecto vinculado; nadie más) y pasó a ser una elección explícita "Acepto / No acepto", sin opción por defecto. La versión del aviso sube a `2026-11`. El texto final lo revisa el abogado en la etapa 6.
 

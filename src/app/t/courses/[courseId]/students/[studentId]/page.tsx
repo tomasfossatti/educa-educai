@@ -9,14 +9,23 @@ import { TextLink } from "@/components/ui/button";
 import { KeyValue, List, ListItem, Notice, PageHeader, Section } from "@/components/ui/layout";
 import { runStatusLabel } from "@/domain/labels";
 import { formatDate, formatDateTime } from "@/lib/format";
-import { requireTeacherStudent } from "@/server/auth/guards";
+import { AccessDenied, requireTeacherStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { StudentFileView } from "@/components/domain/student-file-view";
+import { TEXT } from "@/lib/texts";
+import { loadProjectLinks, loadStudentFile } from "@/server/services/student-file";
 
 export const metadata: Metadata = { title: "Estudiante" };
 
 export default async function TeacherStudentPage({ params }: { params: Promise<{ courseId: string; studentId: string }> }) {
   const { courseId, studentId } = await params;
-  const { student } = await requireTeacherStudent(courseId, studentId);
+  const { student, user } = await requireTeacherStudent(courseId, studentId);
+  const viewer = { id: user.id, role: user.role };
+  // La ficha pasa por la capa de permisos y registra el acceso (V2). Sin consentimiento, no se muestra (V6).
+  const ficha = await Promise.all([loadStudentFile(viewer, studentId, courseId), loadProjectLinks(viewer, studentId, courseId)]).catch((error) => {
+    if (error instanceof AccessDenied) return null;
+    throw error;
+  });
   const base = `/t/courses/${courseId}`;
   const [submissions, interventions, activities, conversations] = await Promise.all([
     db.submission.findMany({
@@ -41,6 +50,7 @@ export default async function TeacherStudentPage({ params }: { params: Promise<{
         description={`${submissions.length} entregas · ${conversations} conversaciones con el tutor (solo ves la evidencia derivada, no las conversaciones completas).`}
       />
       <div className="space-y-10">
+        {ficha ? <StudentFileView file={ficha[0]} projectLinks={ficha[1]} /> : <Notice tone="attention">{TEXT.file.noConsent}</Notice>}
         <Section title="Contexto declarado" action={<LayerTag layer="declared" />}>
           {student.shareContextWithTeachers ? (
             <dl>

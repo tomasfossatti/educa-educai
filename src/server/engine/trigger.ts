@@ -84,3 +84,35 @@ export async function expireStaleRuns(studentId: string): Promise<void> {
     data: { status: "FAILED", error: "El análisis se interrumpió antes de terminar. Podés reintentarlo.", completedAt: new Date() },
   });
 }
+
+export const INACTIVE_CLOSE_MINUTES = 20;
+
+/**
+ * Paso 1 del motor: una conversación del chat se procesa al quedar inactiva 20 minutos.
+ * Cierra las conversaciones activas de una cátedra cuyo último mensaje es más viejo y las encola.
+ * Se llama de forma oportunista al cargar el panel docente y el inicio del estudiante.
+ */
+export async function closeInactiveConversations(opts: { courseId?: string; studentId?: string; now?: Date } = {}): Promise<number> {
+  const now = opts.now ?? new Date();
+  const cutoff = new Date(now.getTime() - INACTIVE_CLOSE_MINUTES * 60 * 1000);
+  const candidates = await db.aIConversation.findMany({
+    where: {
+      status: "ACTIVE",
+      courseId: opts.courseId ?? { not: null },
+      ...(opts.studentId ? { studentId: opts.studentId } : {}),
+      messages: { some: {}, none: { createdAt: { gte: cutoff } } },
+    },
+    select: { id: true, experienceId: true, courseId: true, studentId: true },
+    take: 50,
+  });
+  let closed = 0;
+  for (const c of candidates) {
+    // Cierre condicional: si otra petición ya la cerró, no se encola dos veces.
+    const updated = await db.aIConversation.updateMany({ where: { id: c.id, status: "ACTIVE" }, data: { status: "CLOSED", closedAt: now } });
+    if (updated.count === 0 || !c.courseId) continue;
+    await db.experience.update({ where: { id: c.experienceId }, data: { completedAt: now } });
+    await queueInterpretation({ experienceId: c.experienceId, courseId: c.courseId, studentId: c.studentId, source: "AI_CONVERSATION" });
+    closed++;
+  }
+  return closed;
+}

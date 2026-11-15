@@ -99,6 +99,7 @@ function signals(message: string) {
       curriculumRef,
       description: excerpt.length >= 120 ? "Desarrolla la idea con un ejemplo propio." : "La respuesta queda en una afirmación general sin desarrollar.",
       rationale: "Regla del proveedor de prueba basada en la extensión de la producción.",
+      confidence: "HIGH" as const,
     })),
   };
 }

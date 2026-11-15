@@ -10,6 +10,7 @@ export const signalsSchema = z.object({
       curriculumRef: z.string().nullable().describe("Ref del ítem curricular relacionado, o null si no corresponde a ninguno"),
       description: z.string().describe("La característica concreta observada, en una oración"),
       rationale: z.string().describe("Por qué la observación muestra esta señal"),
+      confidence: z.enum(["LOW", "MEDIUM", "HIGH"]).describe("Qué tan claro es que la observación muestra la señal"),
     }),
   ),
 });
@@ -34,7 +35,8 @@ Reglas:
 - Entre 0 y 3 señales por observación; no fuerces señales donde no las hay.
 - "description" nombra la característica concreta ("Usa necesidades diferenciadas como criterio de segmentación", "Formula la hipótesis como afirmación no verificable").
 - curriculumRef solo puede ser una ref de la lista o null.
-- No uses lo que el estudiante declaró sobre sí mismo como señal.`;
+- No uses lo que el estudiante declaró sobre sí mismo como señal.
+- "confidence": HIGH si la observación lo muestra sin ambigüedad (por ejemplo, el estudiante dice que no entiende o comete el error de forma explícita); MEDIUM si es probable pero admite otra lectura; LOW si es una conjetura. Las de confianza LOW se descartan.`;
 
 export interface SignalsInput {
   courseName: string;

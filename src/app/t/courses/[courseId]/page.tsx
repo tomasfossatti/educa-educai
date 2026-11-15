@@ -10,12 +10,17 @@ import { requireCourseTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { getCourseOverview } from "@/server/services/attention";
 import { supportingEvidenceCounts } from "@/server/services/development";
+import { ClassOverviewSection } from "@/components/domain/class-overview";
+import { closeInactiveConversations } from "@/server/engine/trigger";
+import { getClassOverview } from "@/server/services/class-view";
 
 export const metadata: Metadata = { title: "Curso" };
 
 export default async function CourseOverviewPage({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = await params;
-  const { course } = await requireCourseTeacher(courseId);
+  const { course, user } = await requireCourseTeacher(courseId);
+  await closeInactiveConversations({ courseId });
+  const classOverview = await getClassOverview({ id: user.id, role: user.role }, courseId);
   const base = `/t/courses/${courseId}`;
   const [overview, publishedActivities] = await Promise.all([
     getCourseOverview(courseId),
@@ -45,6 +50,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
       />
 
       <div className="space-y-10">
+        <ClassOverviewSection overview={classOverview} courseId={courseId} />
         {setup.some((s) => !s.done) && (
           <Section title="Primeros pasos">
             <List>
