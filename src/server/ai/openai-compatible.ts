@@ -52,13 +52,57 @@ export function toUsage(model: string, usage: CompatUsage | undefined): UsageInf
   return { model, inputTokens: miss, outputTokens: completion + reasoning, cacheReadTokens: hit, cacheWriteTokens: 0 };
 }
 
-async function errorFromResponse(label: string, response: Response): Promise<AIError> {
+/** Demora que pide la API en un 429 (RetryInfo de Google, "retry in Xs" o Retry-After), en ms. */
+export function retryDelayMs(body: string, retryAfter: string | null): number | null {
+  const info = /"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/.exec(body);
+  if (info) return Math.ceil(Number(info[1]) * 1000);
+  const text = /retry in (?:(\d+)h)?(?:(\d+)m)?(\d+(?:\.\d+)?)s/i.exec(body);
+  if (text) return Math.ceil(((Number(text[1] ?? 0) * 60 + Number(text[2] ?? 0)) * 60 + Number(text[3])) * 1000);
+  if (retryAfter && /^\d+$/.test(retryAfter.trim())) return Number(retryAfter) * 1000;
+  return null;
+}
+
+/** Espera máxima ante un límite por minuto antes de reintentar (AI_RATE_LIMIT_MAX_WAIT_MS, 60 s). */
+function maxWaitMs(): number {
+  const v = Number(process.env.AI_RATE_LIMIT_MAX_WAIT_MS);
+  return Number.isFinite(v) && v >= 0 && process.env.AI_RATE_LIMIT_MAX_WAIT_MS?.trim() ? v : 60_000;
+}
+
+class RateLimited extends Error {
+  constructor(
+    readonly waitMs: number | null,
+    readonly daily: boolean,
+  ) {
+    super("rate limited");
+  }
+}
+
+async function errorFromResponse(label: string, response: Response): Promise<AIError | RateLimited> {
   const body = await response.text().catch(() => "");
   if (response.status === 401 || response.status === 403) return new AIError("not_configured", `La clave de ${label} es inválida o no tiene permisos.`);
   if (response.status === 402) return new AIError("not_configured", `La cuenta de ${label} no tiene saldo.`);
-  if (response.status === 429) return new AIError("rate_limited", `${label} está limitando solicitudes. Intentá de nuevo en unos minutos.`, true);
+  if (response.status === 429) return new RateLimited(retryDelayMs(body, response.headers.get("retry-after")), /PerDay|per day/i.test(body));
   if (response.status >= 500) return new AIError("provider", `Error de ${label} (${response.status}).`, true);
   return new AIError("provider", `Solicitud inválida a ${label} (${response.status}): ${body.slice(0, 300)}`);
+}
+
+/**
+ * Hace el pedido y, ante un límite por minuto con una demora corta, espera y reintenta (hasta 3
+ * veces). Un cupo diario agotado o una demora larga cortan enseguida, con un mensaje que lo dice.
+ */
+async function fetchWithRateLimit(label: string, doFetch: () => Promise<Response>): Promise<Response> {
+  for (let attempt = 0; ; attempt++) {
+    const response = await doFetch();
+    if (response.ok) return response;
+    const error = await errorFromResponse(label, response);
+    if (!(error instanceof RateLimited)) throw error;
+    if (error.daily) throw new AIError("rate_limited", `Se agotó el cupo diario de ${label}. Se renueva mañana.`);
+    const wait = error.waitMs ?? 5_000;
+    if (attempt >= 3 || wait > maxWaitMs()) {
+      throw new AIError("rate_limited", `${label} está limitando solicitudes. Intentá de nuevo en unos minutos.`, true);
+    }
+    await new Promise((r) => setTimeout(r, wait + 250));
+  }
 }
 
 /** El programa en PDF va como texto por página. */
@@ -120,7 +164,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
 
     let response: Response;
     try {
-      response = await fetch(this.url(), {
+      response = await fetchWithRateLimit(this.config.label, () => fetch(this.url(), {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
@@ -131,13 +175,11 @@ export class OpenAICompatibleProvider implements LLMProvider {
           messages: [{ role: "system", content: `${call.system}\n\n${schemaInstruction(call.schema as z.ZodType<unknown>)}` }, ...messages],
         }),
         signal: AbortSignal.timeout(180_000),
-      });
+      }));
     } catch (error) {
       if (error instanceof AIError) throw error;
       throw new AIError("provider", `No se pudo conectar con ${this.config.label}: ${error instanceof Error ? error.message : String(error)}`, true);
     }
-    if (!response.ok) throw await errorFromResponse(this.config.label, response);
-
     const body = (await response.json()) as { choices?: { message?: { content?: string }; finish_reason?: string }[]; usage?: CompatUsage };
     const choice = body.choices?.[0];
     if (choice?.finish_reason === "length") throw new AIError("invalid_output", `La respuesta de ${this.config.label} quedó incompleta (límite de tokens).`, true);
@@ -163,7 +205,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
       return { textStream: (async function* () {})(), done: failed };
     }
     const label = this.config.label;
-    const request = fetch(this.url(), {
+    const request = fetchWithRateLimit(label, () => fetch(this.url(), {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -174,7 +216,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
         stream_options: { include_usage: true },
         messages: [{ role: "system", content: call.system }, ...call.messages],
       }),
-    });
+    }));
 
     let text = "";
     let usage: CompatUsage | undefined;
@@ -189,7 +231,7 @@ export class OpenAICompatibleProvider implements LLMProvider {
     async function* textStream(): AsyncIterable<string> {
       try {
         const response = await request;
-        if (!response.ok || !response.body) throw await errorFromResponse(label, response);
+        if (!response.body) throw new AIError("provider", `${label} respondió sin contenido.`, true);
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";

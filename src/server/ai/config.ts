@@ -49,8 +49,9 @@ export function defaultExtractionModel(): string {
 export function modelFor(operation: AIOperation): string {
   // Con DeepSeek los modelos de Claude no aplican: un modelo para el chat y otro (o el mismo) para el análisis.
   if (process.env.AI_PROVIDER?.toLowerCase() === "gemini") {
-    const chat = process.env.GEMINI_MODEL?.trim() || "gemini-3.5-flash";
-    return EXTRACTION_OPERATIONS.has(operation) ? process.env.GEMINI_EXTRACTION_MODEL?.trim() || chat : chat;
+    // Modelos distintos para el chat y el análisis: en el plan gratuito cada modelo tiene su propio cupo diario.
+    const chat = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
+    return EXTRACTION_OPERATIONS.has(operation) ? process.env.GEMINI_EXTRACTION_MODEL?.trim() || "gemini-3.5-flash-lite" : chat;
   }
   if (process.env.AI_PROVIDER?.toLowerCase() === "deepseek") {
     const chat = process.env.DEEPSEEK_MODEL?.trim() || "deepseek-flash";

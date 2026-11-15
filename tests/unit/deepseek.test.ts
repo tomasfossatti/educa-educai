@@ -66,8 +66,10 @@ describe("proveedor de DeepSeek", () => {
     await expect(new DeepSeekProvider().generateStructured(call())).rejects.toMatchObject({ kind: "not_configured" });
     fetchMock.mockResolvedValue(new Response("{}", { status: 402 }));
     await expect(new DeepSeekProvider().generateStructured(call())).rejects.toMatchObject({ kind: "not_configured" });
+    process.env.AI_RATE_LIMIT_MAX_WAIT_MS = "0";
     fetchMock.mockResolvedValue(new Response("{}", { status: 429 }));
     await expect(new DeepSeekProvider().generateStructured(call())).rejects.toMatchObject({ kind: "rate_limited", retryable: true });
+    delete process.env.AI_RATE_LIMIT_MAX_WAIT_MS;
   });
 
   it("sin clave no llama a la API", async () => {

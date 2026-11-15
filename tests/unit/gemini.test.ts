@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { modelFor } from "@/server/ai/config";
 import { GeminiProvider } from "@/server/ai/gemini";
-import { toUsage } from "@/server/ai/openai-compatible";
+import { retryDelayMs, toUsage } from "@/server/ai/openai-compatible";
 import { estimateCostUsd } from "@/server/ai/pricing";
 
 const schema = z.object({ ok: z.boolean() });
@@ -52,9 +52,35 @@ describe("proveedor de Gemini", () => {
     expect(JSON.parse(String((fetchMock.mock.calls[0] as [string, RequestInit])[1].body)).reasoning_effort).toBeUndefined();
   });
 
-  it("un 429 del plan gratuito es un límite reintentable, con el nombre del proveedor", async () => {
-    fetchMock.mockResolvedValue(new Response("{}", { status: 429 }));
-    await expect(new GeminiProvider().generateStructured(call())).rejects.toMatchObject({ kind: "rate_limited", retryable: true, message: expect.stringContaining("Gemini") });
+  it("un límite por minuto con demora corta espera y reintenta", async () => {
+    const ok = fetchMock.getMockImplementation();
+    fetchMock
+      .mockResolvedValueOnce(new Response('{"error":{"details":[{"retryDelay":"0.01s"}]}}', { status: 429 }))
+      .mockImplementation(ok!);
+    const { data } = await new GeminiProvider().generateStructured(call());
+    expect(data).toEqual({ ok: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("el cupo diario agotado corta enseguida y lo dice", async () => {
+    fetchMock.mockResolvedValue(new Response('{"error":{"message":"Generate content requests per day limit exceeded","details":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"},{"retryDelay":"35937s"}]}}', { status: 429 }));
+    await expect(new GeminiProvider().generateStructured(call())).rejects.toMatchObject({ kind: "rate_limited", message: expect.stringContaining("cupo diario de Gemini") });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("una demora más larga que la espera máxima no se espera", async () => {
+    process.env.AI_RATE_LIMIT_MAX_WAIT_MS = "100";
+    fetchMock.mockResolvedValue(new Response('{"error":{"details":[{"retryDelay":"30s"}]}}', { status: 429 }));
+    await expect(new GeminiProvider().generateStructured(call())).rejects.toMatchObject({ kind: "rate_limited", retryable: true });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    delete process.env.AI_RATE_LIMIT_MAX_WAIT_MS;
+  });
+
+  it("lee la demora de Google, del texto o de Retry-After", () => {
+    expect(retryDelayMs('{"retryDelay":"35937s"}', null)).toBe(35_937_000);
+    expect(retryDelayMs("Please retry in 9h58m57.18s.", null)).toBe(35_937_180);
+    expect(retryDelayMs("", "12")).toBe(12_000);
+    expect(retryDelayMs("", null)).toBeNull();
   });
 });
 
@@ -65,10 +91,10 @@ describe("modelos y precios de Gemini", () => {
 
   it("con AI_PROVIDER=gemini todas las operaciones usan modelos de Gemini", () => {
     process.env.AI_PROVIDER = "gemini";
-    expect(modelFor("folder.chat")).toBe("gemini-3.5-flash");
-    process.env.GEMINI_EXTRACTION_MODEL = "gemini-3.5-flash-lite";
+    expect(modelFor("folder.chat")).toBe("gemini-2.5-flash");
     expect(modelFor("interpret.signals")).toBe("gemini-3.5-flash-lite");
-    expect(modelFor("folder.chat")).toBe("gemini-3.5-flash");
+    process.env.GEMINI_EXTRACTION_MODEL = "gemini-3.5-flash";
+    expect(modelFor("interpret.signals")).toBe("gemini-3.5-flash");
   });
 
   it("el razonamiento interno, que no viene en completion_tokens, cuenta como salida", () => {
