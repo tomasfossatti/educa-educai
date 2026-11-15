@@ -1,6 +1,6 @@
 "use server";
 
-import { refresh } from "next/cache";
+import { refresh } from "@/server/next-refresh";
 import { notFound, redirect } from "next/navigation";
 import { text, type ActionState } from "@/lib/forms";
 import { TEXT } from "@/lib/texts";

@@ -262,6 +262,15 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "slides.generate": slidesGenerate,
 };
 
+/**
+ * Demora simulada por llamada (SCRIPTED_AI_LATENCY_MS), para pruebas de carga: el modelo real
+ * tarda segundos y mantiene abiertas las conexiones mientras tanto. Por defecto, sin demora.
+ */
+function simulatedLatency(): Promise<void> {
+  const ms = Number(process.env.SCRIPTED_AI_LATENCY_MS);
+  return Number.isFinite(ms) && ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve();
+}
+
 export class ScriptedProvider implements LLMProvider {
   readonly name = "scripted";
 
@@ -272,6 +281,7 @@ export class ScriptedProvider implements LLMProvider {
   async generateStructured<T>(call: StructuredCall<T>): Promise<{ data: T; usage: UsageInfo }> {
     const handler = HANDLERS[call.operation];
     if (!handler) throw new Error(`ScriptedProvider no soporta ${call.operation}`);
+    await simulatedLatency();
     const message = call.messages.map((m) => m.content).join("\n\n");
     const data = call.schema.parse(handler(message));
     return { data, usage: usageFor(call.system + message, JSON.stringify(data)) };
