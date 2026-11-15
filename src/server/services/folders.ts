@@ -12,17 +12,15 @@ export async function ensureStudentFolders(studentId: string): Promise<void> {
     where: { studentId, status: "ACTIVE" },
     select: { courseId: true, course: { select: { name: true } } },
   });
-  for (const e of enrollments) {
-    await db.folder.upsert({
-      where: { studentId_courseId: { studentId, courseId: e.courseId } },
-      update: {},
-      create: { studentId, courseId: e.courseId, kind: "SUBJECT", name: e.course.name, createdBy: "SYSTEM" },
-    });
-  }
-  const project = await db.folder.findFirst({ where: { studentId, kind: "PROJECT" } });
-  if (!project) {
-    await db.folder.create({ data: { studentId, kind: "PROJECT", name: PROJECT_FOLDER_NAME, createdBy: "SYSTEM" } });
-  }
+  // ON CONFLICT DO NOTHING: si dos pedidos llegan a la vez, ninguno falla ni duplica carpetas
+  // (único por estudiante y cátedra, y un índice único parcial para la carpeta del proyecto).
+  await db.folder.createMany({
+    data: [
+      ...enrollments.map((e) => ({ studentId, courseId: e.courseId, kind: "SUBJECT" as const, name: e.course.name, createdBy: "SYSTEM" as const })),
+      { studentId, kind: "PROJECT" as const, name: PROJECT_FOLDER_NAME, createdBy: "SYSTEM" as const },
+    ],
+    skipDuplicates: true,
+  });
 }
 
 /** Carpetas del estudiante con su última conversación, para la pantalla de inicio. */

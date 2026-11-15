@@ -19,6 +19,7 @@ test("el docente sube material y la estudiante hace un quiz del tema y ve su dom
   const student = await browser.newPage();
   await login(student, w.students[0]);
   await student.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
+  await student.waitForURL("**/s/folders/**");
   const topic = student.locator("li", { hasText: "Hipotesis falsables" });
   await expect(topic.getByText("Sin intentos")).toBeVisible();
   await topic.getByRole("button", { name: "Hacer quiz" }).click();

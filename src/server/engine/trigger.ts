@@ -109,10 +109,31 @@ export async function closeInactiveConversations(opts: { courseId?: string; stud
   for (const c of candidates) {
     // Cierre condicional: si otra petición ya la cerró, no se encola dos veces.
     const updated = await db.aIConversation.updateMany({ where: { id: c.id, status: "ACTIVE" }, data: { status: "CLOSED", closedAt: now } });
-    if (updated.count === 0 || !c.courseId) continue;
+    if (updated.count === 0) continue;
+    await onConversationClosed(c.id, "Conversación cerrada por inactividad");
+    if (!c.courseId) continue;
     await db.experience.update({ where: { id: c.experienceId }, data: { completedAt: now } });
     await queueInterpretation({ experienceId: c.experienceId, courseId: c.courseId, studentId: c.studentId, source: "AI_CONVERSATION" });
     closed++;
   }
   return closed;
+}
+
+/**
+ * Después de cerrar una conversación (o recibir una subida): traza en la carpeta, hechos nuevos
+ * y, si corresponde, el resumen cruzado. Corre después de responder; un error no afecta al estudiante.
+ */
+export async function onConversationClosed(conversationId: string, label: string): Promise<void> {
+  const { appendTrace, refreshSummaryIfStale, updateFolderFacts } = await import("@/server/services/folder-context");
+  const conversation = await db.aIConversation.findUnique({ where: { id: conversationId }, select: { folderId: true, studentId: true } });
+  if (!conversation?.folderId) return;
+  await appendTrace(conversation.folderId, label, [conversationId]);
+  after(async () => {
+    try {
+      await updateFolderFacts(conversationId);
+      await refreshSummaryIfStale(conversation.studentId);
+    } catch (error) {
+      console.error("[contexto] no se pudo actualizar el contexto de la carpeta", error instanceof Error ? error.message : error);
+    }
+  });
 }

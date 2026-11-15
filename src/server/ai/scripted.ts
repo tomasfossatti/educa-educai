@@ -213,6 +213,20 @@ function quizGenerate(message: string) {
   };
 }
 
+/** Hechos: agrega uno a partir del primer mensaje del estudiante y archiva F1 si existe. */
+function contextFacts(message: string) {
+  const said = /^ESTUDIANTE: (.+)$/m.exec(message)?.[1] ?? "";
+  return {
+    add: said ? [{ content: `Preguntó por: ${quote(said, 80)}`, courseRefs: /^C1:/m.test(message) ? ["C1"] : [] }] : [],
+    archive: /^F1:/m.test(message) ? [{ ref: "F1", reason: "Reemplazado por información más reciente. (Proveedor de prueba.)" }] : [],
+  };
+}
+
+function contextSummary(message: string) {
+  const facts = [...message.matchAll(/^- (.+)$/gm)].map((m) => m[1]);
+  return { summary: `Perfil de prueba basado en ${facts.length} hechos.` };
+}
+
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
   "interpret.observe": observe,
@@ -222,6 +236,8 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "interpret.feedback": feedback,
   "folder.chat": folderChat,
   "quiz.generate": quizGenerate,
+  "context.facts": contextFacts,
+  "context.summary": contextSummary,
 };
 
 export class ScriptedProvider implements LLMProvider {

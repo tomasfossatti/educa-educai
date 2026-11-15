@@ -19,6 +19,8 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "interpret.feedback": { effort: "low", maxTokens: 8000 },
   "folder.chat": { effort: "low", maxTokens: 4000 },
   "quiz.generate": { effort: "medium", maxTokens: 6000 },
+  "context.facts": { effort: "low", maxTokens: 3000 },
+  "context.summary": { effort: "low", maxTokens: 1500 },
 };
 
 /**

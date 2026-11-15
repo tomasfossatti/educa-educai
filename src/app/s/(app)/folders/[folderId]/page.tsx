@@ -9,6 +9,8 @@ import { TEXT } from "@/lib/texts";
 import { startFolderConversationAction, startQuizAction } from "@/server/actions/folders";
 import { AccessDenied, assertFolderOwner, requireStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { listFolderContext } from "@/server/services/folder-context";
+import { ContextSection } from "./context-section";
 import { UploadConversationForm } from "./upload-form";
 
 export const metadata: Metadata = { title: TEXT.folders.sectionTitle };
@@ -22,7 +24,7 @@ export default async function FolderPage({
 }) {
   const { folderId } = await params;
   const { quizError } = await searchParams;
-  const { user } = await requireStudent();
+  const { user, profile } = await requireStudent();
   const folder = await assertFolderOwner({ id: user.id, role: user.role }, folderId).catch((e) => {
     if (e instanceof AccessDenied) notFound();
     throw e;
@@ -32,6 +34,7 @@ export default async function FolderPage({
     orderBy: { createdAt: "desc" },
     select: { id: true, title: true, origin: true, createdAt: true, _count: { select: { messages: true } } },
   });
+  const context = await listFolderContext({ id: user.id, role: user.role }, folderId);
   const topics = folder.courseId
     ? await db.curriculumItem.findMany({
         where: { courseId: folder.courseId, status: "ACCEPTED", kind: "CONCEPT" },
@@ -91,6 +94,7 @@ export default async function FolderPage({
           </List>
         </Section>
       )}
+      <ContextSection summary={context.summary} facts={context.facts} trace={context.trace} consent={Boolean(profile.consentAnalysisAt)} />
       <Section title={TEXT.upload.title} description={TEXT.upload.hint}>
         <UploadConversationForm folderId={folderId} />
       </Section>
