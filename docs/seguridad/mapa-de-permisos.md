@@ -47,12 +47,12 @@ Las páginas bajo `/s` pasan por el layout `src/app/s/(app)/layout.tsx` (`requir
 | `/login`, `/register` | Públicas. Límite de intentos de login |
 | `/` | `getSessionUser`, redirige según el rol |
 | `/s`, `/s/context`, `/s/onboarding` | `requireStudent` |
-| `/s/join` | Solo el layout; la acción que llama tiene su control |
+| `/s/join` | `requireStudent` |
 | `/s/folders/[folderId]` | `requireStudent` y `assertFolderOwner` |
 | `/s/folders/[folderId]/c/[conversationId]` | `requireStudent`; la consulta filtra por estudiante y carpeta |
 | `/s/folders/[folderId]/quiz/[quizId]` | `requireStudent`; el servicio verifica el dueño |
 | `/s/courses/[courseId]/...` (ficha, evidencia, conclusiones, actividades, desarrollo, tutor) | `requireEnrolledStudent`; las lecturas filtran por el estudiante de la sesión |
-| `/t`, `/t/new` | `requireTeacher` (la segunda, solo por el layout) |
+| `/t`, `/t/new` | `requireTeacher` |
 | `/t/courses/[courseId]/...` (vista, material, temas, clases, atención, insights, métricas, actividades, entregas, estudiantes) | `requireCourseTeacher` |
 | `/t/courses/[courseId]/students/[studentId]` | `requireTeacherStudent`; la ficha y el snapshot exigen consentimiento (`loadStudentFile`) |
 | `/t/courses/[courseId]/evidence/[evidenceId]` y `/inferences/[inferenceId]` | `requireCourseTeacher` y `openEvidenceAsTeacher` u `openInferenceAsTeacher` (consentimiento y `AccessLog`) |
@@ -76,5 +76,7 @@ Las páginas bajo `/s` pasan por el layout `src/app/s/(app)/layout.tsx` (`requir
 | V1, V2, V3, V4, V5, V6, V9, V12, V14, V15 | `tests/integration/visibility-stage4.test.ts` |
 | V7, V8, V10, V11, V13 | `tests/integration/visibility-stage3.test.ts` |
 | V2, V3, V6, V9 y V11 en las vistas heredadas (evidencia, conclusiones, atención, insights, resumen) | `tests/integration/visibility-consent-teacher-views.test.ts` |
+| V2, V3, V4 y V8 en el navegador, cambiando ids en la URL | `tests/e2e/permisos.spec.ts` |
+| Toda página, ruta y acción llama a un control de permisos (control estático) | `tests/unit/guard-coverage.test.ts` |
 
 Los tests crean sus propios usuarios y cátedras con las fábricas de `tests/support` y corren en cada PR (job `verificar`).

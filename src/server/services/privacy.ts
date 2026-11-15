@@ -50,6 +50,18 @@ export async function getStudentDataSummary(studentId: string) {
 }
 
 /**
+ * Borra la cuenta de un estudiante y todo lo que cuelga de ella (en cascada desde User), más sus
+ * métricas de uso y las invitaciones con su correo. El registro de costo de IA queda sin vínculo.
+ */
+export async function deleteStudentAccount(studentId: string, email: string): Promise<void> {
+  await db.$transaction([
+    db.productEvent.deleteMany({ where: { OR: [{ userId: studentId }, { studentId }] } }),
+    db.courseInvite.deleteMany({ where: { email: email.toLowerCase() } }),
+    db.user.delete({ where: { id: studentId } }),
+  ]);
+}
+
+/**
  * Copia de todos los datos del estudiante, para el derecho de acceso (Ley 25.326, art. 14).
  * Solo para el propio estudiante: no hay forma de pedir la copia de otra persona. No incluye el
  * hash de la contraseña ni las sesiones. De los accesos a su ficha incluye quién y cuándo (V9).

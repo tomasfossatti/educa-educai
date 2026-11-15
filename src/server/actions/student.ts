@@ -15,7 +15,7 @@ import { onConversationClosed, queueInterpretation, retryInterpretation } from "
 import { EVENT, track } from "@/server/events";
 import { setAnalysisConsent } from "@/server/services/consent";
 import { ensureStudentFolders } from "@/server/services/folders";
-import { deleteExperienceCascade } from "@/server/services/privacy";
+import { deleteExperienceCascade, deleteStudentAccount } from "@/server/services/privacy";
 
 
 const declaredField = z.string().max(1500, "Máximo 1500 caracteres.").optional();
@@ -421,10 +421,7 @@ export async function deleteAccountAction(_prev: ActionState | null, formData: F
   if (text(formData, "confirmEmail").toLowerCase() !== user.email) {
     return { error: "Escribí tu email exactamente para confirmar.", fieldErrors: { confirmEmail: "No coincide." } };
   }
-  await db.$transaction([
-    db.productEvent.deleteMany({ where: { OR: [{ userId: user.id }, { studentId: user.id }] } }),
-    db.user.delete({ where: { id: user.id } }),
-  ]);
+  await deleteStudentAccount(user.id, user.email);
   await destroySession();
   redirect("/login?deleted=1");
 }
