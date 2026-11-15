@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · DeepSeek como proveedor de IA provisorio
+Tomás decidió usar la API de DeepSeek mientras no haya clave de Anthropic. Se sumó `src/server/ai/deepseek.ts` detrás de la misma interfaz (`AI_PROVIDER=deepseek`), sin dependencias nuevas: modo JSON con el esquema en el prompt y validación con zod, el PDF del programa convertido a texto, `reasoning_effort` low para el chat y high para el análisis, y costo con la tarifa de caché. Modelo `deepseek-flash` y precios configurables por variable; por defecto, la tarifa pico más alta publicada, para que el tope de gasto se active antes. Anthropic sigue disponible y es el valor por defecto. Riesgo: según su política de privacidad, DeepSeek procesa los datos en China; con datos sintéticos no importa, con estudiantes reales es una transferencia internacional que habría que resolver antes del piloto.
+
 ### 2026-11-15 · Staging en Vercel con Neon y contraseña de sitio
 La cuenta de Vercel de Tomás ya tenía la integración de Neon, así que staging va ahí en lugar de Render (el spec admite "Render u otro servicio con PostgreSQL gestionado"): base en São Paulo, despliegue automático solo desde `main` y migraciones en el build. Como el registro de la app está abierto, staging pide una contraseña de sitio (`SITE_PASSWORD`, en `src/proxy.ts`) para que nadie de afuera cree cuentas y gaste IA real; sin la variable no cambia nada. Vercel limita cada pedido a 4,5 MB, lo que en staging achica el tamaño máximo del material.
 

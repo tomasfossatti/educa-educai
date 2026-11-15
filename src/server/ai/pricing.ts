@@ -24,7 +24,26 @@ const PRICES: Record<string, Price> = {
   "claude-haiku-4-5": { input: 1, output: 5, cacheRead: 0.1, cacheWrite: 1.25 },
 };
 
+/**
+ * DeepSeek: precios configurables porque cambian seguido y tienen tarifa pico y fuera de pico.
+ * Por defecto, la tarifa pico más alta publicada para V4 Flash (noviembre de 2026), para que el tope
+ * de gasto se active antes y no después. Verificar en la página de precios de DeepSeek.
+ */
+function deepseekPrice(): Price {
+  const num = (key: string, fallback: number) => {
+    const v = Number(process.env[key]);
+    return Number.isFinite(v) && v >= 0 && process.env[key]?.trim() ? v : fallback;
+  };
+  return {
+    input: num("DEEPSEEK_PRICE_INPUT", 0.3),
+    output: num("DEEPSEEK_PRICE_OUTPUT", 1.2),
+    cacheRead: num("DEEPSEEK_PRICE_CACHE_HIT", 0.006),
+    cacheWrite: 0,
+  };
+}
+
 function priceFor(model: string): Price | null {
+  if (model.startsWith("deepseek")) return deepseekPrice();
   const key = Object.keys(PRICES)
     .filter((k) => model === k || model.startsWith(`${k}-`))
     .sort((a, b) => b.length - a.length)[0];

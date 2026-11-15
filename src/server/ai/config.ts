@@ -47,6 +47,11 @@ export function defaultExtractionModel(): string {
  * después AI_EXTRACTION_MODEL para el análisis o AI_MODEL para el resto.
  */
 export function modelFor(operation: AIOperation): string {
+  // Con DeepSeek los modelos de Claude no aplican: un modelo para el chat y otro (o el mismo) para el análisis.
+  if (process.env.AI_PROVIDER?.toLowerCase() === "deepseek") {
+    const chat = process.env.DEEPSEEK_MODEL?.trim() || "deepseek-flash";
+    return EXTRACTION_OPERATIONS.has(operation) ? process.env.DEEPSEEK_EXTRACTION_MODEL?.trim() || chat : chat;
+  }
   const specific = process.env[`AI_MODEL_${operation.replace(/\W/g, "_").toUpperCase()}`]?.trim();
   if (specific) return specific;
   return EXTRACTION_OPERATIONS.has(operation) ? defaultExtractionModel() : defaultModel();
