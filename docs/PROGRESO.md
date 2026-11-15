@@ -4,15 +4,14 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ## Estado actual
 
-- Etapa en curso: 6. Abiertas por pasos que dependen de Tomás: 1 (revisar la lista de esquema), 2 (prueba con Claude real y staging), 4 (medición de precisión con modelo real) y 6 (producción, abogado y revisión de seguridad). La 3 y la 5 están cerradas.
-- Último PR fusionado: #31 (propuesta de aviso y cierre de la sesión).
-- Bloqueos que necesitan a Tomás, con el paso exacto:
-  1. Base de staging: en Vercel, Storage → Create Database → Neon → plan Free → nombre `educai-staging`, región São Paulo (`gru1`). La API no deja crearla sin esa autorización del panel. Con la base creada, Claude Code arma el proyecto de staging, carga los secretos y corre los flujos contra staging.
-  2. Clave de Anthropic de desarrollo cargada como variable `ANTHROPIC_API_KEY` del entorno de Claude Code (etapas 2 y 4).
+- Etapa en curso: 6. Abiertas: 1 (revisar la lista de esquema), 2 (prueba con IA real), 4 (medición de precisión con IA real) y 6 (producción). La 3 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
+- Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio; `npm run test:staging` en verde). IA guionada hasta que la cuenta de DeepSeek tenga saldo.
+- IA real: DeepSeek de forma provisoria (`AI_PROVIDER=deepseek`). La clave está guardada como secreto de red de la sesión, pero la cuenta no tiene saldo (la API responde 402).
+- Pasos que dependen de Tomás:
+  1. Cargar saldo en la cuenta de DeepSeek. Con eso Claude Code corre la prueba real (etapa 2) y, después de la revisión de etiquetas, la medición de precisión (etapa 4).
+  2. Para staging con IA real: en Vercel, proyecto `educai-staging` → Settings → Environment Variables, agregar `DEEPSEEK_API_KEY` como variable sensible. Claude Code cambia después `AI_PROVIDER` a `deepseek`.
   3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1) y la muestra de `docs/informes/etiquetas-muestra.md` (etapa 4).
-  4. Producción: instancia de al menos 2 CPU, PostgreSQL con backup diario y 14 días de retención, entorno `production` protegido, y la prueba de restauración de `ENTORNOS_Y_DESPLIEGUE.md`.
-  5. Webhook de alertas de consumo (`AI_ALERT_WEBHOOK_URL`) y confirmar los montos del tope (2 USD por estudiante por semana, alerta a los 25 USD semanales).
-  6. Abogado: `docs/legal/` (seis preguntas, propuesta de aviso y plazos de conservación). Revisión de seguridad: `docs/seguridad/README.md`.
+  4. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
 
 ## Etapas
 
@@ -61,14 +60,16 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 
 ### Etapa 6: preparación del piloto
 - [ ] Producción con backups diarios y restauración probada (scripts y procedimiento listos, restauración probada en local y en el CI con datos sintéticos: `docs/informes/restauracion-local.md`; falta crear producción, activar el backup diario y hacer la prueba allá, ver `ENTORNOS_Y_DESPLIEGUE.md`)
-- [ ] Aviso de consentimiento y convenio revisados por un abogado (Ley 25.326) (documentos listos en `docs/legal/`, con seis preguntas para el abogado; falta la revisión y la firma)
-- [ ] Revisión de seguridad hecha por una persona (paquete listo en `docs/seguridad/`: mapa de permisos, V1 a V15 con sus tests y puntos a revisar; al prepararlo apareció y se corrigió una brecha de V11 en vistas heredadas; falta la revisión y la firma)
+- [~] Aviso de consentimiento y convenio revisados por un abogado (Ley 25.326): descartado por decisión de Tomás (2026-11-15, ver `DECISIONES.md`). Los documentos de `docs/legal/` quedan como referencia.
+- [~] Revisión de seguridad hecha por una persona: descartada por decisión de Tomás (2026-11-15, ver `DECISIONES.md`). El paquete de `docs/seguridad/` queda como referencia.
 - [x] Tope de costo por estudiante y alerta de consumo (2 USD por semana y estudiante, aviso al 80%, alertas por log y webhook; falta que Tomás cree el webhook y lo cargue en `AI_ALERT_WEBHOOK_URL`)
 - [x] Prueba de carga con 60 estudiantes simulados (`docs/informes/carga-etapa-6.md`: sin errores ni pérdida de datos; con 2 CPU cumple todos los criterios, con 1 CPU el login simultáneo de los 60 tarda 7 s)
 
 ## Bitácora de sesiones
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
+
+- 2026-11-15 (continuación) · Staging en Vercel con Neon, contraseña de sitio y despliegue automático desde `main` (#32); prueba de humo por la interfaz en verde contra staging (#34); DeepSeek como proveedor provisorio, probado con la API simulada y con la API real hasta donde lo permite una cuenta sin saldo (#33). Tomás descartó el abogado y la revisión de seguridad externa. Gasto de IA: 0 USD.
 
 - 2026-11-15 (continuación) · Endurecimiento previo a la revisión de seguridad (#28): test estático de cobertura de permisos (lo pedía `PRUEBAS.md`), intentos de acceso por URL con Playwright, control propio en `/s/join` y `/t/new`, límite de 200 MB descomprimidos para DOCX y PPTX, y borrado de invitaciones al borrar la cuenta. Descarga de los datos propios y corrección de un texto que decía que las conversaciones las veía solo el estudiante (#29). Mecanismo de plazos de conservación, apagado hasta que se fijen (#30). Propuesta de aviso para el abogado (#31). Staging quedó a un clic: la cuenta de Vercel tiene la integración de Neon, pero crear la base pide autorización en el panel. Gasto de IA: 0 USD.
 

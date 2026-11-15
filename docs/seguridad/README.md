@@ -2,6 +2,8 @@
 
 15 de noviembre de 2026 · Preparado por Claude Code para la persona que haga la revisión
 
+> **Estado:** Tomás decidió no hacer la revisión de seguridad externa (2026-11-15). El mapa de permisos y los puntos a revisar quedan como referencia y se mantienen al día con el código.
+
 El spec pide una revisión de seguridad hecha por una persona antes del piloto, con foco en permisos. La IA que escribió el código no debería ser la única que lo audita, así que este paquete no es una revisión: es el mapa para que la revisión sea rápida y no se le escape nada.
 
 ## Qué se protege

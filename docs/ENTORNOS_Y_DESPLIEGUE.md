@@ -19,6 +19,12 @@
 - Prueba de humo: `npm run test:staging` recorre con la interfaz el flujo docente → material → estudiante con consentimiento → pregunta con cita, y el chequeo de salud. Lee la contraseña de `.secrets/staging/SITE_PASSWORD` o de `STAGING_SITE_PASSWORD`. Crea cuentas sintéticas con correos `@test.educai`.
 - Límite propio de Vercel: un pedido no puede superar 4,5 MB, así que en staging el material de la cátedra se sube en archivos de hasta ese tamaño (en local y en producción el límite es 20 MB).
 
+## Producción (propuesta)
+
+Igual que staging, en la misma cuenta: un proyecto `educai` en Vercel y una base Neon `educai-prod` en São Paulo, sin contraseña de sitio y con el proveedor de IA real. Lo único que cambia de fondo es el respaldo de la base: el spec pide backup diario con al menos 14 días de historia. El plan gratuito de Neon guarda un historial de restauración corto, de horas, que no alcanza; los planes pagos lo extienden. Elegir el plan es la decisión de Tomás; el resto (proyecto, variables, migraciones, chequeo de salud y la prueba de restauración) lo hace Claude Code. El despliegue a producción sigue necesitando la aprobación de Tomás.
+
+Alertas de consumo: el webhook se crea en un canal propio (en Discord: configuración del canal → Integraciones → Webhooks → Nuevo webhook → Copiar URL) y se pega como variable sensible `AI_ALERT_WEBHOOK_URL` en el proyecto de Vercel.
+
 ## Flujo de cambios
 
 1. Claude Code trabaja en una rama y abre un PR.

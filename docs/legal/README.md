@@ -2,6 +2,8 @@
 
 15 de noviembre de 2026 · Preparado por Claude Code para Tomás y el abogado
 
+> **Estado:** Tomás decidió no hacer la revisión del abogado (2026-11-15). Estos documentos quedan como referencia de lo que la app hace con los datos y se mantienen al día con el código.
+
 El spec pide que el aviso de consentimiento y el convenio del piloto los revise un abogado, en el marco de la Ley 25.326 de Protección de Datos Personales. Estos documentos describen lo que la app hace hoy, verificado contra el código, para que la revisión parta de hechos y no de intenciones. No son un dictamen ni reemplazan la opinión del abogado.
 
 | Documento | Para qué |
