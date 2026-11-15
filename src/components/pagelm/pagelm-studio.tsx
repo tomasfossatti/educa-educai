@@ -231,7 +231,10 @@ export function PageLMStudio() {
   useEffect(() => {
     try {
       const savedSources = localStorage.getItem("pagelm_sources");
-      if (savedSources) setSources(JSON.parse(savedSources));
+      if (savedSources) {
+        const parsed: SourceItem[] = JSON.parse(savedSources);
+        queueMicrotask(() => setSources(parsed));
+      }
     } catch {
       // Ignorar
     }
