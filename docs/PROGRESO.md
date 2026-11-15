@@ -4,7 +4,7 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ## Estado actual
 
-- Etapa en curso: 4. Abiertas: 1 (falta la revisión de Tomás de la lista de esquema) y 2 (falta la prueba con Claude real y staging). La 3 está cerrada.
+- Etapa en curso: 4 (solo falta la medición de precisión) y 5 en paralelo. Abiertas: 1 (falta la revisión de Tomás de la lista de esquema) y 2 (falta la prueba con Claude real y staging). La 3 está cerrada.
 - Último PR fusionado: #12 (material de la cátedra)
 - Bloqueos que necesitan a Tomás: revisar la lista de entidades y cambios al esquema en `DECISIONES.md`; checklist de `CUENTAS_Y_SECRETOS.md` (clave de Anthropic de desarrollo para la prueba real de la etapa 2, cuenta y token de staging, protección de `main`)
 
@@ -33,12 +33,12 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 Cómo se comprobó (etapa 3): tests de integración contra Postgres (`visibility-stage3`, `material`, `folder-chat`) y un recorrido con Playwright sobre el build de producción. En ese recorrido, el docente sube PDF y PPTX y quedan indexados. Una estudiante nueva se registra, elige "Acepto" (no viene premarcado) y ve sus dos carpetas. Pregunta y recibe "[1] programa.pdf, pág. 2"; pregunta algo fuera del material y se le avisa "Sin fuente"; sube una conversación pegada. Todo con el proveedor guionado. La prueba con Claude real queda junto con la de la etapa 2 (falta la clave).
 
 ### Etapa 4: motor y panel del docente
-- [ ] Detección de dudas por tema con confirmación del estudiante
-- [ ] Vista macro con porcentajes, denominador y participación
-- [ ] Ficha por estudiante con evidencia y registro en `AccessLog`
-- [ ] Mi ficha idéntica a la del docente, con la lista de accesos
-- [ ] Tests de V1 a V6, V9, V12, V14 y V15
-- [ ] 30 conversaciones etiquetadas, al menos 80% de las dudas detectadas son correctas
+- [x] Detección de dudas por tema con confirmación del estudiante
+- [x] Vista macro con porcentajes, denominador y participación
+- [x] Ficha por estudiante con evidencia y registro en `AccessLog`
+- [x] Mi ficha idéntica a la del docente, con la lista de accesos
+- [x] Tests de V1 a V6, V9, V12, V14 y V15
+- [ ] 30 conversaciones etiquetadas, al menos 80% de las dudas detectadas son correctas (las 30 están en `tests/fixtures/dudas` y el script en `npm run eval:dudas`; falta que Tomás revise la muestra de `docs/informes/etiquetas-muestra.md` y la clave de Anthropic para medir)
 
 ### Etapa 5: quiz, dominio, contexto y slides
 - [ ] Quiz por tema con cálculo de dominio
