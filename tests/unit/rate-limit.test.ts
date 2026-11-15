@@ -23,8 +23,9 @@ describe("lockedUntil", () => {
 });
 
 describe("clientIp", () => {
-  it("toma el primer valor de X-Forwarded-For", () => {
-    expect(clientIp("203.0.113.7, 10.0.0.1", null)).toBe("203.0.113.7");
+  it("toma el último valor de X-Forwarded-For (el que agrega el proxy, no el cliente)", () => {
+    expect(clientIp("1.2.3.4, 203.0.113.7", null)).toBe("203.0.113.7");
+    expect(clientIp("203.0.113.7", null)).toBe("203.0.113.7");
   });
   it("cae en X-Real-IP y después en null", () => {
     expect(clientIp(null, "198.51.100.2")).toBe("198.51.100.2");

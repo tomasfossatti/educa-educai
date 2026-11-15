@@ -45,8 +45,11 @@ export async function clearLoginFailures(email: string): Promise<void> {
   await db.loginAttempt.deleteMany({ where: { email } });
 }
 
-/** IP del cliente detrás del proxy (primer valor de X-Forwarded-For). */
+/**
+ * IP del cliente detrás del proxy. Se toma el último valor de X-Forwarded-For, que es el que
+ * agrega el proxy del proveedor; los anteriores los puede inventar el cliente.
+ */
 export function clientIp(forwardedFor: string | null, realIp: string | null): string | null {
-  const first = forwardedFor?.split(",")[0]?.trim();
-  return first || realIp?.trim() || null;
+  const last = forwardedFor?.split(",").map((v) => v.trim()).filter(Boolean).at(-1);
+  return last || realIp?.trim() || null;
 }
