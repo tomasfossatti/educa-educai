@@ -13,18 +13,72 @@ import { closeConversationAction } from "@/server/actions/student";
 import { listConversationDoubts } from "@/server/services/doubts";
 import type { MessageCitations } from "@/server/services/folder-chat";
 import { AskForm } from "./ask-form";
+import { SelectionAsk } from "./selection-ask";
 
 export const metadata: Metadata = { title: "Conversación" };
 
-export default async function FolderConversationPage({ params }: { params: Promise<{ folderId: string; conversationId: string }> }) {
+type Msg = { id: string; role: "STUDENT" | "TUTOR"; content: string; citations: unknown };
+
+/** Mensajes con sus fuentes; cada fuente muestra el fragmento citado (seleccionable para un hilo). */
+function Messages({ messages, chunks }: { messages: Msg[]; chunks: Map<string, string> }) {
+  const t = TEXT.chat;
+  return (
+    <ol className="space-y-4">
+      {messages.map((m) => {
+        const citations = m.citations as MessageCitations | null;
+        const isStudent = m.role === "STUDENT";
+        return (
+          <li key={m.id} className={cn("rounded-xl border p-4", isStudent ? "border-line bg-surface-2" : "border-line bg-surface")}>
+            <p className="mb-1 text-xs font-medium text-muted">{isStudent ? t.you : t.tutor}</p>
+            <p className="whitespace-pre-wrap text-sm text-ink">{m.content}</p>
+            {!isStudent && citations?.items.length ? (
+              <div className="mt-3 space-y-1 border-t border-line pt-2 text-xs text-muted">
+                <span className="font-medium">{t.sources}:</span>
+                {citations.items.map((c) => (
+                  <details key={c.n}>
+                    <summary className="cursor-pointer">
+                      [{c.n}] {c.fileName}, {t.page(c.page)} · {TEXT.thread.showSource}
+                    </summary>
+                    <p className="mt-1 whitespace-pre-wrap text-ink-2">{chunks.get(c.chunkId) ?? "—"}</p>
+                  </details>
+                ))}
+              </div>
+            ) : null}
+            {!isStudent && citations?.noSource && <p className="mt-3 text-xs text-attention">{t.noSource}</p>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export default async function FolderConversationPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ folderId: string; conversationId: string }>;
+  searchParams: Promise<{ hilo?: string }>;
+}) {
   const { folderId, conversationId } = await params;
+  const { hilo } = await searchParams;
   const { user } = await requireStudent();
   // Solo el dueño: la consulta filtra por estudiante y carpeta (V8).
   const conversation = await db.aIConversation.findFirst({
     where: { id: conversationId, folderId, studentId: user.id },
-    include: { folder: { select: { name: true } }, messages: { orderBy: { createdAt: "asc" } } },
+    include: {
+      folder: { select: { name: true } },
+      messages: { where: { threadId: null }, orderBy: { createdAt: "asc" } },
+      threads: { orderBy: { createdAt: "asc" }, include: { messages: { orderBy: { createdAt: "asc" } } } },
+    },
   });
   if (!conversation) notFound();
+  const openThread = hilo ? conversation.threads.find((th) => th.id === hilo) ?? null : null;
+  const chunkIds = [...conversation.messages, ...(openThread?.messages ?? [])].flatMap(
+    (m) => (m.citations as MessageCitations | null)?.items.map((c) => c.chunkId) ?? [],
+  );
+  const chunks = new Map(
+    (await db.materialChunk.findMany({ where: { id: { in: chunkIds }, courseId: conversation.courseId ?? "" }, select: { id: true, text: true } })).map((c) => [c.id, c.text]),
+  );
   const t = TEXT.chat;
   const d = TEXT.doubts;
   const doubts = await listConversationDoubts({ id: user.id, role: user.role }, conversation.id);
@@ -38,29 +92,39 @@ export default async function FolderConversationPage({ params }: { params: Promi
       {conversation.messages.length === 0 ? (
         <EmptyState title={t.empty} />
       ) : (
-        <ol className="space-y-4">
-          {conversation.messages.map((m) => {
-            const citations = m.citations as unknown as MessageCitations | null;
-            const isStudent = m.role === "STUDENT";
-            return (
-              <li key={m.id} className={cn("rounded-xl border p-4", isStudent ? "border-line bg-surface-2" : "border-line bg-surface")}>
-                <p className="mb-1 text-xs font-medium text-muted">{isStudent ? t.you : t.tutor}</p>
-                <p className="whitespace-pre-wrap text-sm text-ink">{m.content}</p>
-                {!isStudent && citations?.items.length ? (
-                  <div className="mt-3 border-t border-line pt-2 text-xs text-muted">
-                    <span className="font-medium">{t.sources}: </span>
-                    {citations.items.map((c) => (
-                      <span key={c.n} className="mr-3">
-                        [{c.n}] {c.fileName}, {t.page(c.page)}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                {!isStudent && citations?.noSource && <p className="mt-3 text-xs text-attention">{t.noSource}</p>}
+        <div className={cn("grid gap-6", openThread && "lg:grid-cols-[1fr_22rem]")}>
+          <div className="space-y-3">
+            <p className="text-xs text-muted">{TEXT.thread.hint}</p>
+            <SelectionAsk conversationId={conversation.id} folderId={folderId}>
+              <Messages messages={conversation.messages} chunks={chunks} />
+            </SelectionAsk>
+          </div>
+          {openThread && (
+            <aside className="space-y-3 rounded-xl border border-primary/30 p-4" aria-label={TEXT.thread.title}>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-semibold text-ink">{TEXT.thread.title}</h2>
+                <TextLink href={`/s/folders/${folderId}/c/${conversation.id}`}>{TEXT.thread.close}</TextLink>
+              </div>
+              <Quote>{openThread.anchor}</Quote>
+              <Messages messages={openThread.messages} chunks={chunks} />
+              {conversation.status === "ACTIVE" && <AskForm conversationId={conversation.id} threadId={openThread.id} placeholder={TEXT.thread.placeholder} />}
+            </aside>
+          )}
+        </div>
+      )}
+      {conversation.threads.length > 0 && (
+        <details>
+          <summary className="cursor-pointer text-sm text-muted">
+            {TEXT.thread.list} ({conversation.threads.length})
+          </summary>
+          <ul className="mt-2 space-y-1 text-sm">
+            {conversation.threads.map((th) => (
+              <li key={th.id}>
+                <TextLink href={`/s/folders/${folderId}/c/${conversation.id}?hilo=${th.id}`}>«{th.anchor.slice(0, 80)}»</TextLink>
               </li>
-            );
-          })}
-        </ol>
+            ))}
+          </ul>
+        </details>
       )}
       {conversation.origin === "CHAT" && conversation.status === "ACTIVE" && <AskForm conversationId={conversation.id} />}
       {conversation.origin === "CHAT" && conversation.status === "ACTIVE" && conversation.courseId && conversation.messages.length > 0 && (
