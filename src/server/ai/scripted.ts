@@ -180,136 +180,12 @@ function feedback(message: string) {
   };
 }
 
-function pagelmQuiz(message: string) {
-  return {
-    questions: [
-      {
-        id: "q-1",
-        question: "¿Cuál es el propósito central de las fuentes analizadas?",
-        options: [
-          quote(message, 60) || "Validar hipótesis con evidencia observable",
-          "Aceptar supuestos sin contrastación previa",
-          "Postergar la medición hasta el final del proyecto",
-          "Evitar la formulación de métricas concretas",
-        ],
-        correctIndex: 0,
-        explanation: "Las fuentes destacan la importancia de verificar supuestos mediante observación y criterios claros.",
-      },
-    ],
-  };
-}
 
-function pagelmFlashcards(message: string) {
-  return {
-    cards: [
-      {
-        id: "fc-1",
-        front: "Concepto Principal",
-        back: quote(message, 120) || "Hipótesis falsable con métrica y umbral verificables.",
-      },
-      {
-        id: "fc-2",
-        front: "Criterio de Validación",
-        back: "Recolección de evidencia empírica antes de comprometer recursos significativos.",
-      },
-    ],
-  };
-}
 
-function pagelmNotes(message: string) {
-  return {
-    title: "Síntesis de Conceptos Clave",
-    sections: [
-      {
-        heading: "1. Núcleo Conceptual",
-        body: quote(message, 200) || "Resumen estructurado de los materiales de estudio.",
-      },
-      {
-        heading: "2. Aplicación Práctica",
-        body: "Diseño de pruebas acotadas con métricas verificables en plazos definidos.",
-      },
-    ],
-  };
-}
 
-function pagelmPodcast(message: string) {
-  return {
-    episodeTitle: "Análisis y Discusión de Fuentes",
-    estimatedDuration: "3 min",
-    lines: [
-      {
-        speaker: "Alex",
-        text: `Hola y bienvenidos. Hoy estamos analizando el material de estudio. Lo central que rescato es: ${quote(message, 90)}.`,
-      },
-      {
-        speaker: "Sam",
-        text: "Totalmente de acuerdo, Alex. El punto clave es cómo transformamos esa teoría en una prueba verificable en el contexto real.",
-      },
-      {
-        speaker: "Alex",
-        text: "Exacto. Si no tenemos una métrica definida antes de empezar, caemos en sesgos de confirmación.",
-      },
-      {
-        speaker: "Sam",
-        text: "Por eso el protocolo de validación temprana marca la diferencia entre una corazonada y una decisión fundamentada.",
-      },
-    ],
-  };
-}
 
-function deepstudentAgent(message: string) {
-  return {
-    steps: [
-      {
-        id: "ds-1",
-        phase: "FASE 1: DIAGNÓSTICO",
-        title: "Diagnóstico contextual",
-        content: `Evaluación de la problemática planteada: ${quote(message, 120)}.`,
-        status: "completed",
-      },
-      {
-        id: "ds-2",
-        phase: "FASE 2: HIPÓTESIS",
-        title: "Hipótesis falsable",
-        content: "Definición de experimento con métrica cuantitativa, umbral mínimo de éxito y plazo de ejecución.",
-        status: "active",
-      },
-      {
-        id: "ds-3",
-        phase: "FASE 3: CONTRAEJEMPLOS",
-        title: "Análisis de sesgos y riesgos",
-        content: "Detección de sesgo de cortesía y validación de disposición real de pago o adopción.",
-        status: "pending",
-      },
-      {
-        id: "ds-4",
-        phase: "FASE 4: VERIFICACIÓN",
-        title: "Protocolo de evidencia",
-        content: "Registro sistemático de resultados contrastando con el umbral predeterminado.",
-        status: "pending",
-      },
-    ],
-  };
-}
 
-function getitFeynman(message: string) {
-  return {
-    childResponse: `¡Entendí una parte! Pero decime, ¿por qué no se puede hacer simplemente preguntándole a todos si les gusta? ¿Qué pasa si te dicen que sí solo para ser amables? («${quote(message, 50)}»)`,
-    critique: "Explicación clara y accesible. Para profundizar, evitá términos abstractos y reforzá con un ejemplo cotidiano.",
-    clarityScore: 85,
-    nextPrompt: "¿Cómo le explicarías a un niño qué es un umbral de éxito sin usar números difíciles?",
-  };
-}
 
-function getitEvaluate(message: string) {
-  return {
-    memory: 85,
-    comprehension: 78,
-    structure: 72,
-    application: 68,
-    evaluatorNote: "Comprensión sólida de la falsabilidad y la necesidad de parámetros cuantitativos antes del experimento.",
-  };
-}
 
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
@@ -318,13 +194,6 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "interpret.evaluate": evaluate,
   "interpret.infer": infer,
   "interpret.feedback": feedback,
-  "pagelm.quiz": pagelmQuiz,
-  "pagelm.flashcards": pagelmFlashcards,
-  "pagelm.notes": pagelmNotes,
-  "pagelm.podcast": pagelmPodcast,
-  "deepstudent.agent": deepstudentAgent,
-  "getit.feynman": getitFeynman,
-  "getit.evaluate": getitEvaluate,
 };
 
 export class ScriptedProvider implements LLMProvider {

@@ -5,17 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import {
   X,
-  ChevronRight,
   AlertCircle,
   Users,
   BookOpen,
   LogOut,
 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { cn } from "@/lib/cn";
 import { logoutAction } from "@/server/actions/auth";
 
 interface SidebarProps {
@@ -30,26 +27,6 @@ interface SidebarProps {
   totalClasses?: number;
 }
 
-const AI_RESOURCES = [
-  {
-    name: "Deep Student",
-    description: "Laboratorio de agentes y prompts para estudiantes",
-    badge: "Agentes",
-    href: "/s/deep-student",
-  },
-  {
-    name: "PageLM Studio",
-    description: "Generador de interfaces educativas con IA",
-    badge: "UI",
-    href: "/s/pagelm",
-  },
-  {
-    name: "Get It",
-    description: "Espacio de resolución guiada paso a paso",
-    badge: "Tutor",
-    href: "/s/get-it",
-  },
-];
 
 export function Sidebar({
   isOpen,
@@ -145,38 +122,6 @@ export function Sidebar({
             </div>
           )}
 
-          {/* Proyectos y herramientas (sentence case) */}
-          <div className="space-y-2">
-            <span className="text-xs font-mono font-medium text-muted px-2">
-              Proyectos y herramientas
-            </span>
-            <div className="space-y-1.5">
-              {AI_RESOURCES.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    "group flex items-center justify-between rounded-xl border p-3 transition-colors duration-150 shadow-xs",
-                    pathname === item.href
-                      ? "border-primary/40 bg-primary/10 text-primary font-semibold"
-                      : "border-line bg-surface-2/50 hover:bg-surface-2 hover:border-line-strong"
-                  )}
-                >
-                  <div className="space-y-0.5 min-w-0">
-                    <p className="text-xs font-semibold text-ink group-hover:text-primary transition-colors flex items-center gap-1.5 truncate">
-                      <span className="truncate">{item.name}</span>
-                      <Badge tone="neutral" className="shrink-0">{item.badge}</Badge>
-                    </p>
-                    <p className="text-xs text-muted truncate">
-                      {item.description}
-                    </p>
-                  </div>
-                  <ChevronRight className="size-4 text-muted group-hover:text-primary transition-colors shrink-0 ml-2" />
-                </Link>
-              ))}
-            </div>
-          </div>
 
           {/* Herramientas de gestión docente */}
           {isTeacher && teacherCourseId && (
