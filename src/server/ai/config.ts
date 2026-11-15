@@ -21,6 +21,7 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "quiz.generate": { effort: "medium", maxTokens: 6000 },
   "context.facts": { effort: "low", maxTokens: 3000 },
   "context.summary": { effort: "low", maxTokens: 1500 },
+  "slides.generate": { effort: "medium", maxTokens: 8000 },
 };
 
 /**

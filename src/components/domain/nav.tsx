@@ -67,6 +67,7 @@ export function TeacherNav({ courseId }: { courseId: string }) {
       <NavLink href={`${base}/activities`} label="Actividades" active={section.startsWith("/activities")} />
       <NavLink href={`${base}/curriculum`} label="Currícula" active={section.startsWith("/curriculum")} />
       <NavLink href={`${base}/material`} label={TEXT.material.nav} active={section.startsWith("/material")} />
+      <NavLink href={`${base}/clases`} label={TEXT.classes.nav} active={section.startsWith("/clases")} />
     </>
   );
 }

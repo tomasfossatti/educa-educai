@@ -16,7 +16,8 @@ export type AIOperation =
   | "folder.chat"
   | "quiz.generate"
   | "context.facts"
-  | "context.summary";
+  | "context.summary"
+  | "slides.generate";
 
 export type Effort = "low" | "medium" | "high";
 

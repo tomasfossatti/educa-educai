@@ -9,8 +9,11 @@ import { Card, EmptyState, List, ListItem, Notice, Section } from "@/components/
 import { truncate } from "@/domain/text-guards";
 import { acceptInviteAction, selectCourseAction } from "@/server/actions/student";
 import { FoldersSection } from "@/components/student/folders-section";
+import { formatDate } from "@/lib/format";
+import { TEXT } from "@/lib/texts";
 import { requireStudent } from "@/server/auth/guards";
 import { closeInactiveConversations } from "@/server/engine/trigger";
+import { nextApprovedSession } from "@/server/services/class-sessions";
 import { getCurrentCourseId, getPendingInvites, getStudentCourses, getStudentHome } from "@/server/services/student-home";
 
 export const metadata: Metadata = { title: "Inicio" };
@@ -65,6 +68,7 @@ export default async function StudentHome() {
   const primaryEnrollment = courses.find((c) => c.courseId === courseId) || courses[0];
   const activeCourse = primaryEnrollment.course;
   const home = await getStudentHome(user.id, activeCourse.id);
+  const nextClass = await nextApprovedSession(activeCourse.id);
   const base = `/s/courses/${activeCourse.id}`;
 
   return (
@@ -87,6 +91,12 @@ export default async function StudentHome() {
       {inviteNotice}
 
       <FoldersSection studentId={user.id} />
+
+      {nextClass && (
+        <Notice title={TEXT.classes.studentNext(formatDate(nextClass.date), nextClass.items.map((i) => i.curriculumItem.title).join(", "))}>
+          {nextClass.objective}
+        </Notice>
+      )}
 
       {/* Tarjeta heroica de la materia activa del día (hairline card refinada) */}
       <section className="relative rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs">

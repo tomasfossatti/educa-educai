@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-15 · Slides de la clase
+Se agregó `ClassSession` (fecha, temas, objetivo, borrador y aprobación). El borrador sale del material de los temas y de las dudas frecuentes de la clase (vista macro de dos semanas). Las slides sin fragmento válido se descartan, y sin material no hay borrador. Editar o regenerar saca la aprobación. La aprobación es lo que muestra la próxima clase en el inicio del estudiante. PowerPoint con `pptxgenjs` (MIT): portada, una slide por punto, fuente al pie y notas del docente.
+
+### 2026-11-15 · Pregunta sobre un fragmento: hilos dentro de la conversación
+El hilo es parte de la misma conversación (`ConversationThread` y `Message.threadId`), así el motor lo sigue viendo como evidencia y el borrado en cascada lo incluye. El historial del hilo no se mezcla con el principal.
+
 ### 2026-11-15 · Contexto de carpeta: dónde vive el resumen y cuándo se construye
 El resumen cruza carpetas, así que se guarda una sola fila SUMMARY activa en la carpeta del proyecto y entra al prompt de todas las carpetas. Los hechos se actualizan al cerrar cada conversación (o al recibir una subida) y el resumen se renueva como máximo una vez por día. Es análisis, así que se construye solo con el consentimiento activo. El archivado es condicional en la base, para no pisar una edición del estudiante que llegue mientras corre el proceso. El estudiante puede borrar; el proceso nunca borra.
 

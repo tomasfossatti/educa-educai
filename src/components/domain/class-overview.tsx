@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { List, ListItem, Section } from "@/components/ui/layout";
-import { formatRelative } from "@/lib/format";
+import { formatDate, formatRelative } from "@/lib/format";
 import { TEXT } from "@/lib/texts";
 import type { ClassOverview } from "@/server/services/class-view";
 
@@ -15,6 +15,24 @@ export function ClassOverviewSection({ overview, courseId }: { overview: ClassOv
   return (
     <Section title={t.title} description={t.participation(p.consented, p.enrolled, p.conversedThisWeek)}>
       <div className="space-y-6">
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-ink">{TEXT.classes.todayTitle}</h3>
+          {overview.nextClass ? (
+            <p className="flex flex-wrap items-center gap-2 text-sm text-ink">
+              {formatDate(overview.nextClass.date)} · {overview.nextClass.topics.join(", ")}
+              <Link href={`/t/courses/${courseId}/clases/${overview.nextClass.id}`} className="text-primary hover:underline">
+                {TEXT.classes.prepare}
+              </Link>
+            </p>
+          ) : (
+            <p className="text-sm text-muted">
+              {TEXT.classes.noNext}{" "}
+              <Link href={`/t/courses/${courseId}/clases`} className="text-primary hover:underline">
+                {TEXT.classes.create}
+              </Link>
+            </p>
+          )}
+        </div>
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-ink">{t.topicsTitle}</h3>
           {discussed.length === 0 && <p className="text-sm text-muted">{t.noTopics}</p>}

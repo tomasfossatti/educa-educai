@@ -9,12 +9,13 @@ import { activityPromptsSchema } from "@/domain/activity";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
 import { extractEmails } from "@/lib/emails";
 import { TEXT } from "@/lib/texts";
-import { isAIConfigured } from "@/server/ai";
+import { AIError, isAIConfigured } from "@/server/ai";
 import { requireCourseTeacher, requireTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { computeAndStoreSnapshot } from "@/server/engine/snapshot";
 import { EVENT, track } from "@/server/events";
 import { startCurriculumExtraction } from "@/server/services/curriculum";
+import { approveSlides, createClassSession, generateSlides, SlidesError, updateSlides } from "@/server/services/class-sessions";
 import { ingestMaterial, MaterialError } from "@/server/services/material";
 
 const JOIN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -463,4 +464,68 @@ export async function uploadMaterialAction(_prev: ActionState | null, formData: 
     if (error instanceof MaterialError) return { error: error.message, fieldErrors: { file: error.message } };
     throw error;
   }
+}
+
+// ───────────── Clases y slides ─────────────
+
+function teacherViewer(user: { id: string; role: "STUDENT" | "TEACHER" | "ADMIN" }) {
+  return { id: user.id, role: user.role };
+}
+
+export async function createClassSessionAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const courseId = text(formData, "courseId");
+  const { user } = await requireCourseTeacher(courseId);
+  const date = new Date(`${text(formData, "date")}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return { error: "Elegí una fecha.", fieldErrors: { date: "Elegí una fecha." } };
+  const topicIds = formData.getAll("topicIds").filter((v): v is string => typeof v === "string");
+  try {
+    await createClassSession(teacherViewer(user), courseId, { date, topicIds, objective: optionalText(formData, "objective") });
+  } catch (error) {
+    if (error instanceof SlidesError) return { error: error.message, fieldErrors: { topicIds: error.message } };
+    throw error;
+  }
+  refresh();
+  return { ok: true };
+}
+
+export async function generateSlidesAction(courseId: string, sessionId: string): Promise<void> {
+  const { user } = await requireCourseTeacher(courseId);
+  try {
+    await generateSlides(teacherViewer(user), sessionId);
+  } catch (error) {
+    if (error instanceof SlidesError || error instanceof AIError) {
+      redirect(`/t/courses/${courseId}/clases/${sessionId}?error=${encodeURIComponent(error.message)}`);
+    }
+    throw error;
+  }
+  refresh();
+}
+
+export async function saveSlidesAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const courseId = text(formData, "courseId");
+  const { user } = await requireCourseTeacher(courseId);
+  const count = Number(text(formData, "count"));
+  const edits = Array.from({ length: Number.isFinite(count) ? Math.min(count, 12) : 0 }, (_, i) => ({
+    title: text(formData, `title${i}`),
+    bullets: text(formData, `bullets${i}`)
+      .split("\n")
+      .map((b) => b.trim())
+      .filter(Boolean),
+    notes: text(formData, `notes${i}`),
+  }));
+  try {
+    await updateSlides(teacherViewer(user), text(formData, "sessionId"), edits);
+  } catch (error) {
+    if (error instanceof SlidesError) return { error: error.message };
+    if (error instanceof z.ZodError) return { error: "Cada slide necesita título y al menos un punto." };
+    throw error;
+  }
+  refresh();
+  return { ok: true, message: TEXT.classes.saved };
+}
+
+export async function approveSlidesAction(courseId: string, sessionId: string): Promise<void> {
+  const { user } = await requireCourseTeacher(courseId);
+  await approveSlides(teacherViewer(user), sessionId);
+  refresh();
 }
