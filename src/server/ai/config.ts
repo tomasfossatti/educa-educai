@@ -25,12 +25,31 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
 };
 
 /**
- * Modelo para una operación. Se puede sobrescribir por operación con
- * AI_MODEL_<OPERACION> (p. ej. AI_MODEL_TUTOR_REPLY) o globalmente con AI_MODEL.
+ * Operaciones de análisis en segundo plano: extracción de evidencia, señales, inferencias y
+ * contexto de carpeta. El spec pide que usen un modelo más económico que el chat.
+ */
+export const EXTRACTION_OPERATIONS: ReadonlySet<AIOperation> = new Set<AIOperation>([
+  "interpret.observe",
+  "interpret.signals",
+  "interpret.evaluate",
+  "interpret.infer",
+  "interpret.feedback",
+  "context.facts",
+  "context.summary",
+]);
+
+export function defaultExtractionModel(): string {
+  return process.env.AI_EXTRACTION_MODEL?.trim() || "claude-sonnet-5-5";
+}
+
+/**
+ * Modelo para una operación. Orden: AI_MODEL_<OPERACION> (p. ej. AI_MODEL_TUTOR_REPLY),
+ * después AI_EXTRACTION_MODEL para el análisis o AI_MODEL para el resto.
  */
 export function modelFor(operation: AIOperation): string {
   const specific = process.env[`AI_MODEL_${operation.replace(/\W/g, "_").toUpperCase()}`]?.trim();
-  return specific || defaultModel();
+  if (specific) return specific;
+  return EXTRACTION_OPERATIONS.has(operation) ? defaultExtractionModel() : defaultModel();
 }
 
 export function dailyTutorMessageLimit(): number {
