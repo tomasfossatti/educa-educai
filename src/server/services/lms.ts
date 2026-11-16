@@ -235,13 +235,6 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
         finishedAt: new Date(),
       },
     });
-    if (proposeTopics && job.courseId) {
-      // La importación ya quedó lista: si la propuesta falla, la materia queda con la currícula en error
-      // y el docente la puede pedir de nuevo desde «Currícula».
-      await proposeCurriculumFromMaterial(job.courseId, job.userId).catch((error) =>
-        console.error("[lms] propuesta de temas fallida", error instanceof Error ? error.message : error),
-      );
-    }
   } catch (error) {
     const message = error instanceof LmsError || error instanceof LmsServiceError ? error.message : "No se pudo completar la importación.";
     if (!(error instanceof LmsError)) console.error("[lms] importación fallida", error instanceof Error ? error.message : error);
