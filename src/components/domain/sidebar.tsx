@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import {
   X,
   AlertCircle,
@@ -12,12 +12,38 @@ import {
   Presentation,
   LogOut,
   Sparkles,
+  Home,
+  ClipboardList,
+  TrendingUp,
+  IdCard,
+  FolderOpen,
+  UserRound,
+  KeyRound,
 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { TEXT } from "@/lib/texts";
 import { logoutAction } from "@/server/actions/auth";
+import type { SidebarFolder } from "@/lib/sidebar";
+
+const SECTION_LABEL = "text-xs font-mono font-medium text-muted px-2";
+
+/** Enlace de la barra lateral con ícono, resaltado si es la página actual. */
+function SideLink({ href, active, icon, children }: { href: string; active: boolean; icon: ReactNode; children: ReactNode }) {
+  return (
+    <ButtonLink
+      href={href}
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
+      aria-current={active ? "page" : undefined}
+      className="w-full justify-start gap-3"
+    >
+      {icon}
+      <span className="truncate">{children}</span>
+    </ButtonLink>
+  );
+}
 
 interface SidebarProps {
   isOpen: boolean;
@@ -29,6 +55,7 @@ interface SidebarProps {
   courseTitle?: string;
   currentClassNumber?: number;
   totalClasses?: number;
+  folders?: SidebarFolder[];
 }
 
 
@@ -42,6 +69,7 @@ export function Sidebar({
   courseTitle,
   currentClassNumber,
   totalClasses,
+  folders = [],
 }: SidebarProps) {
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
@@ -80,7 +108,7 @@ export function Sidebar({
         if (e.target === e.currentTarget) onClose();
       }}
       className="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none bg-black/60 p-0 backdrop-blur-xs block"
-      aria-label="Menú lateral"
+      aria-label={TEXT.sidebar.label}
     >
       {/* Drawer lateral */}
       <aside
@@ -100,7 +128,7 @@ export function Sidebar({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            aria-label="Cerrar menú"
+            aria-label={TEXT.sidebar.close}
           >
             <X className="size-4 text-muted" />
           </Button>
@@ -108,31 +136,22 @@ export function Sidebar({
 
         {/* Contenido con navegación */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
-          {/* Cursada actual */}
-          {!isTeacher && courseTitle && (
-            <div className="space-y-1 px-2 pt-1 pb-1">
-              <Link
-                href={studentCourseId ? `/s/courses/${studentCourseId}` : "/s"}
-                onClick={onClose}
-                className="group block"
-              >
-                <h3 className="text-sm font-bold text-ink tracking-tight group-hover:text-primary transition-colors leading-snug">
-                  {courseTitle}
-                </h3>
-                {currentClassNumber && totalClasses ? (
-                  <p className="text-xs text-muted mt-0.5 font-medium">
-                    Clase {currentClassNumber} de {totalClasses}
-                  </p>
-                ) : null}
-              </Link>
-            </div>
+          {!isTeacher && (
+            <StudentLinks
+              pathname={pathname}
+              courseId={studentCourseId}
+              courseTitle={courseTitle}
+              currentClassNumber={currentClassNumber}
+              totalClasses={totalClasses}
+              folders={folders}
+              onClose={onClose}
+            />
           )}
-
 
           {/* Herramientas de gestión docente */}
           {isTeacher && teacherCourseId && (
             <div className="space-y-1">
-              <span className="text-xs font-mono font-medium text-muted px-2">Gestión docente</span>
+              <span className={SECTION_LABEL}>Gestión docente</span>
               <ButtonLink
                 href={`/t/courses/${teacherCourseId}/attention`}
                 variant={pathname.startsWith(`/t/courses/${teacherCourseId}/attention`) ? "secondary" : "ghost"}
@@ -185,17 +204,13 @@ export function Sidebar({
             </div>
           )}
 
-          <div className="space-y-1">
-            <ButtonLink
-              href={isTeacher ? "/t/asistente" : "/s/asistente"}
-              variant={pathname.endsWith("/asistente") ? "secondary" : "ghost"}
-              size="sm"
-              className="w-full justify-start gap-3"
-            >
-              <Sparkles className="size-4 text-primary shrink-0" />
-              <span>{TEXT.lms.navLabel}</span>
-            </ButtonLink>
-          </div>
+          {isTeacher && (
+            <div className="space-y-1">
+              <SideLink href="/t/asistente" active={pathname === "/t/asistente"} icon={<Sparkles className="size-4 text-primary shrink-0" />}>
+                {TEXT.lms.navLabel}
+              </SideLink>
+            </div>
+          )}
         </div>
 
         {/* Footer del sidebar */}
@@ -218,12 +233,108 @@ export function Sidebar({
                 className="w-full"
               >
                 <LogOut className="size-3.5 mr-1" />
-                <span>Salir</span>
+                <span>{TEXT.sidebar.logout}</span>
               </Button>
             </form>
           </div>
         </div>
       </aside>
     </dialog>
+  );
+}
+
+/** Navegación del estudiante: sección de la materia, sus carpetas y herramientas. */
+function StudentLinks({
+  pathname,
+  courseId,
+  courseTitle,
+  currentClassNumber,
+  totalClasses,
+  folders,
+  onClose,
+}: {
+  pathname: string;
+  courseId?: string;
+  courseTitle?: string;
+  currentClassNumber?: number;
+  totalClasses?: number;
+  folders: SidebarFolder[];
+  onClose: () => void;
+}) {
+  const t = TEXT.sidebar;
+  const base = courseId ? `/s/courses/${courseId}` : null;
+  const section = base && pathname.startsWith(base) ? pathname.slice(base.length) : null;
+  const icon = (Icon: typeof Home) => <Icon className="size-4 text-primary shrink-0" />;
+
+  return (
+    <>
+      <div className="space-y-1">
+        <SideLink href="/s" active={pathname === "/s"} icon={icon(Home)}>
+          {t.home}
+        </SideLink>
+        <SideLink href="/s/asistente" active={pathname === "/s/asistente"} icon={icon(Sparkles)}>
+          {TEXT.lms.navLabel}
+        </SideLink>
+      </div>
+
+      {base ? (
+        <div className="space-y-1">
+          {courseTitle && (
+            <Link href={base} onClick={onClose} className="group block px-2 pb-1">
+              <h3 className="text-sm font-bold text-ink tracking-tight group-hover:text-primary transition-colors leading-snug">
+                {courseTitle}
+              </h3>
+              {currentClassNumber && totalClasses ? (
+                <p className="text-xs text-muted mt-0.5 font-medium">
+                  Clase {currentClassNumber} de {totalClasses}
+                </p>
+              ) : null}
+            </Link>
+          )}
+          <SideLink href={base} active={section === "" || Boolean(section?.startsWith("/tutor"))} icon={icon(BookOpen)}>
+            {t.course}
+          </SideLink>
+          <SideLink href={`${base}/activities`} active={Boolean(section?.startsWith("/activities"))} icon={icon(ClipboardList)}>
+            {t.activities}
+          </SideLink>
+          <SideLink href={`${base}/development`} active={Boolean(section?.startsWith("/development"))} icon={icon(TrendingUp)}>
+            {t.development}
+          </SideLink>
+          <SideLink href={`${base}/ficha`} active={Boolean(section?.startsWith("/ficha"))} icon={icon(IdCard)}>
+            {TEXT.file.myTitle}
+          </SideLink>
+        </div>
+      ) : (
+        <div className="space-y-1">
+          <SideLink href="/s/join" active={pathname === "/s/join"} icon={icon(KeyRound)}>
+            {t.join}
+          </SideLink>
+        </div>
+      )}
+
+      <div className="space-y-1">
+        <span className={SECTION_LABEL}>{t.folders}</span>
+        {folders.length === 0 ? (
+          <p className="px-2 text-xs text-muted">{t.noFolders}</p>
+        ) : (
+          folders.map((f) => (
+            <SideLink
+              key={f.id}
+              href={`/s/folders/${f.id}`}
+              active={pathname.startsWith(`/s/folders/${f.id}`)}
+              icon={icon(FolderOpen)}
+            >
+              {f.name}
+            </SideLink>
+          ))
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <SideLink href="/s/context" active={pathname.startsWith("/s/context")} icon={icon(UserRound)}>
+          {t.context}
+        </SideLink>
+      </div>
+    </>
   );
 }

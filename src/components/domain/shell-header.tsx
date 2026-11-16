@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/domain/user-menu";
 import { Sidebar } from "@/components/domain/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { OPEN_SIDEBAR_EVENT } from "@/lib/sidebar";
+import { OPEN_SIDEBAR_EVENT, type SidebarFolder } from "@/lib/sidebar";
+import { TEXT } from "@/lib/texts";
 
 interface ShellHeaderProps {
   home: string;
@@ -17,6 +18,7 @@ interface ShellHeaderProps {
   courseTitle?: string;
   currentClassNumber?: number;
   totalClasses?: number;
+  folders?: SidebarFolder[];
   nav?: ReactNode;
   userLinks?: ReactNode;
 }
@@ -29,6 +31,7 @@ export function ShellHeader({
   courseTitle,
   currentClassNumber,
   totalClasses,
+  folders,
   nav,
   userLinks,
 }: ShellHeaderProps) {
@@ -72,8 +75,8 @@ export function ShellHeader({
               variant="secondary"
               size="icon"
               onClick={handleOpenSidebar}
-              title="Abrir menú lateral"
-              aria-label="Abrir menú lateral"
+              title={TEXT.sidebar.open}
+              aria-label={TEXT.sidebar.open}
             >
               <PanelLeft className="size-4 text-ink-2" />
             </Button>
@@ -108,6 +111,7 @@ export function ShellHeader({
         courseTitle={courseTitle}
         currentClassNumber={currentClassNumber}
         totalClasses={totalClasses}
+        folders={folders}
       />
     </>
   );

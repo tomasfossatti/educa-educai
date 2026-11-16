@@ -4,12 +4,14 @@ import { AppShell } from "@/components/domain/shell";
 import { StudentNav } from "@/components/domain/nav";
 import { requireStudent } from "@/server/auth/guards";
 import { EVENT, todayKey, track } from "@/server/events";
+import { listStudentFolderLinks } from "@/server/services/folders";
 import { getCurrentCourseId, getStudentCourses } from "@/server/services/student-home";
 import { CURRENT_COURSE_COOKIE } from "@/lib/constants";
+import { TEXT } from "@/lib/texts";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const { user } = await requireStudent();
-  const enrollments = await getStudentCourses(user.id);
+  const [enrollments, folders] = await Promise.all([getStudentCourses(user.id), listStudentFolderLinks(user.id)]);
   const preferred = (await cookies()).get(CURRENT_COURSE_COOKIE)?.value;
   const currentEnrollment = enrollments.find((e) => e.courseId === preferred) ?? enrollments[0];
   const courseId = currentEnrollment?.courseId ?? (await getCurrentCourseId(user.id));
@@ -24,10 +26,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
       roleLabel="Estudiante"
       courseId={courseId ?? undefined}
       courseTitle={courseTitle}
+      folders={folders}
       nav={<StudentNav defaultCourseId={courseId} />}
       userLinks={
         <Link href="/s/context" className="text-ink-2 hover:text-ink">
-          Tu contexto
+          {TEXT.sidebar.context}
         </Link>
       }
     >
