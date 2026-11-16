@@ -4,22 +4,19 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ## Estado actual
 
-- Etapa en curso: 6. Abiertas: 1 (revisar la lista de esquema), 2 (prueba con IA real), 4 (medición de precisión con IA real) y 6 (producción). La 3 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
+- Etapa en curso: 6. Abiertas: 2 (prueba con IA real) y 6 (producción). La 1, la 3, la 4 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
 - Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio). IA real con la cadena de respaldo gratuita (Groq y OpenRouter); `npm run test:staging` en verde con IA real.
 - IA real: cadena de proveedores gratuitos (`AI_PROVIDER=fallback`: Groq, Gemini, OpenRouter). DeepSeek queda en la cadena para cuando tenga saldo. Planes gratuitos: solo datos sintéticos.
 - Asistente del LMS (pedido de Tomás, fuera del spec original): docente y estudiante conectan Canvas o Moodle y piden por chat "crea la materia «Costos de proyectos»"; Educai la arma y baja módulos y lecturas. Para Canvas sin tokens (Siglo 21) hay una extensión de navegador que se vincula con un código y mantiene la sesión. Primera prueba real de Tomás con «Costos de proyectos»: se conectó y bajó las 16 lecturas, pero como texto; corregido para que baje el PDF y confirmado por Tomás en staging (ver `DECISIONES.md`, 2026-11-16).
 - Pasos que dependen de Tomás:
-  1. Revisar la muestra de etiquetas: la medición preliminar con Gemini dio 95,8% de precisión y la etapa 4 se cierra con esa revisión.
-  2. Rotar las claves de Groq y OpenRouter, que quedaron escritas en el chat, y cargar las nuevas en Vercel y en la sesión.
-  3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1).
-  4. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
+  1. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
 
 ## Etapas
 
 ### Etapa 1: especificación en el repositorio
 - [x] `docs/SPEC.md` exportado en el repositorio
 - [x] `CLAUDE.md` con las reglas
-- [ ] Lista de entidades nuevas y cambios al esquema, revisada por Tomás (escrita en `DECISIONES.md`, espera revisión)
+- [x] Lista de entidades nuevas y cambios al esquema, revisada por Tomás (escrita en `DECISIONES.md`; Tomás la dio por revisada el 2026-11-16)
 
 ### Etapa 2: auditoría de educa-educai
 - [x] La app corre en local y en un entorno de prueba con PostgreSQL (staging en Vercel con Neon; `npm run test:staging` pasa el flujo completo)
@@ -44,7 +41,7 @@ Cómo se comprobó (etapa 3): tests de integración contra Postgres (`visibility
 - [x] Ficha por estudiante con evidencia y registro en `AccessLog`
 - [x] Mi ficha idéntica a la del docente, con la lista de accesos
 - [x] Tests de V1 a V6, V9, V12, V14 y V15
-- [ ] 30 conversaciones etiquetadas, al menos 80% de las dudas detectadas son correctas. Medición preliminar con Gemini (`gemini-3.5-flash-lite`): **precisión 95,8%, cobertura 100%** (`docs/informes/precision-preliminar-gemini.md`). Se cierra cuando Tomás revise la muestra de `docs/informes/etiquetas-muestra.md`, para que la vara no la ponga la misma IA.
+- [x] 30 conversaciones etiquetadas, al menos 80% de las dudas detectadas son correctas. Medición preliminar con Gemini (`gemini-3.5-flash-lite`): **precisión 95,8%, cobertura 100%** (`docs/informes/precision-preliminar-gemini.md`). Tomás dio por revisada la muestra de `docs/informes/etiquetas-muestra.md` el 2026-11-16.
 
 ### Etapa 5: quiz, dominio, contexto y slides
 - [x] Quiz por tema con cálculo de dominio
@@ -73,6 +70,7 @@ Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falt
 - 2026-11-16 (continuación) · El estudiante que ya tenía una materia no encontraba cómo sumarse a otra (pregunta de Tomás). «Unirme a otra materia» queda siempre en la barra lateral y en el inicio; la barra muestra la materia de la página abierta. Se corrigió también que el menú lateral se cerraba solo al abrirlo después de navegar por la barra de arriba. Tests en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · La barra lateral del estudiante solo mostraba «Asistente» (reporte de Tomás). Ahora lleva Inicio, Asistente, la materia con Materia, Actividades, Desarrollo y Mi ficha, sus carpetas (incluidas las traídas del LMS) y Tu contexto; sin materias, ofrece sumarse con un código. Las carpetas que falten se crean al armar la barra, porque el layout se arma antes que el inicio. Test de punta a punta en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Ronda de QA en local con datos sintéticos (`docs/informes/qa-local-2026-11-16.md`): suites en verde y recorrido completo con Playwright. Seis hallazgos, cada uno con su PR: la ficha contaba dudas sin confirmar (#50), un estudiante quitado volvía solo con el código (#51), la lista de estudiantes ocultaba a quien no dio consentimiento (#52), la ficha sin consentimiento mostraba cuántas conversaciones había (#53), errores internos a la vista del estudiante (#54) y plurales (#55). Gasto de IA: 0 USD.
+- 2026-11-16 (continuación) · Tomás dio por hechos la rotación de las claves de Groq y OpenRouter, la revisión de la muestra de etiquetas (cierra la etapa 4) y la revisión de la lista de esquema (cierra la etapa 1). También confirmó en staging los temas propuestos de «Taller de innovación». Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · «Taller de innovación» quedó en «Procesando programa»: la propuesta de temas corría al final de la importación y podía pasarse del tope de 5 minutos de Vercel. Ahora corre en su propio pedido, la que se corta pasa a «con error» a los 6 minutos y «Currícula» tiene un botón para proponer los temas con el material. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · La importación del LMS propone los temas con las lecturas cuando la cátedra no tiene programa (pedido de Tomás: «Currícula sin cargar» después de traer «Costos de proyectos»). Quedan en revisión para que el docente los confirme. Gasto de IA: 0 USD en los tests (proveedor guionado).
 - 2026-11-16 (continuación) · Tomás confirmó en staging «Costos de proyectos» con 12 PDF y 4 textos, todos con título. Los archivos sin páginas (TXT, MD, DOCX) citan "sección" en vez de "pág." en toda la interfaz y en lo que recibe la IA. Gasto de IA: 0 USD.
