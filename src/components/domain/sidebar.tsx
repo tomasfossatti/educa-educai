@@ -25,7 +25,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { TEXT } from "@/lib/texts";
 import { logoutAction } from "@/server/actions/auth";
-import type { SidebarFolder } from "@/lib/sidebar";
+import type { SidebarCourse, SidebarFolder } from "@/lib/sidebar";
 
 const SECTION_LABEL = "text-xs font-mono font-medium text-muted px-2";
 
@@ -56,6 +56,7 @@ interface SidebarProps {
   currentClassNumber?: number;
   totalClasses?: number;
   folders?: SidebarFolder[];
+  courses?: SidebarCourse[];
 }
 
 
@@ -70,6 +71,7 @@ export function Sidebar({
   currentClassNumber,
   totalClasses,
   folders = [],
+  courses = [],
 }: SidebarProps) {
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
@@ -84,11 +86,12 @@ export function Sidebar({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Cierra el menú al cambiar de página. La página se recuerda siempre, también con el menú
+  // cerrado: si no, al abrirlo después de navegar por otro lado se cerraba solo.
   useEffect(() => {
-    if (prevPathname.current !== pathname && isOpen) {
-      prevPathname.current = pathname;
-      onClose();
-    }
+    if (prevPathname.current === pathname) return;
+    prevPathname.current = pathname;
+    if (isOpen) onClose();
   }, [pathname, onClose, isOpen]);
 
   const studentMatch = pathname.match(/^\/s\/courses\/([^/]+)/);
@@ -140,7 +143,8 @@ export function Sidebar({
             <StudentLinks
               pathname={pathname}
               courseId={studentCourseId}
-              courseTitle={courseTitle}
+              // El título sigue a la materia de la URL; si no hay, a la elegida en el inicio.
+              courseTitle={courses.find((c) => c.id === studentCourseId)?.name ?? courseTitle}
               currentClassNumber={currentClassNumber}
               totalClasses={totalClasses}
               folders={folders}
@@ -304,13 +308,13 @@ function StudentLinks({
             {TEXT.file.myTitle}
           </SideLink>
         </div>
-      ) : (
-        <div className="space-y-1">
-          <SideLink href="/s/join" active={pathname === "/s/join"} icon={icon(KeyRound)}>
-            {t.join}
-          </SideLink>
-        </div>
-      )}
+      ) : null}
+
+      <div className="space-y-1">
+        <SideLink href="/s/join" active={pathname === "/s/join"} icon={icon(KeyRound)}>
+          {base ? t.joinAnother : t.join}
+        </SideLink>
+      </div>
 
       <div className="space-y-1">
         <span className={SECTION_LABEL}>{t.folders}</span>

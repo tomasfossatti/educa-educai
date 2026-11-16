@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/domain/user-menu";
 import { Sidebar } from "@/components/domain/sidebar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { OPEN_SIDEBAR_EVENT, type SidebarFolder } from "@/lib/sidebar";
+import { OPEN_SIDEBAR_EVENT, type SidebarCourse, type SidebarFolder } from "@/lib/sidebar";
 import { TEXT } from "@/lib/texts";
 
 interface ShellHeaderProps {
@@ -19,6 +19,7 @@ interface ShellHeaderProps {
   currentClassNumber?: number;
   totalClasses?: number;
   folders?: SidebarFolder[];
+  courses?: SidebarCourse[];
   nav?: ReactNode;
   userLinks?: ReactNode;
 }
@@ -32,6 +33,7 @@ export function ShellHeader({
   currentClassNumber,
   totalClasses,
   folders,
+  courses,
   nav,
   userLinks,
 }: ShellHeaderProps) {
@@ -112,6 +114,7 @@ export function ShellHeader({
         currentClassNumber={currentClassNumber}
         totalClasses={totalClasses}
         folders={folders}
+        courses={courses}
       />
     </>
   );

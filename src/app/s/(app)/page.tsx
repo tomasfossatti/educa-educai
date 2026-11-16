@@ -136,10 +136,17 @@ export default async function StudentHome() {
         </div>
       </section>
 
-      {/* Otras materias inscriptas si las hubiere */}
-      {courses.length > 1 && (
-        <section className="space-y-3">
-          <h3 className="text-xs font-mono font-medium text-muted">Otras materias inscriptas</h3>
+      {/* Otras materias inscriptas y la entrada para sumarse a una nueva */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-xs font-mono font-medium text-muted">
+            {courses.length > 1 ? TEXT.home.otherCourses : TEXT.home.anotherCourse}
+          </h3>
+          <ButtonLink href="/s/join" variant="secondary" size="sm">
+            {TEXT.sidebar.joinAnother}
+          </ButtonLink>
+        </div>
+        {courses.length > 1 && (
           <div className="grid gap-3 sm:grid-cols-2">
             {courses
               .filter((c) => c.courseId !== activeCourse.id)
@@ -157,8 +164,8 @@ export default async function StudentHome() {
                 </Card>
               ))}
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       <AutoRefresh active={home.processingRuns > 0} intervalMs={4000} />
 
