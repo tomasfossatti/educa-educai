@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { embeddedReadings, htmlToText, matchCourse, materialFileName, normalizeName, parseLmsCommand, parseRiseCourse, planImport } from "@/domain/lms";
+import { embeddedReadings, htmlToText, matchCourse, materialFileName, normalizeName, parseLmsCommand, parseRiseCourse, planImport, readingPage } from "@/domain/lms";
 
 describe("parseLmsCommand", () => {
   it.each([
@@ -92,6 +92,26 @@ describe("parseRiseCourse", () => {
 
   it("devuelve null si la página no es una lectura interactiva", () => {
     expect(parseRiseCourse("<p>hola</p>", "https://x.com/")).toBeNull();
+  });
+});
+
+describe("readingPage (lecturas en HTML de Siglo 21)", () => {
+  // Misma estructura que las lecturas reales de meca.ues21.edu.ar, con texto sintético.
+  const html =
+    '<div id="intro" class="row cabezal"><div class="cell"><div id="iebh" class="titulomateria">Los costos en la teoría de valor&nbsp;</div></div></div>' +
+    '<div class="texto_simple">Texto. Recuperado de: <a href="https://biblioteca.example.org/pdf_318.pdf">pdf_318.pdf</a> y <a href="20empresas.pdf">otro</a></div>' +
+    '<a draggable="true" target="_blank" href="m1lectura2.pdf" id="i36u89" class="link borrar"><img src="https://content.lameca.com.ar/Meca-Grapes/templates/2022/logo_PDF.png" class="pdf"/></a>';
+
+  it("toma el título del cabezal y el PDF del ícono, no los de la bibliografía", () => {
+    expect(readingPage(html, "https://meca.ues21.edu.ar/canvas/X/costos/L2/index.html")).toEqual({
+      title: "Los costos en la teoría de valor",
+      pdfUrl: "https://meca.ues21.edu.ar/canvas/X/costos/L2/m1lectura2.pdf",
+    });
+  });
+
+  it("sin ícono usa el primer PDF del mismo servidor; sin PDF propio devuelve null", () => {
+    expect(readingPage('<a href="M2L1.pdf">Descargar</a>', "https://meca.ues21.edu.ar/L5/index.html").pdfUrl).toBe("https://meca.ues21.edu.ar/L5/M2L1.pdf");
+    expect(readingPage('<title>Lectura</title><a href="https://otro.org/a.pdf">a</a>', "https://meca.ues21.edu.ar/L5/index.html")).toEqual({ title: "Lectura", pdfUrl: null });
   });
 });
 

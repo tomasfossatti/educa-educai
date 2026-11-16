@@ -160,8 +160,11 @@ export class CanvasClient implements LmsClient {
           module: moduleLabel,
           title: readingTitle,
           kind: "reading",
-          key: `reading:${r.url}`,
-          download: () => downloadReading(r.url, `${moduleLabel} · ${readingTitle}`, materialFileName(moduleLabel, readingTitle, "").replace(/\.$/, "")),
+          // "reading2": desde que se prefiere el PDF de la lectura y se usa su título. Reemplaza lo
+          // importado con la clave anterior, que podía haber entrado como texto sin título.
+          key: `reading2:${r.url}`,
+          replaces: [`reading:${r.url}`],
+          download: () => downloadReading(r.url, moduleLabel, readingTitle),
         });
         byReadingModule.set(r.module, list);
       }

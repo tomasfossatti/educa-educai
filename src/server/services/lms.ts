@@ -195,6 +195,7 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
     await db.lmsImport.update({ where: { id: job.id }, data: { total: plan.items.length, modules: plan.modules } });
 
     const queue: LmsItem[] = [...plan.items];
+    const asText = { scanned_pdf: 0, no_pdf: 0 };
     const worker = async () => {
       for (let item = queue.shift(); item; item = queue.shift()) {
         let ok = false;
@@ -202,6 +203,11 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
           const file = await item.download();
           const result = await ingestMaterial({ ...scope, uploadedById: job.userId, fileName: file.fileName, mimeType: file.mimeType, data: file.data, module: item.module, sourceUrl: item.key });
           ok = result.status === "READY";
+          if (ok && file.fallback && item.kind === "reading") asText[file.fallback]++;
+          // Lo importado antes con otra clave (por ejemplo, la misma lectura como texto) se reemplaza.
+          if (ok && item.replaces?.length) {
+            await db.material.deleteMany({ where: { ...scope, sourceUrl: { in: item.replaces }, id: { not: result.id } } });
+          }
         } catch (error) {
           // Solo el tipo de error: nunca el contenido ni la credencial.
           console.warn(JSON.stringify({ event: "lms.import.item_failed", importId: job.id, kind: error instanceof LmsError ? error.kind : "other" }));
@@ -218,7 +224,8 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
       where: { id: job.id },
       data: {
         status: nothing || allFailed ? "FAILED" : "DONE",
-        error: nothing ? "La materia no tiene archivos ni lecturas que Educai pueda leer." : allFailed ? "No se pudo bajar ningún archivo de la materia." : null,
+        // Con la importación terminada bien, `error` guarda un aviso (lecturas que entraron como texto).
+        error: nothing ? "La materia no tiene archivos ni lecturas que Educai pueda leer." : allFailed ? "No se pudo bajar ningún archivo de la materia." : readingsNotice(asText),
         finishedAt: new Date(),
       },
     });
@@ -227,6 +234,23 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
     if (!(error instanceof LmsError)) console.error("[lms] importación fallida", error instanceof Error ? error.message : error);
     await db.lmsImport.update({ where: { id: job.id }, data: { status: "FAILED", error: message, finishedAt: new Date() } });
   }
+}
+
+/**
+ * Aviso para cuando alguna lectura entró como texto: ahí la IA cita secciones del texto ("pág. 3") que
+ * no coinciden con las páginas del PDF que ve el estudiante.
+ */
+export function readingsNotice(asText: { scanned_pdf: number; no_pdf: number }): string | null {
+  const total = asText.scanned_pdf + asText.no_pdf;
+  if (total === 0) return null;
+  const which = total === 1 ? "1 lectura entró" : `${total} lecturas entraron`;
+  const why =
+    asText.no_pdf === 0
+      ? total === 1 ? "porque su PDF es una imagen escaneada" : "porque sus PDF son imágenes escaneadas"
+      : asText.scanned_pdf === 0
+        ? total === 1 ? "porque no tiene PDF para bajar" : "porque no tienen PDF para bajar"
+        : "porque no tienen PDF o es escaneado";
+  return `${which} como texto ${why}: en esas, las páginas que cita la IA son secciones del texto y no las del PDF.`;
 }
 
 export interface ImportStatus {
@@ -238,6 +262,8 @@ export interface ImportStatus {
   failed: number;
   modules: number;
   error: string | null;
+  /** Aviso de una importación terminada (por ejemplo, lecturas que entraron como texto). */
+  note: string | null;
   href: string;
 }
 
@@ -252,5 +278,6 @@ export async function getLmsImportStatus(viewer: Viewer, importId: string): Prom
     error = "La importación se interrumpió. Pedímela de nuevo y sigo desde donde quedó.";
     await db.lmsImport.update({ where: { id: job.id }, data: { status, error, finishedAt: new Date() } });
   }
-  return { id: job.id, name: job.lmsCourseName, status, total: job.total, done: job.done, failed: job.failed, modules: job.modules, error, href: hrefFor(viewer, job) };
+  const note = status === "DONE" ? error : null;
+  return { id: job.id, name: job.lmsCourseName, status, total: job.total, done: job.done, failed: job.failed, modules: job.modules, error: status === "DONE" ? null : error, note, href: hrefFor(viewer, job) };
 }

@@ -119,12 +119,43 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     const t = await f.teacher();
     await lms.connectLms(asTeacher(t.id), { provider: "CANVAS", baseUrl: fake.url, authKind: "token", token: FAKE_TOKENS.teacher });
     const { status } = await importByChat(asTeacher(t.id), "traé la materia «Estrategia y Validación de Negocios»");
-    expect(status).toMatchObject({ status: "DONE", total: 4, done: 3, failed: 1, modules: 2 });
+    expect(status).toMatchObject({ status: "DONE", total: 6, done: 5, failed: 1, modules: 3 });
     const course = await db.course.findFirstOrThrow({ where: { teacherId: t.id } });
-    const files = await db.material.findMany({ where: { courseId: course.id, status: "READY" }, select: { fileName: true, mimeType: true, module: true } });
-    expect(files.map((m) => m.module).sort()).toEqual(["Módulo 1", "Módulo 1", "Módulo 2"]);
-    // La primera lectura trae su PDF de descarga; las otras, su texto.
-    expect(files.find((m) => m.fileName.startsWith("Módulo 1 · Lectura 1"))?.mimeType).toBe("application/pdf");
+    const files = await db.material.findMany({ where: { courseId: course.id, status: "READY" }, select: { fileName: true, mimeType: true, module: true, pageCount: true } });
+    expect(files.map((m) => m.module).sort()).toEqual(["Módulo 1", "Módulo 1", "Módulo 2", "Módulo 3", "Módulo 3"]);
+    // La lectura interactiva trae su PDF de descarga, con su título.
+    expect(files.find((m) => m.fileName.startsWith("Módulo 1 · Lectura 1"))).toMatchObject({ fileName: "Módulo 1 · Lectura 1 - Hipótesis y experimentos.pdf", mimeType: "application/pdf" });
+    // La lectura en HTML común (el formato real de Siglo 21) también trae su PDF, con páginas reales.
+    expect(files.find((m) => m.fileName.startsWith("Módulo 3 · Lectura 1"))).toMatchObject({ fileName: "Módulo 3 · Lectura 1 - Canales y relaciones.pdf", mimeType: "application/pdf", pageCount: 2 });
+    // Si el PDF es escaneado, se usa el texto de la página y se avisa.
+    expect(files.find((m) => m.fileName.startsWith("Módulo 3 · Lectura 2"))).toMatchObject({ fileName: "Módulo 3 · Lectura 2 - Métricas de tracción.txt", mimeType: "text/plain" });
+    expect(status?.note).toMatch(/^3 lecturas entraron como texto porque no tienen PDF o es escaneado: .*no las del PDF\.$/);
+  });
+
+  it("reemplaza las lecturas que una importación anterior guardó como texto", async () => {
+    const t = await f.teacher();
+    await lms.connectLms(asTeacher(t.id), { provider: "CANVAS", baseUrl: fake.url, authKind: "token", token: FAKE_TOKENS.teacher });
+    await importByChat(asTeacher(t.id), "traé la materia «Estrategia y Validación de Negocios»");
+    const course = await db.course.findFirstOrThrow({ where: { teacherId: t.id } });
+    // Así quedaba una lectura con la versión anterior: texto, sin título y con la clave vieja.
+    const readingUrl = `${fake.url}/meca/m3l1/`;
+    await db.material.deleteMany({ where: { courseId: course.id, sourceUrl: `reading2:${readingUrl}` } });
+    const old = await material.ingestMaterial({
+      courseId: course.id,
+      uploadedById: t.id,
+      fileName: "Módulo 3 · Lectura 1.txt",
+      mimeType: "text/plain",
+      data: new TextEncoder().encode("Módulo 3 · Lectura 1\n\nTexto de la lectura importada antes. ".repeat(10)),
+      module: "Módulo 3",
+      sourceUrl: `reading:${readingUrl}`,
+    });
+    expect(old.status).toBe("READY");
+
+    const { status } = await importByChat(asTeacher(t.id), "traé la materia «Estrategia y Validación de Negocios»");
+    expect(status).toMatchObject({ status: "DONE", total: 2, done: 1, failed: 1 });
+    const module3 = await db.material.findMany({ where: { courseId: course.id, module: "Módulo 3" }, select: { fileName: true }, orderBy: { fileName: "asc" } });
+    expect(module3.map((m) => m.fileName)).toEqual(["Módulo 3 · Lectura 1 - Canales y relaciones.pdf", "Módulo 3 · Lectura 2 - Métricas de tracción.txt"]);
+    expect(await db.materialChunk.count({ where: { materialId: old.id } })).toBe(0);
   });
 
   it("el estudiante importa a una carpeta propia que no ve nadie más", async () => {
