@@ -318,6 +318,20 @@ export const TEXT = {
     otherCourses: "Otras materias inscriptas",
     anotherCourse: "¿Cursás otra materia?",
   },
+  /** Página de una materia (`/s/courses/[id]`), solo con datos reales. */
+  coursePage: {
+    teacher: (name: string) => `Docente: ${name}`,
+    ask: "Preguntar",
+    askHint: "Preguntale a la IA sobre la materia. Te responde con el material de tu docente.",
+    nextClass: "Próxima clase",
+    noNextClass: "Tu docente todavía no publicó la próxima clase.",
+    task: "Tarea de tu docente",
+    noTask: "Tu docente todavía no publicó tareas.",
+    openTask: "Abrir la tarea",
+    lastConversation: "Tu última conversación",
+    noConversation: "Todavía no conversaste sobre esta materia.",
+    openConversation: "Seguir la conversación",
+  },
   myData: {
     title: "Descargar mis datos",
     description: "Una copia de todo lo que Educai guarda sobre vos, en un archivo JSON: perfil, carpetas, conversaciones, dudas, conclusiones, quizzes y quién abrió tu ficha.",

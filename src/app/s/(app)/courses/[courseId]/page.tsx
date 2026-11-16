@@ -1,113 +1,95 @@
 import type { Metadata } from "next";
-import { ClassDashboard } from "@/components/student/class-dashboard";
-import { FloatingTutor } from "@/components/student/floating-tutor";
+import { ButtonLink, TextLink } from "@/components/ui/button";
+import { Card, EmptyState, PageHeader, Section } from "@/components/ui/layout";
+import { formatDate } from "@/lib/format";
+import { TEXT } from "@/lib/texts";
 import { requireEnrolledStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { nextApprovedSession } from "@/server/services/class-sessions";
+import { ensureStudentFolders } from "@/server/services/folders";
 
-export const metadata: Metadata = { title: "Clase de hoy" };
+export const metadata: Metadata = { title: "Materia" };
 
+/**
+ * Página de una materia: solo datos reales (próxima clase aprobada, última tarea publicada y
+ * última conversación). Sin dato, un estado vacío honesto; nunca valores de ejemplo.
+ */
 export default async function CoursePage({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = await params;
   const { user, course } = await requireEnrolledStudent(courseId);
+  const t = TEXT.coursePage;
 
-  const [items, conversations, profile, activity] = await Promise.all([
-    db.curriculumItem.findMany({
-      where: { courseId, status: "ACCEPTED", kind: { in: ["CONCEPT", "OBJECTIVE", "COMPETENCY"] } },
-      orderBy: [{ kind: "asc" }, { position: "asc" }],
-    }),
-    db.aIConversation.findMany({
-      where: { courseId, studentId: user.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: { select: { messages: true } },
-        experience: { include: { runs: { orderBy: { createdAt: "desc" }, take: 1 }, _count: { select: { evidence: true } } } },
-      },
-    }),
-    db.studentProfile.findUnique({ where: { userId: user.id } }),
+  await ensureStudentFolders(user.id);
+  const [folder, nextClass, activity, lastConversation] = await Promise.all([
+    db.folder.findFirst({ where: { studentId: user.id, courseId }, select: { id: true } }),
+    nextApprovedSession(courseId),
     db.activity.findFirst({
       where: { courseId, status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
+      select: { id: true, title: true },
+    }),
+    db.aIConversation.findFirst({
+      where: { courseId, studentId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true, title: true, folderId: true },
     }),
   ]);
 
-  const concepts = items.filter((i) => i.kind === "CONCEPT");
-  const activeConversation = conversations.find((c) => c.status === "ACTIVE") || conversations[0];
-
-  // Concepto central de la clase de hoy (extraído de la currícula)
-  const currentConcept = concepts.find((c) => c.title.toLowerCase().includes("hipótesis")) || concepts[0];
-  const conceptTitle = currentConcept?.title || "hipótesis falsables";
-  const conceptDescription = currentConcept?.description || "Formular hipótesis de negocio falsables (métrica, umbral y plazo) para no perder tiempo ni plata en ideas que no funcionan.";
-
-  // Organización o contexto declarado en el onboarding
-  let userOrganization = "tu empresa o emprendimiento";
-  if (profile?.declaredCurrentContext) {
-    const raw = profile.declaredCurrentContext.trim();
-    if (raw.toLowerCase().includes("restaurante")) {
-      userOrganization = "tu restaurante en el centro de Rosario";
-    } else if (raw.toLowerCase().includes("diseño") || raw.toLowerCase().includes("interfaces")) {
-      userOrganization = "tus proyectos de diseño e interfaces";
-    } else if (raw.toLowerCase().includes("logística") || raw.toLowerCase().includes("commerce")) {
-      userOrganization = "tu e-commerce";
-    } else {
-      const cleaned = raw
-        .replace(/^trabajo en (el área comercial de |la parte de )?/i, "")
-        .replace(/^trabajo en /i, "")
-        .replace(/^soy /i, "")
-        .replace(/\.$/, "");
-      userOrganization = cleaned.length > 55 ? cleaned.slice(0, 55) + "…" : cleaned;
-    }
-  }
+  const conversationHref = lastConversation
+    ? lastConversation.folderId
+      ? `/s/folders/${lastConversation.folderId}/c/${lastConversation.id}`
+      : `/s/courses/${courseId}/tutor/${lastConversation.id}`
+    : null;
 
   return (
-    <div className="relative w-full flex-1 flex flex-col">
-      {/* ──────────────── 1. DASHBOARD DE CLASE PRINCIPAL ──────────────── */}
-      <ClassDashboard
-        courseId={courseId}
-        courseName={course.name}
-        teacherName={course.teacher.user.name}
-        totalClasses={8}
-        currentClassNumber={4}
-        conceptTitle={conceptTitle}
-        conceptDescription={conceptDescription}
-        userOrganization={userOrganization}
-        activity={
-          activity
-            ? {
-                id: activity.id,
-                title: activity.title,
-                description:
-                  activity.scenario ||
-                  activity.instructions ||
-                  "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio.",
-                isUnlocked: false,
-              }
-            : {
-                id: "practice-logistics",
-                title: "Práctica: hipótesis falsables en logística de última milla",
-                description:
-                  "Una empresa de logística quiere ofrecer entregas en franjas de una hora, con un costo extra, a clientes de comercios online. No sabe si alguien pagaría por ese servicio.",
-                isUnlocked: false,
-              }
-        }
-        activeConversation={
-          activeConversation
-            ? {
-                id: activeConversation.id,
-                title: activeConversation.title,
-                messageCount: activeConversation._count.messages,
-              }
-            : null
+    <div className="shell space-y-6">
+      <PageHeader
+        title={course.name}
+        description={t.teacher(course.teacher.user.name)}
+        actions={
+          folder ? (
+            <ButtonLink href={`/s/folders/${folder.id}`} variant="primary">
+              {t.ask}
+            </ButtonLink>
+          ) : null
         }
       />
+      <p className="text-muted">{t.askHint}</p>
 
-      {/* ──────────────── 2. CHAT IA FLOTANTE EN LA ESQUINA INFERIOR DERECHA ──────────────── */}
-      <FloatingTutor
-        courseId={courseId}
-        courseName={course.name}
-        topicTitle={currentConcept?.title || "Hipótesis falsables"}
-        initialConversationId={activeConversation?.id}
-        initialMessageCount={activeConversation?._count.messages ?? 0}
-      />
+      <Section title={t.nextClass}>
+        {nextClass ? (
+          <Card>
+            <p className="font-semibold text-ink">
+              {formatDate(nextClass.date)} · {nextClass.items.map((i) => i.curriculumItem.title).join(", ")}
+            </p>
+            {nextClass.objective && <p className="mt-1 text-sm text-muted">{nextClass.objective}</p>}
+          </Card>
+        ) : (
+          <EmptyState title={t.noNextClass} />
+        )}
+      </Section>
+
+      <Section title={t.task}>
+        {activity ? (
+          <Card>
+            <p className="font-semibold text-ink">{activity.title}</p>
+            <TextLink href={`/s/courses/${courseId}/activities/${activity.id}`}>{t.openTask}</TextLink>
+          </Card>
+        ) : (
+          <EmptyState title={t.noTask} />
+        )}
+      </Section>
+
+      <Section title={t.lastConversation}>
+        {lastConversation && conversationHref ? (
+          <Card>
+            <p className="font-semibold text-ink">{lastConversation.title}</p>
+            <TextLink href={conversationHref}>{t.openConversation}</TextLink>
+          </Card>
+        ) : (
+          <EmptyState title={t.noConversation} />
+        )}
+      </Section>
     </div>
   );
 }
