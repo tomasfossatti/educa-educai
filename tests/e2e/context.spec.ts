@@ -9,11 +9,11 @@ async function chatAndFinish(page: Page, folderUrl: string, questions: string[])
   await page.waitForLoadState("networkidle");
   for (const q of questions) {
     await page.fill("textarea[name=question]", q);
-    await page.getByRole("button", { name: "Enviar" }).click();
+    await page.getByRole("button", { name: "Preguntar", exact: true }).click();
     await expect(page.getByText(q)).toBeVisible();
     await expect(page.locator("textarea[name=question]")).toHaveValue("");
   }
-  await page.getByRole("button", { name: "Terminar y analizar" }).click();
+  await page.getByRole("button", { name: "Terminar", exact: true }).click();
   await page.waitForLoadState("networkidle");
 }
 

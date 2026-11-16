@@ -15,8 +15,9 @@ import { onConversationClosed, queueInterpretation, retryInterpretation } from "
 import { EVENT, track } from "@/server/events";
 import { setAnalysisConsent } from "@/server/services/consent";
 import { enrollWithCode } from "@/server/services/enrollment";
+import { startFolderConversation } from "@/server/services/folder-chat";
 import { ensureStudentFolders } from "@/server/services/folders";
-import { deleteExperienceCascade, deleteStudentAccount } from "@/server/services/privacy";
+import { deleteStudentAccount } from "@/server/services/privacy";
 import { ImproveTextError, improveProfileText } from "@/server/services/profile-writing";
 import { AIError } from "@/server/ai";
 import { budgetResetLabel } from "@/server/ai/budget";
@@ -200,6 +201,10 @@ export async function selectCourseAction(courseId: string): Promise<void> {
 
 // ───────────── Tutor ─────────────
 
+/**
+ * Abre una charla desde una tarea, un tema o una acción sugerida. Hay un solo chat: la charla va a la
+ * carpeta de la materia, que cita el material (ver DECISIONES.md, 2026-11-16).
+ */
 export async function startConversationAction(formData: FormData): Promise<void> {
   const courseId = text(formData, "courseId");
   const { user } = await requireEnrolledStudent(courseId);
@@ -216,27 +221,15 @@ export async function startConversationAction(formData: FormData): Promise<void>
   ]);
   const title = activity ? `Sobre la actividad: ${activity.title}` : focusItem ? focusItem.title : "Sesión de estudio";
 
-  const experience = await db.experience.create({
-    data: {
-      courseId,
-      studentId: user.id,
-      type: "AI_CONVERSATION",
-      title,
-      activityId: activity?.id ?? null,
-      conversation: {
-        create: {
-          courseId,
-          studentId: user.id,
-          title,
-          focusItemId: focusItem?.id ?? null,
-          activityId: activity?.id ?? null,
-          suggestedActionId: action?.id ?? null,
-        },
-      },
-    },
-    include: { conversation: true },
+  await ensureStudentFolders(user.id);
+  const folder = await db.folder.findFirst({ where: { studentId: user.id, courseId, kind: "SUBJECT" }, select: { id: true } });
+  if (!folder) notFound();
+  const conversation = await startFolderConversation({ id: user.id, role: user.role }, folder.id, title, {
+    focusItemId: focusItem?.id ?? null,
+    activityId: activity?.id ?? null,
+    suggestedActionId: action?.id ?? null,
   });
-  redirect(`/s/courses/${courseId}/tutor/${experience.conversation!.id}`);
+  redirect(`/s/c/${conversation.id}`);
 }
 
 export async function closeConversationAction(conversationId: string): Promise<void> {
@@ -268,14 +261,6 @@ export async function retryRunAction(runId: string): Promise<void> {
   const { user } = await requireStudent();
   await retryInterpretation(runId, user.id);
   refresh();
-}
-
-export async function deleteConversationAction(conversationId: string): Promise<void> {
-  const { user } = await requireStudent();
-  const conversation = await db.aIConversation.findFirst({ where: { id: conversationId, studentId: user.id } });
-  if (!conversation) notFound();
-  await deleteExperienceCascade(conversation.experienceId, user.id, conversation.courseId);
-  redirect(conversation.courseId ? `/s/courses/${conversation.courseId}` : "/s");
 }
 
 // ───────────── Actividades ─────────────

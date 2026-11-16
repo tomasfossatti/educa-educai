@@ -29,7 +29,7 @@ test("tope semanal de IA: aviso al 80% y chat en pausa al llegar al tope", async
   await expect(page.getByText("Llegaste al tope semanal de uso de la IA").first()).toBeVisible();
 
   await page.fill("textarea[name=question]", "¿Qué hace falsable a una hipótesis?");
-  await page.getByRole("button", { name: "Enviar" }).click();
+  await page.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(page.getByText("Llegaste al tope semanal de uso de la IA")).toHaveCount(2);
   await expect(page.getByText("Fuentes:")).toHaveCount(0);
 });

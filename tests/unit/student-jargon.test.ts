@@ -16,6 +16,8 @@ import { STUDENT_FORBIDDEN_WORDS, TEXT } from "@/lib/texts";
 
 const ROOT = join(__dirname, "..", "..");
 const STUDENT_SOURCES = ["src/app/s", "src/components/student"];
+/** Acciones y servicios cuyos mensajes ve el estudiante (errores, avisos): se revisan los bloques de TEXT que usan. */
+const STUDENT_MESSAGE_SOURCES = ["src/server/actions/folders.ts", "src/server/actions/student.ts", "src/server/services/student-errors.ts"];
 /** Donde "ficha" sí se puede decir: Mis datos, "Lo que ve mi docente sobre mí". */
 const FICHA_ALLOWED_TEXT = ["student.myData"];
 const FICHA_ALLOWED_FILES = [/^src\/app\/s\/\(app\)\/mis-datos\//];
@@ -45,7 +47,6 @@ const TRANSITIONAL_FILES: string[] = [
   "src/app/s/(app)/courses/[courseId]/development/page.tsx",
   "src/app/s/(app)/courses/[courseId]/evidence/[evidenceId]/page.tsx",
   "src/app/s/(app)/courses/[courseId]/inferences/[inferenceId]/page.tsx",
-  "src/app/s/(app)/courses/[courseId]/tutor/[conversationId]/page.tsx",
   "src/app/s/(app)/page.tsx",
   "src/app/s/onboarding/onboarding-form.tsx",
 ];
@@ -92,8 +93,12 @@ const sources = STUDENT_SOURCES.flatMap(files)
   .filter((f) => /\.tsx?$/.test(f))
   .map((f) => ({ file: relative(ROOT, f), content: readFileSync(f, "utf8") }));
 
-/** Bloques de TEXT que usan las pantallas del estudiante, más el bloque propio. */
-const studentBlocks = [...new Set(["student", ...sources.flatMap(({ content }) => [...content.matchAll(/TEXT\.(\w+)/g)].map((m) => m[1]))])];
+const messageSources = STUDENT_MESSAGE_SOURCES.map((f) => readFileSync(join(ROOT, f), "utf8"));
+
+/** Bloques de TEXT que usan las pantallas y los mensajes del estudiante, más el bloque propio. */
+const studentBlocks = [
+  ...new Set(["student", ...[...sources.map((s) => s.content), ...messageSources].flatMap((content) => [...content.matchAll(/TEXT\.(\w+)/g)].map((m) => m[1]))]),
+];
 
 function stripComments(code: string): string {
   return code.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"'`])\/\/.*$/gm, "$1").replace(/\{\s*\}/g, "");

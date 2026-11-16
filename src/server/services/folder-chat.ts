@@ -38,20 +38,96 @@ Reglas:
 async function ownedConversation(viewer: Viewer, conversationId: string) {
   const conversation = await db.aIConversation.findFirst({
     where: { id: conversationId, studentId: viewer.id },
-    include: { folder: true },
+    include: {
+      folder: true,
+      focusItem: { select: { title: true, description: true } },
+      activity: { select: { title: true, scenario: true, instructions: true } },
+    },
   });
   if (!conversation || !conversation.folder || viewer.role !== "STUDENT") throw new AccessDenied();
   return conversation as typeof conversation & { folder: NonNullable<typeof conversation.folder> };
 }
 
+/**
+ * Una conversación del estudiante con todo lo que muestra el chat: mensajes principales, hilos,
+ * el hilo abierto, el texto de los fragmentos citados y el último análisis. Solo el dueño (V8).
+ */
+export async function getOwnFolderConversation(viewer: Viewer, conversationId: string, threadId?: string) {
+  if (viewer.role !== "STUDENT") return null;
+  const conversation = await db.aIConversation.findFirst({
+    where: { id: conversationId, studentId: viewer.id, folderId: { not: null } },
+    include: {
+      folder: { select: { id: true, name: true, courseId: true } },
+      messages: { where: { threadId: null }, orderBy: { createdAt: "asc" } },
+      threads: { orderBy: { createdAt: "asc" }, include: { messages: { orderBy: { createdAt: "asc" } } } },
+    },
+  });
+  if (!conversation || !conversation.folder) return null;
+  const folder = conversation.folder;
+  const openThread = threadId ? (conversation.threads.find((th) => th.id === threadId) ?? null) : null;
+  const chunkIds = [...conversation.messages, ...(openThread?.messages ?? [])].flatMap(
+    (m) => (m.citations as MessageCitations | null)?.items.map((c) => c.chunkId) ?? [],
+  );
+  // El material es el de la cátedra o, en una materia traída del LMS, el de la propia carpeta.
+  const chunkScope = folder.courseId ? { courseId: folder.courseId } : { folderId: folder.id };
+  const [chunkRows, lastRun] = await Promise.all([
+    chunkIds.length
+      ? db.materialChunk.findMany({ where: { id: { in: chunkIds }, ...chunkScope }, select: { id: true, text: true } })
+      : Promise.resolve([]),
+    db.interpretationRun.findFirst({
+      where: { experienceId: conversation.experienceId },
+      orderBy: { createdAt: "desc" },
+      select: { status: true, statusNote: true, error: true },
+    }),
+  ]);
+  return {
+    conversation: { ...conversation, folder },
+    openThread,
+    chunks: new Map(chunkRows.map((c) => [c.id, c.text])),
+    lastRun,
+  };
+}
+
+/** Lo que el tutor tiene que saber de una charla que empezó desde un tema o una tarea. */
+function sessionFocus(conversation: {
+  focusItem: { title: string; description: string | null } | null;
+  activity: { title: string; scenario: string; instructions: string } | null;
+}): string {
+  const parts: string[] = [];
+  if (conversation.focusItem) {
+    const desc = conversation.focusItem.description ? ` — ${conversation.focusItem.description}` : "";
+    parts.push(`FOCO DE ESTA CONVERSACIÓN: ${conversation.focusItem.title}${desc}`);
+  }
+  if (conversation.activity) {
+    parts.push(
+      `TAREA EVALUADA EN CURSO (no la resuelvas ni redactes algo para entregar; guialo con preguntas): "${conversation.activity.title}".\nSituación: ${conversation.activity.scenario}\nConsigna: ${conversation.activity.instructions}`,
+    );
+  }
+  return parts.join("\n\n");
+}
+
 /** Abre una conversación nueva en una carpeta del estudiante. */
-export async function startFolderConversation(viewer: Viewer, folderId: string, title = "Conversación") {
+export async function startFolderConversation(
+  viewer: Viewer,
+  folderId: string,
+  title = "Conversación",
+  start: { focusItemId?: string | null; activityId?: string | null; suggestedActionId?: string | null } = {},
+) {
   const folder = await assertFolderOwner(viewer, folderId);
   const experience = await db.experience.create({
-    data: { courseId: folder.courseId, studentId: viewer.id, type: "AI_CONVERSATION", title },
+    data: { courseId: folder.courseId, studentId: viewer.id, type: "AI_CONVERSATION", title, activityId: start.activityId ?? null },
   });
   return db.aIConversation.create({
-    data: { experienceId: experience.id, courseId: folder.courseId, studentId: viewer.id, folderId: folder.id, title },
+    data: {
+      experienceId: experience.id,
+      courseId: folder.courseId,
+      studentId: viewer.id,
+      folderId: folder.id,
+      title,
+      focusItemId: start.focusItemId ?? null,
+      activityId: start.activityId ?? null,
+      suggestedActionId: start.suggestedActionId ?? null,
+    },
   });
 }
 
@@ -117,9 +193,10 @@ export async function askInFolder(viewer: Viewer, conversationId: string, questi
   messages.push({ role: "user", content: `${focus}${fragmentsBlock(hits)}\n\nPREGUNTA: ${text}` });
 
   const studentContext = await contextForPrompt(conversation.folder.id, viewer.id);
+  const system = [SYSTEM, sessionFocus(conversation), studentContext].filter(Boolean).join("\n\n");
   const result = await generateStructured({
     operation: "folder.chat",
-    system: studentContext ? `${SYSTEM}\n\n${studentContext}` : SYSTEM,
+    system,
     messages,
     schema: answerSchema,
     context: { actorUserId: viewer.id, studentId: viewer.id, courseId: conversation.folder.courseId },

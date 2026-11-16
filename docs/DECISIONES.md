@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Un solo chat: el de la carpeta de la materia
+Contexto: el estudiante tenía dos chats. El tutor de la materia (`/s/courses/[id]/tutor/[c]`, `/api/tutor`, operación `tutor.reply`) no buscaba en el material, no citaba ni avisaba "sin fuente", no tenía hilos sobre un fragmento ni dudas para confirmar, y creaba conversaciones sin carpeta, así que no alimentaba el contexto. El de la carpeta (`/s/folders/[f]/c/[c]`, `folder.chat`) hace todo eso.
+Alternativas: conservar el tutor y sumarle material y citas (habría que rehacer las citas en streaming); conservar el de la carpeta y llevarle lo único que el tutor tenía de más: el foco en un tema o en una tarea.
+Decisión: queda el de la carpeta, en `/s/c/[id]`. Cumple la regla 4 de CLAUDE.md (cita archivo y página o dice que no hay fuente) y el modelo de datos del spec ("una conversación pertenece siempre a una carpeta"). "Pensarla con el tutor" y "Practicar con el tutor" abren una charla en la carpeta de la materia, con la tarea o el tema; el prompt del chat los recibe, con la instrucción de no resolver la tarea. Se retiran `/api/tutor/[id]`, el componente del chat en streaming y `services/conversations.ts`. El tope semanal y `AIUsageEvent` no cambian, porque el chat sigue pasando por `generateStructured`.
+Consecuencias: migración de datos `unificar_chat`, aditiva e idempotente. Crea la carpeta de la materia si falta y asigna `folderId` a las conversaciones que no lo tenían; no toca mensajes. Las direcciones viejas (`/s/folders/[f]/c/[c]` con su hilo, `/s/courses/[id]/tutor/[c]`) redirigen. `prompts/tutor.ts` queda sin uso en la app (lo usa un test de evaluadores).
+
 ### 2026-11-16 · Panel del estudiante simplificado: el chat es la app (decisión de Tomás)
 Contexto: el estudiante se perdía. Había dos chats paralelos (el tutor de la materia en `/s/courses/[id]/tutor`, sin material ni citas, y el de las carpetas en `/s/folders/[id]/c`), una página de materia con datos inventados y una barra lateral con diez entradas.
 Alternativas: ordenar la barra actual; mantener el inicio con tarjetas y sumar un acceso directo al chat; rehacer la navegación alrededor del chat.

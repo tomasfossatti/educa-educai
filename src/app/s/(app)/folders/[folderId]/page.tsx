@@ -67,7 +67,7 @@ export default async function FolderPage({
           <List>
             {conversations.map((c) => (
               <ListItem key={c.id}>
-                <Link href={`/s/folders/${folderId}/c/${c.id}`} className="flex items-center justify-between gap-2">
+                <Link href={`/s/c/${c.id}`} className="flex items-center justify-between gap-2">
                   <span className="truncate text-sm font-medium text-ink">{c.title}</span>
                   <span className="flex shrink-0 items-center gap-2 text-xs text-muted">
                     {c.origin === "UPLOAD" && <Badge tone="muted">{TEXT.folders.uploaded}</Badge>}

@@ -36,7 +36,7 @@ test("ni otro estudiante ni el docente de otra cátedra abren datos ajenos cambi
   await anaPage.waitForURL("**/c/**");
   await anaPage.waitForLoadState("networkidle");
   await anaPage.fill("textarea[name=question]", secret);
-  await anaPage.getByRole("button", { name: "Enviar" }).click();
+  await anaPage.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(anaPage.getByText(secret)).toBeVisible();
   const conversationUrl = new URL(anaPage.url()).pathname;
 
