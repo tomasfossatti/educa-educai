@@ -1,4 +1,5 @@
 import "server-only";
+import { countsForTeacher } from "@/domain/doubts";
 import { assertCanViewStudentFile, assertCourseTeacher, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { logAccess } from "@/server/services/access-log";
@@ -59,7 +60,8 @@ async function buildStudentFile(studentId: string, courseId: string) {
       select: {
         id: true,
         title: true,
-        _count: { select: { signals: { where: { studentId, polarity: "DIFFICULTY" } } } },
+        // Solo cuentan las dudas que llegan al docente: misma regla que la vista macro (countsForTeacher).
+        signals: { where: { studentId, polarity: "DIFFICULTY" }, select: { studentStatus: true, confidence: true, createdAt: true } },
       },
     }),
     db.evidenceObject.findMany({
@@ -82,6 +84,7 @@ async function buildStudentFile(studentId: string, courseId: string) {
     db.masteryRecord.findMany({ where: { studentId, curriculumItem: { courseId } }, select: { curriculumItemId: true, score: true, attempts: true } }),
   ]);
   const masteryByTopic = new Map(mastery.map((m) => [m.curriculumItemId, m]));
+  const now = new Date();
 
   return {
     student: {
@@ -95,7 +98,7 @@ async function buildStudentFile(studentId: string, courseId: string) {
     topics: topics.map((t) => ({
       id: t.id,
       title: t.title,
-      doubts: t._count.signals,
+      doubts: t.signals.filter((s) => countsForTeacher(s, now)).length,
       mastery: masteryByTopic.get(t.id)?.score ?? null,
       attempts: masteryByTopic.get(t.id)?.attempts ?? 0,
     })),

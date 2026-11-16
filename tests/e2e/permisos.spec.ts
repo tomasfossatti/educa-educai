@@ -85,3 +85,21 @@ test("ni otro estudiante ni el docente de otra cátedra abren datos ajenos cambi
   await expect(teacherA.getByText(secret).first()).toBeVisible();
   expect(await db.accessLog.count({ where: { studentId: ana.id, viewerId: a.teacher.id, view: "EVIDENCE" } })).toBe(1);
 });
+
+test("sin consentimiento, la ficha no muestra ni cuántas conversaciones tuvo el estudiante (V6)", async ({ browser }) => {
+  const { teacher, course, students } = await world({ students: 1 });
+  const beto = students[0];
+  await db.studentProfile.update({ where: { userId: beto.id }, data: { consentAnalysisAt: null, consentVersion: null } });
+  const folder = await db.folder.create({ data: { studentId: beto.id, courseId: course.id, kind: "SUBJECT", name: "Materia" } });
+  const experience = await db.experience.create({ data: { courseId: course.id, studentId: beto.id, type: "AI_CONVERSATION", title: "Charla" } });
+  await db.aIConversation.create({
+    data: { experienceId: experience.id, courseId: course.id, studentId: beto.id, folderId: folder.id, title: "Charla", status: "CLOSED", closedAt: new Date() },
+  });
+
+  const page = await browser.newPage();
+  await login(page, teacher);
+  await page.goto(`/t/courses/${course.id}/students/${beto.id}`);
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText("no podés ver su ficha ni sus conversaciones")).toBeVisible();
+  await expect(page.getByText(/conversaci(ón|ones) con el tutor/)).toHaveCount(0);
+});

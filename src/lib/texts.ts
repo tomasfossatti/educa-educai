@@ -15,6 +15,9 @@ function count(n: number, singular: string, plural: string): string {
 }
 
 export const TEXT = {
+  common: {
+    unexpected: "Algo salió mal y no se guardó. Probá de nuevo en un rato.",
+  },
   teacherCourse: {
     pendingReview: (n: number) =>
       `${n} ${n === 1 ? "necesita" : "necesitan"} revisión humana antes de considerarse ${n === 1 ? "confiable" : "confiables"}.`,
@@ -105,6 +108,11 @@ export const TEXT = {
     focusRequired: "Elegí de dónde salen los ejemplos.",
     workRequiredForFocus: "Contanos qué hacés hoy para poder usarlo en los ejemplos.",
   },
+  enrollment: {
+    invalidCode: "El código tiene 6 caracteres (letras y números).",
+    unknownCode: "No encontramos una materia con ese código.",
+    removed: "Tu docente te quitó de esta materia. Si querés volver, pedile que te invite de nuevo.",
+  },
   folders: {
     sectionTitle: "Tus carpetas",
     sectionDescription: "Conversá con la IA sobre cada materia y sobre tu proyecto. Las respuestas citan el material de la cátedra.",
@@ -172,6 +180,7 @@ export const TEXT = {
     removeConfirm: "Se borra este dato del contexto. No se puede deshacer.",
     trace: "Historial de la carpeta",
     noConsent: "No diste consentimiento de análisis: la IA no guarda contexto sobre vos.",
+    emptyText: "El texto no puede quedar vacío.",
   },
   quiz: {
     practiceTitle: "Practicar un tema",
@@ -246,6 +255,7 @@ export const TEXT = {
     list: "Hilos sobre fragmentos",
     placeholder: "¿Qué querés saber de este fragmento?",
     showSource: "Ver fragmento",
+    tooShort: "Seleccioná un fragmento un poco más largo.",
   },
   chat: {
     placeholder: "Escribí tu pregunta…",
@@ -273,6 +283,9 @@ export const TEXT = {
     done: "Listo: la conversación quedó en la carpeta.",
     missing: "Elegí un archivo .txt o pegá el texto.",
     onlyTxt: "Solo se aceptan archivos .txt.",
+    tooBig: "La conversación supera los 2 MB.",
+    tooBigField: "Máximo 2 MB.",
+    empty: "La conversación está vacía.",
   },
   improve: {
     button: "Mejorar la redacción con IA",
