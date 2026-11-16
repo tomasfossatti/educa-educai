@@ -6,7 +6,7 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
 import { TEXT } from "@/lib/texts";
-import { lmsAssistantAction, lmsImportStatusAction } from "@/server/actions/lms";
+import { lmsAssistantAction, lmsImportStatusAction, proposeTopicsAction } from "@/server/actions/lms";
 
 interface ChatEntry {
   id: number;
@@ -50,6 +50,7 @@ export function LmsAssistantChat({ welcome }: { welcome: string }) {
               : `${t.done(status.name, status.done, status.modules, status.failed)}${status.note ? ` ${status.note}` : ""}`
             : t.failed(status.name, status.error ?? "");
       setEntries((list) => list.map((e) => (e.id === tracking.entryId ? { ...e, content: `${e.content.split("\n")[0]}\n${line}`, href: status.href } : e)));
+      if (status.status === "DONE" && status.proposeTopics) void proposeTopicsAction(status.id);
       if (status.status !== "RUNNING") setTracking(null);
       else timer = setTimeout(tick, POLL_MS);
     };

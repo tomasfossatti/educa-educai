@@ -10,6 +10,14 @@ function cite(fileName: string, n: number): string {
 }
 
 export const TEXT = {
+  curriculum: {
+    fromMaterial: {
+      title: "Proponer los temas con el material",
+      description: "Si no tenés el programa a mano, Educai propone los temas a partir del material de la materia. Después los revisás y los confirmás.",
+      button: "Proponer temas con el material",
+      pending: "Pidiendo la propuesta…",
+    },
+  },
   citation: {
     /** "programa.pdf, pág. 2" o "apunte.txt, sección 2". */
     source: (fileName: string, n: number) => `${fileName}, ${cite(fileName, n)}`,

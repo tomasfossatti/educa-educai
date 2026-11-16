@@ -13,6 +13,7 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
   let lms: typeof import("@/server/services/lms");
   let assistant: typeof import("@/server/services/lms-assistant");
   let material: typeof import("@/server/services/material");
+  let curriculum: typeof import("@/server/services/curriculum");
   let guards: typeof import("@/server/auth/guards");
   let crypto: typeof import("@/server/lms/crypto");
   let f: ReturnType<typeof factories>;
@@ -38,6 +39,7 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     lms = await import("@/server/services/lms");
     assistant = await import("@/server/services/lms-assistant");
     material = await import("@/server/services/material");
+    curriculum = await import("@/server/services/curriculum");
     guards = await import("@/server/auth/guards");
     crypto = await import("@/server/lms/crypto");
     f = factories(db);
@@ -96,7 +98,14 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     expect(hits[0]?.fileName).toMatch(/Curva S/);
 
     // Sin programa cargado, la IA propone los temas con las lecturas; el docente los revisa y confirma.
+    // La propuesta la pide el chat en otro pedido, con su propio tope de tiempo, y no se corre dos veces.
     expect(status?.note).toMatch(/armo una propuesta de temas a partir de las lecturas/);
+    expect(status?.proposeTopics).toBe(true);
+    const claimed = await lms.claimTopicsForImport(asTeacher(t.id), status!.id);
+    expect(claimed).toEqual({ courseId: course.id });
+    expect(await lms.claimTopicsForImport(asTeacher(t.id), status!.id)).toBeNull();
+    await curriculum.runCurriculumExtraction(course.id, t.id, null);
+    expect((await lms.getLmsImportStatus(asTeacher(t.id), status!.id)).proposeTopics).toBe(false);
     const withCurriculum = await db.course.findUniqueOrThrow({ where: { id: course.id } });
     expect(withCurriculum.curriculumStatus).toBe("IN_REVIEW");
     expect(withCurriculum.programText).toMatch(/^Esta materia no tiene programa cargado\./);
@@ -110,10 +119,30 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     // Pedirla de nuevo no duplica: reutiliza la cátedra, no baja lo que ya está y no pisa la currícula en revisión.
     const again = await importByChat(asTeacher(t.id), "creá la materia costos de proyectos");
     expect(again.turn.reply).toMatch(/Ya tenías «Costos de Proyectos»/);
-    expect(again.status).toMatchObject({ status: "DONE", total: 0, note: null });
+    expect(again.status).toMatchObject({ status: "DONE", total: 0, note: null, proposeTopics: false });
     expect(await db.curriculumItem.count({ where: { courseId: course.id } })).toBe(proposed.length);
     expect(await db.course.count({ where: { teacherId: t.id } })).toBe(1);
     expect(await db.material.count({ where: { courseId: course.id } })).toBe(16);
+  });
+
+  it("una propuesta de temas cortada a mitad de camino se da por fallida y se puede pedir de nuevo", async () => {
+    const t = await f.teacher();
+    await lms.connectLms(asTeacher(t.id), { provider: "CANVAS", baseUrl: fake.url, authKind: "token", token: FAKE_TOKENS.teacher });
+    const { status } = await importByChat(asTeacher(t.id), 'crea la materia "costos de proyectos"');
+    const course = await db.course.findFirstOrThrow({ where: { teacherId: t.id } });
+    // El proceso se corta después de reservar la propuesta: la materia queda "procesando".
+    expect(await lms.claimTopicsForImport(asTeacher(t.id), status!.id)).toEqual({ courseId: course.id });
+    expect(await curriculum.recoverStaleExtractions(t.id)).toBe(0);
+    const later = new Date(Date.now() + curriculum.STALE_EXTRACTION_MS + 1000);
+    expect(await curriculum.recoverStaleExtractions(t.id, later)).toBe(1);
+    expect(await db.course.findUniqueOrThrow({ where: { id: course.id } })).toMatchObject({ curriculumStatus: "FAILED", curriculumError: expect.stringMatching(/se interrumpió/) });
+    // Otro docente no puede pedir la propuesta de esta cátedra.
+    const other = await f.teacher();
+    expect(await curriculum.claimMaterialProposal(course.id, other.id)).toBe(false);
+    // El docente la pide de nuevo desde «Currícula».
+    expect(await curriculum.claimMaterialProposal(course.id, t.id)).toBe(true);
+    await curriculum.runCurriculumExtraction(course.id, t.id, null);
+    expect((await db.course.findUniqueOrThrow({ where: { id: course.id } })).curriculumStatus).toBe("IN_REVIEW");
   });
 
   it("si el nombre es ambiguo o no existe, pregunta en vez de adivinar", async () => {

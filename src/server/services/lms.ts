@@ -8,7 +8,7 @@ import { clientForConnection, createLmsClient, LmsError, normalizeBaseUrl, type 
 import { encryptSecret } from "@/server/lms/crypto";
 import { MoodleClient } from "@/server/lms/moodle";
 import { createCourseForTeacher } from "./courses";
-import { proposeCurriculumFromMaterial } from "./curriculum";
+import { canProposeFromMaterial, claimMaterialProposal } from "./curriculum";
 import { ingestMaterial } from "./material";
 
 /**
@@ -223,7 +223,8 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
     const nothing = final.total === 0 && already.size === 0;
     const allFailed = final.total > 0 && final.done === 0;
     // En la cátedra de un docente sin programa cargado, la IA propone los temas con el material traído.
-    const proposeTopics = !nothing && !allFailed && job.courseId && isAIConfigured() ? await curriculumPending(job.courseId) : false;
+    // Corre en otro pedido (lo dispara el chat al ver la importación lista), con su propio tope de tiempo.
+    const proposeTopics = !nothing && !allFailed && job.courseId && isAIConfigured() ? await canProposeFromMaterial(job.courseId, job.userId) : false;
     const notices = [readingsNotice(asText), proposeTopics ? CURRICULUM_NOTICE : null].filter(Boolean).join(" ");
     await db.lmsImport.update({
       where: { id: job.id },
@@ -234,13 +235,6 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
         finishedAt: new Date(),
       },
     });
-    if (proposeTopics && job.courseId) {
-      // La importación ya quedó lista: si la propuesta falla, la materia queda con la currícula en error
-      // y el docente la puede pedir de nuevo desde «Currícula».
-      await proposeCurriculumFromMaterial(job.courseId, job.userId).catch((error) =>
-        console.error("[lms] propuesta de temas fallida", error instanceof Error ? error.message : error),
-      );
-    }
   } catch (error) {
     const message = error instanceof LmsError || error instanceof LmsServiceError ? error.message : "No se pudo completar la importación.";
     if (!(error instanceof LmsError)) console.error("[lms] importación fallida", error instanceof Error ? error.message : error);
@@ -251,9 +245,16 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
 const CURRICULUM_NOTICE =
   "Como la materia no tiene programa cargado, armo una propuesta de temas a partir de las lecturas: la vas a ver en «Currícula» en un minuto para revisarla y confirmarla.";
 
-async function curriculumPending(courseId: string): Promise<boolean> {
-  const course = await db.course.findUnique({ where: { id: courseId }, select: { curriculumStatus: true } });
-  return course?.curriculumStatus === "NOT_STARTED" || course?.curriculumStatus === "FAILED";
+/**
+ * Arranca la propuesta de temas de la cátedra de una importación propia ya terminada. Devuelve la
+ * cátedra si quien llama tiene que correr la extracción; null si no corresponde o ya está en curso.
+ */
+export async function claimTopicsForImport(viewer: Viewer, importId: string): Promise<{ courseId: string } | null> {
+  assertRole(viewer);
+  if (viewer.role !== "TEACHER" || !isAIConfigured()) return null;
+  const job = await db.lmsImport.findFirst({ where: { id: importId, userId: viewer.id, status: "DONE" }, select: { courseId: true } });
+  if (!job?.courseId) return null;
+  return (await claimMaterialProposal(job.courseId, viewer.id)) ? { courseId: job.courseId } : null;
 }
 
 /**
@@ -284,6 +285,8 @@ export interface ImportStatus {
   error: string | null;
   /** Aviso de una importación terminada (por ejemplo, lecturas que entraron como texto). */
   note: string | null;
+  /** La cátedra no tiene temas: el chat tiene que pedir la propuesta (`proposeTopicsAction`). */
+  proposeTopics: boolean;
   href: string;
 }
 
@@ -299,5 +302,6 @@ export async function getLmsImportStatus(viewer: Viewer, importId: string): Prom
     await db.lmsImport.update({ where: { id: job.id }, data: { status, error, finishedAt: new Date() } });
   }
   const note = status === "DONE" ? error : null;
-  return { id: job.id, name: job.lmsCourseName, status, total: job.total, done: job.done, failed: job.failed, modules: job.modules, error: status === "DONE" ? null : error, note, href: hrefFor(viewer, job) };
+  const proposeTopics = status === "DONE" && viewer.role === "TEACHER" && !!job.courseId && isAIConfigured() && (await canProposeFromMaterial(job.courseId, viewer.id));
+  return { id: job.id, name: job.lmsCourseName, status, total: job.total, done: job.done, failed: job.failed, modules: job.modules, error: status === "DONE" ? null : error, note, proposeTopics, href: hrefFor(viewer, job) };
 }
