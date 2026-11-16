@@ -1,4 +1,6 @@
 import "server-only";
+import { TEXT } from "@/lib/texts";
+import { StudentInputError } from "@/server/services/student-errors";
 import { z } from "zod";
 import { planFactsUpdate, summaryIsStale, type ActiveFact } from "@/domain/folder-context";
 import { generateStructured } from "@/server/ai";
@@ -191,7 +193,7 @@ async function ownedEditable(viewer: Viewer, contextId: string) {
 export async function editContextItem(viewer: Viewer, contextId: string, content: string) {
   const row = await ownedEditable(viewer, contextId);
   const text = content.trim().slice(0, 800);
-  if (!text) throw new Error("El texto no puede quedar vacío.");
+  if (!text) throw new StudentInputError(TEXT.context.emptyText);
   return db.folderContext.update({ where: { id: row.id }, data: { content: text, editedByStudent: true } });
 }
 
