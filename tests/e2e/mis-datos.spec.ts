@@ -11,7 +11,7 @@ test("la estudiante descarga una copia de sus datos desde Tu contexto", async ({
   await page.waitForURL("**/c/**");
   await page.waitForLoadState("networkidle");
   await page.fill("textarea[name=question]", "Pregunta para mi copia de datos");
-  await page.getByRole("button", { name: "Enviar" }).click();
+  await page.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(page.getByText("Pregunta para mi copia de datos")).toBeVisible();
 
   await page.goto("/s/context");

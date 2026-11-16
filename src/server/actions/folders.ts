@@ -33,7 +33,7 @@ function denyAsNotFound(error: unknown): never {
 export async function startFolderConversationAction(folderId: string): Promise<void> {
   const v = await viewer();
   const conversation = await startFolderConversation(v, folderId).catch(denyAsNotFound);
-  redirect(`/s/folders/${folderId}/c/${conversation.id}`);
+  redirect(`/s/c/${conversation.id}`);
 }
 
 export async function askInFolderAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
@@ -140,7 +140,6 @@ export async function deleteContextAction(contextId: string): Promise<void> {
 export async function startThreadAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const v = await viewer();
   const conversationId = text(formData, "conversationId");
-  const folderId = text(formData, "folderId");
   let threadId: string;
   try {
     threadId = (await startThread(v, conversationId, text(formData, "anchor"))).id;
@@ -148,5 +147,5 @@ export async function startThreadAction(_prev: ActionState | null, formData: For
     if (error instanceof AccessDenied) notFound();
     return { error: studentErrorMessage(error, "thread.start") };
   }
-  redirect(`/s/folders/${folderId}/c/${conversationId}?hilo=${threadId}`);
+  redirect(`/s/c/${conversationId}?hilo=${threadId}`);
 }

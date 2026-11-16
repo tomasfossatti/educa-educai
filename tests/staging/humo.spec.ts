@@ -61,7 +61,7 @@ test("staging: materia con material, estudiante con consentimiento y respuesta c
   await student.getByRole("button", { name: "Nueva conversación" }).click();
   await student.waitForURL("**/c/**");
   await student.fill("textarea[name=question]", "¿Qué hace falsable a una hipótesis?");
-  await student.getByRole("button", { name: "Enviar" }).click();
+  await student.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(student.getByText("Fuentes:")).toBeVisible({ timeout: 90_000 });
   await expect(student.getByText(/programa\.pdf, pág\. 2/).first()).toBeVisible();
 });

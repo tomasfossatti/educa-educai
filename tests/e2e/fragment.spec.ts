@@ -49,11 +49,11 @@ test("pregunta sobre un fragmento seleccionado sin perder la conversación princ
   await page.waitForURL("**/c/**");
   await page.waitForLoadState("networkidle");
   await page.fill("textarea[name=question]", "¿Qué hace falsable a una hipótesis?");
-  await page.getByRole("button", { name: "Enviar" }).click();
+  await page.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(page.getByText("Fuentes:")).toBeVisible();
 
   // El fragmento citado se puede ver debajo de la respuesta.
-  await page.getByText("Ver fragmento").click();
+  await page.getByText("Ver el texto").click();
   await expect(page.locator("details p", { hasText: "define el resultado que la refutaria" })).toBeVisible();
 
   await selectText(page, "define el resultado que la refutaria");
@@ -61,10 +61,10 @@ test("pregunta sobre un fragmento seleccionado sin perder la conversación princ
   await page.waitForURL(/hilo=/);
   await page.waitForLoadState("networkidle");
 
-  const thread = page.getByRole("complementary", { name: "Pregunta sobre un fragmento" });
+  const thread = page.getByRole("complementary", { name: "Pregunta sobre un pedazo de texto" });
   await expect(thread.locator("blockquote")).toContainText("define el resultado que la refutaria");
   await thread.locator("textarea[name=question]").fill("¿Me das un ejemplo de eso?");
-  await thread.getByRole("button", { name: "Enviar" }).click();
+  await thread.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(thread.getByText("¿Me das un ejemplo de eso?")).toBeVisible();
   await expect(thread.getByText("Educai", { exact: true })).toBeVisible();
 
@@ -73,6 +73,6 @@ test("pregunta sobre un fragmento seleccionado sin perder la conversación princ
   await expect(main.getByText("¿Qué hace falsable a una hipótesis?")).toBeVisible();
   await expect(main.getByText("¿Me das un ejemplo de eso?")).toHaveCount(0);
 
-  await thread.getByRole("link", { name: "Cerrar hilo" }).click();
-  await expect(page.getByText("Hilos sobre fragmentos (1)")).toBeVisible();
+  await thread.getByRole("link", { name: "Cerrar", exact: true }).click();
+  await expect(page.getByText("Preguntas sobre pedazos de texto (1)")).toBeVisible();
 });

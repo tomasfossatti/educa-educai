@@ -115,7 +115,7 @@ test(`${N} estudiantes conversando a la vez`, async ({ browser }) => {
       pages.map((page, i) =>
         timed("pregunta", i, async () => {
           await page.fill("textarea[name=question]", QUESTIONS[(i + round) % QUESTIONS.length]);
-          await page.getByRole("button", { name: "Enviar" }).click();
+          await page.getByRole("button", { name: "Preguntar", exact: true }).click();
           await expect(page.locator("ol").first().locator(":scope > li")).toHaveCount(2 * (round + 1), { timeout: 120_000 });
         }),
       ),
@@ -128,9 +128,9 @@ test(`${N} estudiantes conversando a la vez`, async ({ browser }) => {
   await Promise.all(
     pages.map((page, i) =>
       timed("cierre", i, async () => {
-        await page.getByRole("button", { name: "Terminar y analizar" }).click();
+        await page.getByRole("button", { name: "Terminar", exact: true }).click();
         // El botón cambia a "Cerrando…" al hacer clic: se espera a que terminen la acción y el refresco.
-        await expect(page.getByRole("button", { name: /Terminar y analizar|Cerrando/ })).toHaveCount(0, { timeout: 120_000 });
+        await expect(page.getByRole("button", { name: /^(Terminar|Terminando…)$/ })).toHaveCount(0, { timeout: 120_000 });
         const conversationId = new URL(page.url()).pathname.split("/c/")[1];
         const closed = await db.aIConversation.count({ where: { id: conversationId, studentId: w.students[i].id, status: "CLOSED" } });
         if (closed !== 1) {

@@ -31,15 +31,11 @@ export default async function CoursePage({ params }: { params: Promise<{ courseI
     db.aIConversation.findFirst({
       where: { courseId, studentId: user.id },
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, folderId: true },
+      select: { id: true, title: true },
     }),
   ]);
 
-  const conversationHref = lastConversation
-    ? lastConversation.folderId
-      ? `/s/folders/${lastConversation.folderId}/c/${lastConversation.id}`
-      : `/s/courses/${courseId}/tutor/${lastConversation.id}`
-    : null;
+  const conversationHref = lastConversation ? `/s/c/${lastConversation.id}` : null;
 
   return (
     <div className="shell space-y-6">
