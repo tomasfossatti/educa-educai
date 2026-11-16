@@ -20,6 +20,7 @@ export function ExtensionLink({ baseUrlInputId }: { baseUrlInputId: string }) {
   const [result, setResult] = useState<{ code: string; expiresAt: string } | { error: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [connected, setConnected] = useState<string | null>(null);
+  const [stage, setStage] = useState<{ stage: string; error: string | null }>({ stage: "code", error: null });
   const code = result && "code" in result ? result.code : null;
 
   useEffect(() => {
@@ -29,11 +30,12 @@ export function ExtensionLink({ baseUrlInputId }: { baseUrlInputId: string }) {
     const tick = async () => {
       const status = await lmsConnectionStatusAction();
       if (cancelled) return;
-      if (status.connected && status.extensionLinked) {
+      if (status.connected && status.extensionStage === "synced") {
         setConnected(status.accountName ?? "tu cuenta");
         router.refresh();
         return;
       }
+      setStage({ stage: status.extensionStage, error: status.extensionError });
       timer = setTimeout(tick, POLL_MS);
     };
     timer = setTimeout(tick, POLL_MS);
@@ -46,6 +48,7 @@ export function ExtensionLink({ baseUrlInputId }: { baseUrlInputId: string }) {
   function generate() {
     const input = document.getElementById(baseUrlInputId) as HTMLInputElement | null;
     setCopied(false);
+    setStage({ stage: "code", error: null });
     startTransition(async () => setResult(await createExtensionCodeAction(input?.value ?? "")));
   }
 
@@ -82,9 +85,13 @@ export function ExtensionLink({ baseUrlInputId }: { baseUrlInputId: string }) {
             </Button>
           </div>
           <p className="text-xs text-muted">{t.expires}</p>
-          <p className="text-xs text-muted" role="status">
-            {t.waiting}
-          </p>
+          {stage.stage === "error" && stage.error ? (
+            <Notice tone="error">{t.failed(stage.error)}</Notice>
+          ) : (
+            <p className="text-xs text-muted" role="status">
+              {stage.stage === "linked" ? t.linked : t.waiting}
+            </p>
+          )}
         </div>
       ) : (
         <Button type="button" onClick={generate} disabled={pending}>

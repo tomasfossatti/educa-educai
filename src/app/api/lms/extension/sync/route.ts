@@ -11,9 +11,9 @@ export async function POST(request: Request) {
     if (error instanceof AccessDenied) return Response.json({ error: "La extensión ya no está vinculada. Pedí un código nuevo en Educai.", unlinked: true }, { status: 401 });
     throw error;
   }
-  const body = (await request.json().catch(() => ({}))) as { cookies?: unknown };
+  const body = (await request.json().catch(() => ({}))) as { cookies?: unknown; userAgent?: unknown };
   try {
-    const { accountName } = await syncExtensionCookies(auth.viewer, auth.link, body.cookies);
+    const { accountName } = await syncExtensionCookies(auth.viewer, auth.link, body.cookies, undefined, body.userAgent);
     return Response.json({ ok: true, accountName, canvasUrl: auth.link.baseUrl }, { headers: { "cache-control": "no-store" } });
   } catch (error) {
     if (error instanceof ExtensionError || error instanceof LmsError) return Response.json({ error: error.message }, { status: 422 });

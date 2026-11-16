@@ -51,7 +51,8 @@ async function sync({ force = false } = {}) {
     res = await fetch(`${s.server}/api/lms/extension/sync`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${s.key}` },
-      body: JSON.stringify({ cookies: header }),
+      // El mismo navegador del que sale la sesión: Canvas puede rechazarla desde otro agente.
+      body: JSON.stringify({ cookies: header, userAgent: navigator.userAgent }),
     });
   } catch {
     const error = 'No hay conexión con Educai. Se reintenta en unos minutos.';

@@ -84,7 +84,7 @@ export async function disconnectLms(viewer: Viewer): Promise<void> {
   await db.$transaction([db.lmsConnection.deleteMany({ where: { userId: viewer.id } }), db.lmsExtensionLink.deleteMany({ where: { userId: viewer.id } })]);
 }
 
-type ClientFactory = (connection: { provider: LmsProvider; baseUrl: string; credential: string; authKind: string }) => LmsClient;
+type ClientFactory = (connection: { provider: LmsProvider; baseUrl: string; credential: string; authKind: string; userAgent?: string | null }) => LmsClient;
 
 async function clientFor(viewer: Viewer, factory: ClientFactory = clientForConnection): Promise<{ client: LmsClient; provider: LmsProvider } | null> {
   const connection = await db.lmsConnection.findUnique({ where: { userId: viewer.id } });

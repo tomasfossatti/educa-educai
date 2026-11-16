@@ -6,6 +6,7 @@ import { AIError, generateStructured } from "@/server/ai";
 import { AccessDenied, type Viewer } from "@/server/auth/guards";
 import { LmsError } from "@/server/lms";
 import { listLmsCourses, startLmsImport, LmsServiceError } from "./lms";
+import { getExtensionStatus } from "./lms-extension";
 
 /**
  * Chat del asistente (docente y estudiante) para traer materias desde el LMS. Los pedidos comunes se
@@ -82,8 +83,10 @@ export async function lmsAssistantTurn(viewer: Viewer, rawMessage: string, rawHi
     if (command.action === "create_subject") {
       const result = await startLmsImport(viewer, command.courseName);
       switch (result.kind) {
-        case "no_connection":
-          return { reply: t.noConnection };
+        case "no_connection": {
+          const extension = await getExtensionStatus(viewer);
+          return { reply: extension.stage === "error" && extension.error ? t.extensionFailed(extension.error) : t.noConnection };
+        }
         case "not_found":
           return { reply: t.notFound(command.courseName, result.available) };
         case "ambiguous":

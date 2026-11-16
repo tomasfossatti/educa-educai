@@ -28,6 +28,7 @@ interface CanvasFile {
 }
 
 const MAX_PAGES_SCANNED = 40;
+const BROWSER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 const MIN_PAGE_TEXT = 200;
 const FILE_LINK = /\/(?:courses\/\d+\/)?files\/(\d+)(?:\/download|\/preview|\b)/gi;
 
@@ -39,8 +40,12 @@ export class CanvasClient implements LmsClient {
     private readonly baseUrl: string,
     credential: string,
     authKind: "token" | "cookie" = "token",
+    userAgent?: string | null,
   ) {
-    this.headers = { accept: "application/json", "user-agent": "Educai (lectura de material)" };
+    // Con la cookie de sesión se usa el mismo navegador del que salió, como hace la extensión de mcp-siglo:
+    // Canvas puede rechazar una sesión que llega desde otro agente.
+    const agent = userAgent?.trim().slice(0, 400) || (authKind === "cookie" ? BROWSER_UA : "Educai (lectura de material)");
+    this.headers = { accept: "application/json", "user-agent": agent };
     if (authKind === "cookie") {
       // Si se pegó solo el valor de la cookie, se le pone el nombre que usa Canvas.
       const cookie = credential.replace(/^cookie:\s*/i, "").trim();
