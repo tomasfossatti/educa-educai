@@ -62,7 +62,7 @@ export interface FeedbackInput {
 
 export function buildFeedbackMessage(input: FeedbackInput): string {
   const declared = [
-    input.declared.currentContext && `Contexto actual: ${input.declared.currentContext}`,
+    input.declared.currentContext && `Foco para ejemplos (elegido por el estudiante): ${input.declared.currentContext}`,
     input.declared.goals && `Objetivos: ${input.declared.goals}`,
     input.declared.strengths && `Fortalezas que percibe: ${input.declared.strengths}`,
     input.declared.difficulties && `Dificultades que percibe: ${input.declared.difficulties}`,

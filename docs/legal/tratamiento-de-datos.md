@@ -13,7 +13,7 @@ El piloto es una cátedra de una materia, con 20 a 60 estudiantes, durante un cu
 | Categoría | Datos | De quién |
 | --- | --- | --- |
 | Cuenta | Nombre, correo, contraseña (solo su hash scrypt, nunca el texto), rol, fechas de alta | Estudiantes, docentes, administrador |
-| Perfil | Carrera, año, descripción corta del proyecto personal, y el contexto que el estudiante declara de sí mismo (intereses, objetivos, fortalezas, dificultades, forma de trabajar) | Estudiantes |
+| Perfil | Carrera, año, descripción corta del proyecto personal, trabajo actual (opcional), de cuál de los dos quiere que salgan los ejemplos, y el contexto que declara de sí mismo (intereses, objetivos, fortalezas, dificultades, forma de trabajar) | Estudiantes |
 | Consentimiento | Fecha de aceptación, versión del aviso, fecha de retiro | Estudiantes |
 | Cursada | Inscripción a la cátedra; invitaciones (correo invitado y fecha de aceptación) | Estudiantes |
 | Conversaciones | Mensajes del chat de cada carpeta, hilos sobre fragmentos, y conversaciones de otra IA que el estudiante sube (texto de hasta 2 MB) | Estudiantes |

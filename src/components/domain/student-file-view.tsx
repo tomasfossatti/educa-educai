@@ -17,6 +17,7 @@ export function StudentFileView({ file, projectLinks }: { file: StudentFile; pro
           <KeyValue label={t.career}>{file.student.career ?? "—"}</KeyValue>
           <KeyValue label={t.year}>{file.student.studyYear ?? "—"}</KeyValue>
           <KeyValue label={t.project}>{file.student.projectDescription ?? "—"}</KeyValue>
+          <KeyValue label={TEXT.profile.focusLabel}>{TEXT.profile.focusShort[file.student.personalizationFocus]}</KeyValue>
         </dl>
       </Section>
 

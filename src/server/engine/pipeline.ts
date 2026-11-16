@@ -34,6 +34,7 @@ import { SIGNALS_SYSTEM, buildSignalsMessage, signalsSchema } from "@/server/ai/
 import { db } from "@/server/db";
 import { EVENT, track } from "@/server/events";
 import { computeAndStoreSnapshot } from "./snapshot";
+import { focusText } from "@/domain/personalization";
 
 /**
  * Interpretation Engine — pipeline explícito:
@@ -379,7 +380,8 @@ async function interpret(run: LoadedRun, logStep: (e: Omit<StepEntry, "at">) => 
   }
 
   // ── 3. Señales + vinculación curricular ──
-  const declaredContext = [run.student.declaredCurrentContext, run.student.declaredInterests].filter(Boolean).join("; ") || null;
+  // Un solo contexto: el que el estudiante eligió como foco (trabajo o proyecto), nunca los dos.
+  const declaredContext = focusText(run.student).text;
   const signalOutput = await generateStructuredWithRetry({
     operation: "interpret.signals",
     system: SIGNALS_SYSTEM,
@@ -699,7 +701,7 @@ async function interpret(run: LoadedRun, logStep: (e: Omit<StepEntry, "at">) => 
         strengths: run.student.declaredStrengths,
         difficulties: run.student.declaredDifficulties,
         goals: run.student.declaredGoals,
-        currentContext: run.student.declaredCurrentContext,
+        currentContext: focusText(run.student).text,
       },
       inferences: inferences.map((i) => ({
         statement: i.studentStatement,

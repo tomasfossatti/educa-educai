@@ -1,6 +1,7 @@
 import "server-only";
 import { buildTutorSystem } from "@/server/ai/prompts/tutor";
 import { db } from "@/server/db";
+import { focusText } from "@/domain/personalization";
 
 /** Conversación del estudiante dentro de una materia (siempre filtrada por dueño). */
 export async function getOwnConversation(conversationId: string, studentId: string) {
@@ -61,8 +62,8 @@ export async function buildTutorSystemPrompt(conversationId: string): Promise<st
       ? { title: conversation.activity.title, scenario: conversation.activity.scenario, instructions: conversation.activity.instructions }
       : null,
     declaredContext:
-      student.declaredCurrentContext || student.declaredInterests || student.declaredGoals
-        ? { currentContext: student.declaredCurrentContext, interests: student.declaredInterests, goals: student.declaredGoals }
+      focusText(student).text || student.declaredInterests || student.declaredGoals
+        ? { currentContext: focusText(student).text, interests: student.declaredInterests, goals: student.declaredGoals }
         : null,
     priorEvidenceNotes,
   });
