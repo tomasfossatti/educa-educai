@@ -155,7 +155,7 @@ La ficha se arma con la misma evidencia que las conversaciones, así que se apli
 ### 2026-11-15 · Descartar PageLM, DeepStudent, Get It y Gemini
 Las tres herramientas no figuran en el spec y sus acciones llamaban a la IA sin exigir sesión. Gemini está fuera del stack del spec. Sin `AI_PROVIDER`, el proveedor por defecto pasa a ser Anthropic.
 
-### 2026-11-15 · Etapa 1: entidades nuevas y cambios al esquema (pendiente de revisión de Tomás)
+### 2026-11-15 · Etapa 1: entidades nuevas y cambios al esquema (revisada por Tomás el 2026-11-16)
 Contexto: el spec pide comparar `prisma/schema.prisma` con "Modelo de datos" y listar los cambios antes de implementarlos (se implementan en la etapa 3 y siguientes).
 
 Consentimiento hoy: está en un solo lugar, `StudentProfile.consentAnalysisAt` + `consentVersion` (lo escribe `src/server/actions/student.ts` y lo lee `src/server/engine/trigger.ts` antes de analizar). `privacy.ts` no guarda consentimiento: solo hace el borrado en cascada y el resumen de datos. Aparte existe `shareContextWithTeachers` (compartir el contexto declarado) y `CourseInvite.acceptedAt` (aceptar la invitación, no es consentimiento de análisis). Decisión: el consentimiento queda en `StudentProfile`; se agrega `consentWithdrawnAt` para V11 y se documenta que `CourseInvite.acceptedAt` no es consentimiento.
