@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Umbrales del semáforo de Mi avance
+Contexto: Mi avance muestra un semáforo por tema, sin porcentajes. Lo tiene que calcular código determinístico a partir de `MasteryRecord`, no el modelo.
+Alternativas: verde desde 0,7 (con dos intentos perfectos ya sería verde, pero también con dos intentos mediocres); verde solo con tres intentos (deja en amarillo a quien acertó todo dos veces); verde desde 0,8.
+Decisión: `TRAFFIC_LIGHT` en `src/domain/traffic-light.ts`. Verde ("Lo domino") con un avance de 0,8 o más. Amarillo ("En camino") con al menos una práctica y menos de 0,8. Gris ("Sin empezar") sin prácticas o sin registro. Con el tope de la fórmula portada (0,5 con un intento y 0,8 con dos), el verde pide al menos dos prácticas buenas: un acierto con suerte no alcanza. Las dudas confirmadas no cambian el color, igual que no bajan el puntaje en el spec.
+Consecuencias: sin migración. Tests de los bordes en `tests/unit/traffic-light.test.ts` (0,79, 0,8, un intento perfecto, dos perfectos y sin registro). Tocar un tema arranca una práctica de ese tema con la misma acción que Practicar.
+
 ### 2026-11-16 · Practicar: un botón por tema, resultado en una pantalla
 Contexto: el quiz vivía dentro de la página de la carpeta, con el porcentaje de dominio a la vista. El diseño nuevo pide una lista de temas, que tocar uno arranque el quiz y un resultado con un solo mensaje y "Seguir".
 Alternativas: arrancar el quiz con un enlace (`/s/practicar?tema=…`); con un botón que llama a la acción.

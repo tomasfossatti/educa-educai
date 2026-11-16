@@ -19,6 +19,8 @@ test("el docente sube material y la estudiante practica un tema con un quiz que 
   const student = await browser.newPage();
   await login(student, w.students[0]);
   // Practicar: los temas de la materia; tocar uno arma el quiz.
+  await student.getByRole("link", { name: "Mi avance" }).click();
+  await expect(student.getByRole("button", { name: "Hipotesis falsables: Sin empezar" })).toBeVisible();
   await student.getByRole("link", { name: "Practicar" }).click();
   await student.waitForURL("**/s/practicar");
   await student.getByRole("button", { name: "Practicar: Hipotesis falsables" }).click();
@@ -40,6 +42,10 @@ test("el docente sube material y la estudiante practica un tema con un quiz que 
   await expect(student.getByText("Tu respuesta").first()).toBeVisible();
   await student.getByRole("link", { name: "Seguir" }).click();
   await student.waitForURL("**/s/practicar");
+
+  // El semáforo de Mi avance cambia de gris a amarillo (una práctica: tope 0,5).
+  await student.getByRole("link", { name: "Mi avance" }).click();
+  await expect(student.getByRole("button", { name: "Hipotesis falsables: En camino" })).toBeVisible();
 
   const course = await db.course.findUniqueOrThrow({ where: { id: w.course.id } });
   await student.goto(`/s/courses/${course.id}/ficha`);
