@@ -8,11 +8,11 @@ import { deleteAccountAction, updateContextAction } from "@/server/actions/stude
 
 const FIELDS = [
   { name: "currentContext", label: TEXT.profile.work, hint: TEXT.profile.workHint, required: false },
-  { name: "interests", label: "Intereses", hint: "Problemas, industrias, disciplinas, actividades.", required: false },
-  { name: "goals", label: "Objetivos", hint: "Qué querés desarrollar o lograr.", required: true },
-  { name: "strengths", label: "Fortalezas que percibís", hint: "", required: false },
-  { name: "difficulties", label: "Dificultades que percibís", hint: "", required: false },
-  { name: "workPreferences", label: "Cómo preferís trabajar", hint: "", required: false },
+  { name: "interests", label: "Intereses", hint: TEXT.profile.hints.interests, required: false },
+  { name: "goals", label: "Objetivos", hint: TEXT.profile.hints.goals, required: true },
+  { name: "strengths", label: "Fortalezas que percibís", hint: TEXT.profile.hints.strengths, required: false },
+  { name: "difficulties", label: "Dificultades que percibís", hint: TEXT.profile.hints.difficulties, required: false },
+  { name: "workPreferences", label: "Cómo preferís trabajar", hint: TEXT.profile.hints.workPreferences, required: false },
 ] as const;
 
 type Defaults = Record<(typeof FIELDS)[number]["name"], string>;
