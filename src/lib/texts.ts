@@ -2,7 +2,19 @@
  * Textos de la interfaz en español rioplatense, centralizados para poder traducirlos (regla 8).
  * Las pantallas nuevas toman sus textos de acá; las existentes se migran a medida que se tocan.
  */
+import { citationUnit } from "@/domain/citations";
+
+/** "pág. 3" en un PDF; "sección 3" en un TXT o DOCX, donde no hay páginas reales. */
+function cite(fileName: string, n: number): string {
+  return citationUnit(fileName) === "section" ? `sección ${n}` : `pág. ${n}`;
+}
+
 export const TEXT = {
+  citation: {
+    /** "programa.pdf, pág. 2" o "apunte.txt, sección 2". */
+    source: (fileName: string, n: number) => `${fileName}, ${cite(fileName, n)}`,
+    unit: cite,
+  },
   material: {
     nav: "Material",
     title: "Material de la cátedra",
@@ -15,10 +27,12 @@ export const TEXT = {
     empty: "Todavía no cargaste material.",
     emptyHint: "Subí el programa, apuntes o presentaciones para que el chat pueda citarlos.",
     status: { PROCESSING: "Procesando", READY: "Listo", FAILED: "Con error" },
-    pages: (n: number) => `${n} ${n === 1 ? "página" : "páginas"}`,
+    pages: (n: number, fileName = "") =>
+      citationUnit(fileName) === "section" ? `${n} ${n === 1 ? "sección" : "secciones"}` : `${n} ${n === 1 ? "página" : "páginas"}`,
     fragments: (n: number) => `${n} ${n === 1 ? "fragmento" : "fragmentos"}`,
     version: (v: number) => `versión ${v}`,
-    uploaded: (fileName: string, pages: number) => `Listo: ${fileName} quedó indexado (${pages} ${pages === 1 ? "página" : "páginas"}).`,
+    uploaded: (fileName: string, pages: number) =>
+      `Listo: ${fileName} quedó indexado (${citationUnit(fileName) === "section" ? `${pages} ${pages === 1 ? "sección" : "secciones"}` : `${pages} ${pages === 1 ? "página" : "páginas"}`}).`,
     noFile: "Elegí un archivo.",
   },
   consent: {
@@ -144,7 +158,7 @@ export const TEXT = {
     mastery: (score: number) => `Dominio ${Math.round(score * 100)}%`,
     noMastery: "Sin intentos",
     title: (topic: string) => `Quiz: ${topic}`,
-    source: (file: string, page: number) => `Fuente: ${file}, pág. ${page}`,
+    source: (file: string, page: number) => `Fuente: ${file}, ${cite(file, page)}`,
     submit: "Entregar",
     submitting: "Corrigiendo…",
     result: (correct: number, total: number) => `${correct} de ${total} correctas`,
@@ -217,7 +231,7 @@ export const TEXT = {
     you: "Vos",
     tutor: "Educai",
     sources: "Fuentes",
-    page: (n: number) => `pág. ${n}`,
+    page: (n: number, fileName = "") => cite(fileName, n),
     noSource: "Sin fuente en el material: esta respuesta no se apoya en el material de la cátedra.",
     empty: "Hacé la primera pregunta. La IA busca en el material de la cátedra y cita archivo y página.",
     backToFolder: "Volver a la carpeta",

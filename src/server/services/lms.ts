@@ -237,8 +237,8 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
 }
 
 /**
- * Aviso para cuando alguna lectura entró como texto: ahí la IA cita secciones del texto ("pág. 3") que
- * no coinciden con las páginas del PDF que ve el estudiante.
+ * Aviso para cuando alguna lectura entró como texto: ahí la IA cita secciones del texto ("sección 3"),
+ * no páginas del PDF que ve el estudiante.
  */
 export function readingsNotice(asText: { scanned_pdf: number; no_pdf: number }): string | null {
   const total = asText.scanned_pdf + asText.no_pdf;
@@ -250,7 +250,7 @@ export function readingsNotice(asText: { scanned_pdf: number; no_pdf: number }):
       : asText.scanned_pdf === 0
         ? total === 1 ? "porque no tiene PDF para bajar" : "porque no tienen PDF para bajar"
         : "porque no tienen PDF o es escaneado";
-  return `${which} como texto ${why}: en esas, las páginas que cita la IA son secciones del texto y no las del PDF.`;
+  return `${which} como texto ${why}: en esas, la IA cita secciones del texto en vez de páginas del PDF.`;
 }
 
 export interface ImportStatus {

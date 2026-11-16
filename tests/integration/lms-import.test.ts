@@ -129,7 +129,7 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     expect(files.find((m) => m.fileName.startsWith("Módulo 3 · Lectura 1"))).toMatchObject({ fileName: "Módulo 3 · Lectura 1 - Canales y relaciones.pdf", mimeType: "application/pdf", pageCount: 2 });
     // Si el PDF es escaneado, se usa el texto de la página y se avisa.
     expect(files.find((m) => m.fileName.startsWith("Módulo 3 · Lectura 2"))).toMatchObject({ fileName: "Módulo 3 · Lectura 2 - Métricas de tracción.txt", mimeType: "text/plain" });
-    expect(status?.note).toMatch(/^3 lecturas entraron como texto porque no tienen PDF o es escaneado: .*no las del PDF\.$/);
+    expect(status?.note).toMatch(/^3 lecturas entraron como texto porque no tienen PDF o es escaneado: en esas, la IA cita secciones del texto en vez de páginas del PDF\.$/);
   });
 
   it("reemplaza las lecturas que una importación anterior guardó como texto", async () => {

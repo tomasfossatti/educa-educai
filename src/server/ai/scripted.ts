@@ -183,7 +183,7 @@ function feedback(message: string) {
 
 /** Chat de carpeta: si hay fragmentos, responde citando el primero; si no, avisa que no hay fuente. */
 function folderChat(message: string) {
-  const first = /^\[1\] (.+?), página (\d+):\n([\s\S]*?)(?:\n\[2\]|\nPREGUNTA:)/m.exec(message);
+  const first = /^\[1\] (.+?), (?:página|sección) (\d+):\n([\s\S]*?)(?:\n\[2\]|\nPREGUNTA:)/m.exec(message);
   if (!first) {
     return {
       answer: "No encontré esto en el material de la cátedra, así que no puedo darte una respuesta con fuente. (Respuesta del proveedor de prueba.)",
@@ -200,7 +200,7 @@ function folderChat(message: string) {
 
 /** Quiz: tres preguntas sobre el primer fragmento, todas citándolo. */
 function quizGenerate(message: string) {
-  const first = /^\[1\] (.+?), página (\d+):\n([\s\S]*?)(?:\n\[2\]|\nTEMA:)/m.exec(message);
+  const first = /^\[1\] (.+?), (?:página|sección) (\d+):\n([\s\S]*?)(?:\n\[2\]|\nTEMA:)/m.exec(message);
   const fact = first ? quote(first[3].trim(), 80) : "el tema";
   return {
     questions: [1, 2, 3].map((n) => ({
@@ -229,7 +229,7 @@ function contextSummary(message: string) {
 
 /** Slides: una por tipo, todas citando el primer fragmento. */
 function slidesGenerate(message: string) {
-  const first = /^\[1\] (.+?), página (\d+):\n([\s\S]*?)(?:\n\[2\]|\nTEMAS:)/m.exec(message);
+  const first = /^\[1\] (.+?), (?:página|sección) (\d+):\n([\s\S]*?)(?:\n\[2\]|\nTEMAS:)/m.exec(message);
   const fact = first ? quote(first[3].trim(), 90) : "el tema";
   const kinds = [
     ["EXPLANATION", "Qué es"],
