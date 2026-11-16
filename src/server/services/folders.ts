@@ -23,19 +23,6 @@ export async function ensureStudentFolders(studentId: string): Promise<void> {
   });
 }
 
-/** Carpetas del estudiante con su última conversación, para la pantalla de inicio. */
-export async function listStudentFolders(studentId: string) {
-  await ensureStudentFolders(studentId);
-  return db.folder.findMany({
-    where: { studentId },
-    orderBy: [{ kind: "asc" }, { createdAt: "asc" }],
-    include: {
-      course: { select: { id: true, name: true } },
-      conversations: { orderBy: { createdAt: "desc" }, take: 1, select: { id: true, title: true, createdAt: true, origin: true } },
-    },
-  });
-}
-
 /**
  * Carpetas del estudiante para la barra lateral: solo nombre y tipo. Si le falta la del proyecto
  * o la de alguna materia (el layout se arma antes que el inicio que las crea), las crea primero.

@@ -5,10 +5,10 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
 import { parseActivityPrompts } from "@/domain/activity";
-import { CONSENT_VERSION, CURRENT_COURSE_COOKIE } from "@/lib/constants";
+import { CONSENT_VERSION, CURRENT_COURSE_COOKIE, CURRENT_FOLDER_COOKIE } from "@/lib/constants";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
 import { TEXT } from "@/lib/texts";
-import { requireEnrolledStudent, requireStudent } from "@/server/auth/guards";
+import { assertFolderOwner, requireEnrolledStudent, requireStudent } from "@/server/auth/guards";
 import { destroySession } from "@/server/auth/session";
 import { db } from "@/server/db";
 import { onConversationClosed, queueInterpretation, retryInterpretation } from "@/server/engine/trigger";
@@ -89,8 +89,11 @@ function contextData(v: z.infer<typeof contextSchema>) {
   };
 }
 
+/** La materia actual pasa a ser esta (y su carpeta, por la cookie de curso). */
 async function setCurrentCourse(courseId: string) {
-  (await cookies()).set(CURRENT_COURSE_COOKIE, courseId, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 180 });
+  const jar = await cookies();
+  jar.set(CURRENT_COURSE_COOKIE, courseId, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 180 });
+  jar.delete(CURRENT_FOLDER_COOKIE);
 }
 
 export async function completeOnboardingAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
@@ -173,7 +176,7 @@ export async function joinCourseAction(_prev: ActionState | null, formData: Form
   const result = await enrollWithCode(user.id, text(formData, "joinCode"));
   if ("error" in result) return { error: result.error, fieldErrors: { joinCode: result.error } };
   await setCurrentCourse(result.courseId);
-  redirect(`/s/courses/${result.courseId}`);
+  redirect("/s");
 }
 
 export async function acceptInviteAction(inviteId: string): Promise<void> {
@@ -190,8 +193,23 @@ export async function acceptInviteAction(inviteId: string): Promise<void> {
   ]);
   await ensureStudentFolders(user.id);
   await setCurrentCourse(invite.courseId);
-  redirect(`/s/courses/${invite.courseId}`);
+  redirect("/s");
 }
+
+/** Cambia la materia actual desde el selector de arriba (materia, materia del LMS o el proyecto). */
+export async function selectFolderAction(folderId: string, next: string): Promise<void> {
+  const { user } = await requireStudent();
+  const folder = await assertFolderOwner({ id: user.id, role: user.role }, folderId).catch(() => null);
+  if (!folder) notFound();
+  const jar = await cookies();
+  const options = { httpOnly: true, sameSite: "lax" as const, path: "/", maxAge: 60 * 60 * 24 * 180 };
+  jar.set(CURRENT_FOLDER_COOKIE, folder.id, options);
+  if (folder.courseId) jar.set(CURRENT_COURSE_COOKIE, folder.courseId, options);
+  redirect(PANEL_PATHS.includes(next) ? next : "/s");
+}
+
+/** Pantallas del panel a las que vuelve el selector de materia. */
+const PANEL_PATHS = ["/s", "/s/practicar", "/s/avance"];
 
 export async function selectCourseAction(courseId: string): Promise<void> {
   await requireEnrolledStudent(courseId);

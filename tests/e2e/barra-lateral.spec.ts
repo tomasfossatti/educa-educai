@@ -52,8 +52,7 @@ test("con una materia, la estudiante encuentra cómo sumarse a otra y la barra s
   await login(page, student);
   await page.goto("/s");
 
-  // Desde el inicio y desde la barra lateral, aunque ya esté en una materia.
-  await expect(page.getByRole("main").getByRole("link", { name: "Unirme a otra materia" })).toBeVisible();
+  // Desde la barra lateral, aunque ya esté en una materia.
   await page.getByRole("button", { name: "Abrir menú lateral" }).click();
   const menu = page.getByRole("dialog", { name: "Menú lateral" });
   await menu.getByRole("link", { name: "Unirme a otra materia" }).click();
@@ -61,7 +60,9 @@ test("con una materia, la estudiante encuentra cómo sumarse a otra y la barra s
 
   await page.getByLabel("Código").fill(second.course.joinCode!);
   await page.getByRole("button", { name: "Unirme" }).click();
-  await expect(page).toHaveURL(new RegExp(`/s/courses/${second.course.id}$`));
+  // Entra directo al chat de la materia nueva.
+  await expect(page).toHaveURL(/\/s$/);
+  await expect(page.getByRole("main").getByRole("heading", { name: second.course.name })).toBeVisible();
 
   // La barra muestra la materia nueva y su carpeta.
   await page.getByRole("button", { name: "Abrir menú lateral" }).click();
@@ -70,10 +71,11 @@ test("con una materia, la estudiante encuentra cómo sumarse a otra y la barra s
   await expect(menu.locator(`a[href="/s/folders/${folder.id}"]`)).toHaveText(second.course.name);
   await menu.getByRole("button", { name: "Cerrar menú" }).click();
 
-  // En el inicio, la materia anterior queda en "Otras materias inscriptas".
+  // La materia anterior queda en el selector de arriba y se vuelve a ella con un toque.
   await page.goto("/s");
-  await expect(page.getByText("Otras materias inscriptas")).toBeVisible();
-  await expect(page.getByRole("heading", { name: first.course.name })).toBeVisible();
+  await page.getByLabel(`Elegir materia: ${second.course.name}`).click();
+  await page.getByRole("button", { name: first.course.name }).click();
+  await expect(page.getByRole("main").getByRole("heading", { name: first.course.name })).toBeVisible();
 });
 
 test("después de navegar por la barra de arriba, el menú lateral se abre y queda abierto", async ({ page }) => {

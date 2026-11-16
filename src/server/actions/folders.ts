@@ -36,13 +36,25 @@ export async function startFolderConversationAction(folderId: string): Promise<v
   redirect(`/s/c/${conversation.id}`);
 }
 
+/** Título de una charla nueva: el comienzo de la primera pregunta. */
+function titleFrom(question: string): string {
+  const oneLine = question.replace(/\s+/g, " ").trim();
+  return oneLine.length > 60 ? `${oneLine.slice(0, 59)}…` : oneLine;
+}
+
+/**
+ * Pregunta en el chat. Con `conversationId`, en esa charla; con `folderId` y sin charla (la caja del
+ * inicio), abre una charla nueva en esa materia y pregunta en la misma acción.
+ */
 export async function askInFolderAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
   const v = await viewer();
-  const conversationId = text(formData, "conversationId");
+  let conversationId = text(formData, "conversationId");
+  const folderId = text(formData, "folderId");
   const threadId = text(formData, "threadId") || undefined;
   const question = text(formData, "question");
   if (!question) return { error: TEXT.chat.emptyQuestion, fieldErrors: { question: TEXT.chat.emptyQuestion } };
   try {
+    if (!conversationId && folderId) conversationId = (await startFolderConversation(v, folderId, titleFrom(question))).id;
     await askInFolder(v, conversationId, question.slice(0, 4000), threadId);
   } catch (error) {
     if (error instanceof AIError || error instanceof StudentInputError) return { error: studentErrorMessage(error, "folder.ask") };

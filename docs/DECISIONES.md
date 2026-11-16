@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · El inicio es el chat y la materia actual es una carpeta
+Contexto: el inicio tenía tarjetas de carpetas, "Tu desarrollo" y "Tu contexto declarado". El diseño nuevo pide que `/s` ya sea el chat, con la caja grande, como mucho dos toques entre el login y la primera pregunta, y un selector de materia arriba.
+Alternativas: abrir el chat en `/s/c/[id]` después de la primera pregunta (cambia la dirección y obliga a volver); quedarse en `/s` con la última charla abierta.
+Decisión: `/s` muestra la última charla abierta de la materia actual o, si no hay, la caja vacía. La primera pregunta crea la charla y responde en la misma acción, sin cambiar de pantalla. "Terminar" la cierra (y la analiza, si hay consentimiento), y la caja queda lista para otra. La materia actual es una carpeta: cookie `educai_folder`, con la de curso como respaldo para quien ya la tenía. Sumarse con código o aceptar una invitación lleva directo al chat de esa materia. Sin materia de la cátedra ni del LMS, `/s` muestra solo el campo del código. Las invitaciones pendientes son una tarjeta con "Unirme".
+Consecuencias: sin migración. `src/server/services/student-panel.ts` arma el selector, la materia actual y la charla activa, siempre con datos del propio estudiante. Se retiran las tarjetas de carpetas y los bloques viejos del inicio.
+
 ### 2026-11-16 · Un solo chat: el de la carpeta de la materia
 Contexto: el estudiante tenía dos chats. El tutor de la materia (`/s/courses/[id]/tutor/[c]`, `/api/tutor`, operación `tutor.reply`) no buscaba en el material, no citaba ni avisaba "sin fuente", no tenía hilos sobre un fragmento ni dudas para confirmar, y creaba conversaciones sin carpeta, así que no alimentaba el contexto. El de la carpeta (`/s/folders/[f]/c/[c]`, `folder.chat`) hace todo eso.
 Alternativas: conservar el tutor y sumarle material y citas (habría que rehacer las citas en streaming); conservar el de la carpeta y llevarle lo único que el tutor tenía de más: el foco en un tema o en una tarea.
