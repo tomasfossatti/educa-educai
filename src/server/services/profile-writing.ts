@@ -20,7 +20,6 @@ export const IMPROVABLE_FIELDS = {
   },
   strengths: { purpose: "En qué se siente fuerte.", max: 1500 },
   difficulties: { purpose: "Qué le cuesta.", max: 1500 },
-  workPreferences: { purpose: "Cómo prefiere trabajar o aprender.", max: 1500 },
 } as const;
 
 export type ImprovableField = keyof typeof IMPROVABLE_FIELDS;

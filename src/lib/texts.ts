@@ -40,6 +40,14 @@ export const TEXT = {
     year: "Año que cursás",
     project: "Tu proyecto personal",
     projectHint: "Qué estás armando o te gustaría armar, para quién y qué problema resuelve, en dos o tres líneas. Va a su propia carpeta.",
+    /** Opciones de "¿Cómo preferís trabajar?" (se guardan como texto, separadas por "; "). */
+    workPreferenceOptions: [
+      "Con ejemplos prácticos primero",
+      "Con la teoría primero",
+      "Con explicaciones cortas y directas",
+      "Con explicaciones paso a paso, en detalle",
+      "En equipo, más que solo",
+    ],
     hints: {
       career: "Qué estudiás. Ej.: Ingeniería en Innovación y Desarrollo.",
       studyYear: "En qué año de la carrera estás. Ej.: 3.",
@@ -47,7 +55,7 @@ export const TEXT = {
       goals: "Qué querés aprender o poder hacer. Ej.: aprender a validar un producto con usuarios reales.",
       strengths: "Lo que te sale bien o te reconocen. Ej.: hablar con clientes, ordenar procesos.",
       difficulties: "Lo que te cuesta o evitás. Ej.: los números, presentar en público.",
-      workPreferences: "Cómo te gusta trabajar o aprender. Ej.: ejemplos prácticos primero, en equipo, explicaciones cortas.",
+      workPreferences: "Cómo te gusta trabajar o aprender. Marcá todas las que te representen.",
     },
     work: "¿Qué hacés hoy además de estudiar?",
     workHint: "Un trabajo, un emprendimiento o una organización donde participás, con o sin sueldo. Si no hacés nada de eso, dejalo vacío.",

@@ -57,6 +57,13 @@ function readProfile(formData: FormData) {
   };
 }
 
+/** Casillas de "¿Cómo preferís trabajar?": solo valen las opciones ofrecidas, en su orden. */
+function readWorkPreferences(formData: FormData): string | undefined {
+  const chosen = new Set(formData.getAll("workPreferences").map(String));
+  const valid = TEXT.profile.workPreferenceOptions.filter((option) => chosen.has(option));
+  return valid.length ? valid.join("; ") : undefined;
+}
+
 function readContext(formData: FormData) {
   return {
     currentContext: text(formData, "currentContext"),
@@ -64,7 +71,7 @@ function readContext(formData: FormData) {
     goals: text(formData, "goals"),
     strengths: text(formData, "strengths") || undefined,
     difficulties: text(formData, "difficulties") || undefined,
-    workPreferences: text(formData, "workPreferences") || undefined,
+    workPreferences: readWorkPreferences(formData),
   };
 }
 

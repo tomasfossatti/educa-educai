@@ -172,9 +172,15 @@ export function OnboardingForm({
         <Field label="¿Qué te cuesta?" htmlFor="difficulties" hint={TEXT.profile.hints.difficulties} optional error={state?.fieldErrors?.difficulties}>
           <ImprovableTextarea field="difficulties" id="difficulties" name="difficulties" maxLength={1500} />
         </Field>
-        <Field label="¿Cómo preferís trabajar?" htmlFor="workPreferences" hint={TEXT.profile.hints.workPreferences} optional error={state?.fieldErrors?.workPreferences}>
-          <ImprovableTextarea field="workPreferences" id="workPreferences" name="workPreferences" maxLength={1500} className="min-h-16" />
-        </Field>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-ink">
+            ¿Cómo preferís trabajar? <span className="font-normal text-muted">(opcional)</span>
+          </legend>
+          <p className="text-xs text-muted">{TEXT.profile.hints.workPreferences}</p>
+          {TEXT.profile.workPreferenceOptions.map((option) => (
+            <Checkbox key={option} name="workPreferences" value={option} label={option} />
+          ))}
+        </fieldset>
       </section>
 
       <section data-step="4" className={panel(4)}>
