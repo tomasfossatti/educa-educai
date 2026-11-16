@@ -30,7 +30,7 @@ test("pensar una tarea con la IA abre el único chat, en la materia y con fuente
   });
   await login(page, ana);
   await page.goto(`/s/courses/${w.course.id}/activities/${activity.id}`);
-  await page.getByRole("button", { name: "Pensarla con el tutor" }).click();
+  await page.getByRole("button", { name: "Pensarla con la IA" }).click();
   await page.waitForURL(/\/s\/c\//);
   const conversation = await db.aIConversation.findFirstOrThrow({ where: { studentId: ana.id, activityId: activity.id }, include: { folder: true } });
   expect(conversation.folder).toMatchObject({ kind: "SUBJECT", courseId: w.course.id });

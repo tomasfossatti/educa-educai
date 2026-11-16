@@ -15,7 +15,7 @@ import { describe, expect, it } from "vitest";
 import { STUDENT_FORBIDDEN_WORDS, TEXT } from "@/lib/texts";
 
 const ROOT = join(__dirname, "..", "..");
-const STUDENT_SOURCES = ["src/app/s", "src/components/student"];
+const STUDENT_SOURCES = ["src/app/s", "src/components/student", "src/components/lms"];
 /** Acciones y servicios cuyos mensajes ve el estudiante (errores, avisos): se revisan los bloques de TEXT que usan. */
 const STUDENT_MESSAGE_SOURCES = ["src/server/actions/folders.ts", "src/server/actions/student.ts", "src/server/services/student-errors.ts"];
 /** Donde "ficha" sí se puede decir: Mis datos, "Lo que ve mi docente sobre mí". */
@@ -23,14 +23,9 @@ const FICHA_ALLOWED_TEXT = ["student.myData"];
 const FICHA_ALLOWED_FILES = [/^src\/app\/s\/\(app\)\/mis-datos\//];
 
 /** Bloques de TEXT que usan pantallas viejas, en transición. Se vacía en el PR 12. */
-const TRANSITIONAL_BLOCKS: string[] = [
-  "lms",
-];
+const TRANSITIONAL_BLOCKS: string[] = [];
 /** Archivos de pantallas viejas, en transición. Se vacía en el PR 12. */
-const TRANSITIONAL_FILES: string[] = [
-  "src/app/s/(app)/courses/[courseId]/activities/[activityId]/submission-form.tsx",
-  "src/app/s/(app)/courses/[courseId]/activities/page.tsx",
-];
+const TRANSITIONAL_FILES: string[] = [];
 
 function normalize(text: string): string {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();

@@ -4,7 +4,7 @@ import type { Confidence, DeclaredAssistance } from "@prisma/client";
 import { Field, Radio, Textarea } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
 import type { ActivityPrompt } from "@/domain/activity";
-import { confidenceLabel, declaredAssistanceLabel } from "@/domain/labels";
+import { TEXT } from "@/lib/texts";
 import { saveSubmissionAction } from "@/server/actions/student";
 
 interface Draft {
@@ -15,6 +15,7 @@ interface Draft {
 }
 
 export function SubmissionForm({ activityId, prompts, draft }: { activityId: string; prompts: ActivityPrompt[]; draft: Draft | null }) {
+  const t = TEXT.student.task;
   const { state, pending, onSubmit } = useActionForm(saveSubmissionAction);
   return (
     <form method="post" onSubmit={onSubmit} className="space-y-6">
@@ -26,39 +27,36 @@ export function SubmissionForm({ activityId, prompts, draft }: { activityId: str
       ))}
 
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-ink">¿Usaste ayuda para responder?</legend>
-        <p className="text-xs text-muted">
-          No cambia cómo se te evalúa: es contexto para interpretar la evidencia con honestidad (por ejemplo, para no confundir lo que hiciste con lo
-          que hizo una IA).
-        </p>
-        {(Object.keys(declaredAssistanceLabel) as DeclaredAssistance[]).map((value) => (
-          <Radio key={value} name="declaredAssistance" value={value} label={declaredAssistanceLabel[value]} defaultChecked={draft?.declaredAssistance === value} />
+        <legend className="text-sm font-medium text-ink">{t.help}</legend>
+        <p className="text-xs text-muted">{t.helpHint}</p>
+        {(Object.keys(t.helpOptions) as DeclaredAssistance[]).map((value) => (
+          <Radio key={value} name="declaredAssistance" value={value} label={t.helpOptions[value]} defaultChecked={draft?.declaredAssistance === value} />
         ))}
         {state?.fieldErrors?.declaredAssistance && <p className="text-xs text-danger">{state.fieldErrors.declaredAssistance}</p>}
       </fieldset>
 
-      <Field label="Detalle sobre la ayuda" htmlFor="assistanceNote" optional>
+      <Field label={t.helpNote} htmlFor="assistanceNote" optional>
         <Textarea id="assistanceNote" name="assistanceNote" defaultValue={draft?.assistanceNote ?? ""} maxLength={1000} className="min-h-16" />
       </Field>
 
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium text-ink">
-          ¿Cuánta confianza tenés en tu respuesta? <span className="font-normal text-muted">(opcional)</span>
+          {t.sure} <span className="font-normal text-muted">{t.optional}</span>
         </legend>
         <div className="flex flex-wrap gap-4">
-          {(Object.keys(confidenceLabel) as Confidence[]).map((value) => (
-            <Radio key={value} name="confidence" value={value} label={confidenceLabel[value]} defaultChecked={draft?.confidence === value} />
+          {(Object.keys(t.sureOptions) as Confidence[]).map((value) => (
+            <Radio key={value} name="confidence" value={value} label={t.sureOptions[value]} defaultChecked={draft?.confidence === value} />
           ))}
         </div>
       </fieldset>
 
       <FormMessage state={state} />
       <div className="flex flex-wrap gap-2 border-t border-line pt-4">
-        <PendingButton pending={pending} name="intent" value="submit" pendingText="Enviando…">
-          Entregar
+        <PendingButton pending={pending} name="intent" value="submit" pendingText={t.submitting} className="min-h-11 px-6">
+          {t.submit}
         </PendingButton>
-        <PendingButton pending={pending} name="intent" value="draft" variant="secondary">
-          Guardar borrador
+        <PendingButton pending={pending} name="intent" value="draft" variant="secondary" className="min-h-11">
+          {t.draft}
         </PendingButton>
       </div>
     </form>
