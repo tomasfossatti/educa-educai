@@ -73,3 +73,18 @@ test("staging: el chequeo de salud responde con la base al día", async ({ page 
   expect(health.ok).toBe(true);
   expect(health.migration).toMatch(/^\d{14}_/);
 });
+
+test("staging: el asistente del LMS pide conectar y rechaza una dirección que no es un LMS", async ({ page }) => {
+  await register(page, "Docente", "Docente Asistente", `staging-asistente-${uid}@test.educai`, pass());
+  await page.goto("/t/asistente");
+  const box = page.getByRole("textbox", { name: /creá la materia/ });
+  await box.fill('crea la materia "costos de proyectos"');
+  await box.press("Enter");
+  await expect(page.getByText(/Primero conectá tu LMS/)).toBeVisible({ timeout: 30_000 });
+
+  await page.getByLabel("Dirección del campus").fill("https://example.com");
+  await page.getByLabel("Token de acceso").fill("token-sintetico-invalido");
+  await page.getByRole("button", { name: "Conectar" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: /LMS/ })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/Conectado a Canvas como/)).toHaveCount(0);
+});
