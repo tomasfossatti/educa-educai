@@ -11,6 +11,7 @@ import { formatDate, formatDateTime } from "@/lib/format";
 import { setActivityStatusAction } from "@/server/actions/teacher";
 import { requireCourseTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { TEXT } from "@/lib/texts";
 
 export const metadata: Metadata = { title: "Actividad" };
 
@@ -90,7 +91,7 @@ export default async function TeacherActivityPage({ params }: { params: Promise<
           </dl>
         </Section>
 
-        <Section title="Entregas" description={`${new Set(submitted.map((s) => s.studentId)).size} de ${enrollments.length} estudiantes entregaron.`}>
+        <Section title="Entregas" description={TEXT.teacherCourse.submitted(new Set(submitted.map((s) => s.studentId)).size, enrollments.length)}>
           <List>
             {enrollments
               .sort((a, b) => a.student.user.name.localeCompare(b.student.user.name))

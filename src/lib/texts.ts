@@ -9,9 +9,24 @@ function cite(fileName: string, n: number): string {
   return citationUnit(fileName) === "section" ? `sección ${n}` : `pág. ${n}`;
 }
 
+/** "1 evidencia", "2 evidencias". */
+function count(n: number, singular: string, plural: string): string {
+  return `${n} ${n === 1 ? singular : plural}`;
+}
+
 export const TEXT = {
   common: {
     unexpected: "Algo salió mal y no se guardó. Probá de nuevo en un rato.",
+  },
+  teacherCourse: {
+    pendingReview: (n: number) =>
+      `${n} ${n === 1 ? "necesita" : "necesitan"} revisión humana antes de considerarse ${n === 1 ? "confiable" : "confiables"}.`,
+    submitted: (done: number, total: number) =>
+      `${done} de ${count(total, "estudiante", "estudiantes")} ${done === 1 ? "entregó" : "entregaron"}.`,
+  },
+  development: {
+    snapshotBasis: (date: string, evidence: number, experiences: number) =>
+      `Calculado ${date} a partir de ${count(evidence, "evidencia", "evidencias")} en ${count(experiences, "experiencia", "experiencias")}. Cada dimensión muestra la evidencia que la sostiene.`,
   },
   curriculum: {
     fromMaterial: {
@@ -282,6 +297,7 @@ export const TEXT = {
     unavailable: "No se pudo mejorar el texto ahora. Probá de nuevo en unos minutos.",
   },
   home: {
+    welcome: "Te damos la bienvenida a Educai.",
     yourCourse: "Tu materia",
     enterCourse: "Entrar a la materia",
   },

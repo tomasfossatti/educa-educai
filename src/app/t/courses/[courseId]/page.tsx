@@ -13,6 +13,7 @@ import { supportingEvidenceCounts } from "@/server/services/development";
 import { ClassOverviewSection } from "@/components/domain/class-overview";
 import { closeInactiveConversations } from "@/server/engine/trigger";
 import { getClassOverview } from "@/server/services/class-view";
+import { TEXT } from "@/lib/texts";
 
 export const metadata: Metadata = { title: "Curso" };
 
@@ -161,7 +162,7 @@ export default async function CourseOverviewPage({ params }: { params: Promise<{
 
         <Section
           title="Inferencias pendientes"
-          description={`${overview.pendingInferences.length} necesitan revisión humana antes de considerarse confiables.`}
+          description={TEXT.teacherCourse.pendingReview(overview.pendingInferences.length)}
           action={overview.pendingInferences.length > 0 ? <TextLink href={`${base}/attention#pendientes`}>Revisar todas</TextLink> : undefined}
         >
           {overview.pendingInferences.length === 0 ? (

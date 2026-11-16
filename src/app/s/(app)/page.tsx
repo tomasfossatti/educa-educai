@@ -53,7 +53,7 @@ export default async function StudentHome() {
         <div className="space-y-6">
           <div className="space-y-1">
             <h1 className="text-3xl font-extrabold text-ink">Hola, {user.name.split(" ")[0]}</h1>
-            <p className="text-muted">Bienvenido a Educai.</p>
+            <p className="text-muted">{TEXT.home.welcome}</p>
           </div>
           {inviteNotice}
           <FoldersSection studentId={user.id} />
