@@ -68,7 +68,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 Pedido de Tomás del 2026-11-16 (ver `DECISIONES.md`). Hay un PR en borrador por paso, con las ramas encadenadas.
 - [x] 1. Docs y decisión: `DECISIONES.md`, `SPEC.md` (Panel del estudiante) y esta etapa
 - [x] 2. Fuera datos inventados en la página de la materia, con un test que falla si reaparecen
-- [ ] 3. Textos del panel simple centralizados y test de jerga prohibida
+- [x] 3. Textos del panel simple centralizados y test de jerga prohibida
 - [ ] 4. Un solo chat (el de la carpeta de la materia), sin perder conversaciones y con las URLs viejas redirigidas
 - [ ] 5. Inicio = chat de la materia actual, con selector arriba
 - [ ] 6. Navegación con 3 destinos y Mis datos (barra inferior en el celular, lateral en la computadora)
@@ -91,7 +91,7 @@ Criterios de cierre:
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
-- 2026-11-16 (continuación) · Arranca la simplificación del panel del estudiante (decisión de Tomás). PR 1: relevamiento de rutas, chats, acciones y tests; spec, decisiones y etapa nueva. Hallazgo: las vistas del docente muestran y cuentan dudas sin confirmar (en "Pasos que dependen de Tomás"). PR 2: la página de la materia queda solo con datos reales; se borran el tablero de clase de relleno y el tutor flotante, que llamaba a una ruta inexistente. Gasto de IA: 0 USD.
+- 2026-11-16 (continuación) · Arranca la simplificación del panel del estudiante (decisión de Tomás). PR 1: relevamiento de rutas, chats, acciones y tests; spec, decisiones y etapa nueva. Hallazgo: las vistas del docente muestran y cuentan dudas sin confirmar (en "Pasos que dependen de Tomás"). PR 2: la página de la materia queda solo con datos reales; se borran el tablero de clase de relleno y el tutor flotante, que llamaba a una ruta inexistente. PR 3: bloque `TEXT.student` y test de jerga, con una lista de transición que se vacía en el PR 12. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · El estudiante que ya tenía una materia no encontraba cómo sumarse a otra (pregunta de Tomás). «Unirme a otra materia» queda siempre en la barra lateral y en el inicio; la barra muestra la materia de la página abierta. Se corrigió también que el menú lateral se cerraba solo al abrirlo después de navegar por la barra de arriba. Tests en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · La barra lateral del estudiante solo mostraba «Asistente» (reporte de Tomás). Ahora lleva Inicio, Asistente, la materia con Materia, Actividades, Desarrollo y Mi ficha, sus carpetas (incluidas las traídas del LMS) y Tu contexto; sin materias, ofrece sumarse con un código. Las carpetas que falten se crean al armar la barra, porque el layout se arma antes que el inicio. Test de punta a punta en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Ronda de QA en local con datos sintéticos (`docs/informes/qa-local-2026-11-16.md`): suites en verde y recorrido completo con Playwright. Seis hallazgos, cada uno con su PR: la ficha contaba dudas sin confirmar (#50), un estudiante quitado volvía solo con el código (#51), la lista de estudiantes ocultaba a quien no dio consentimiento (#52), la ficha sin consentimiento mostraba cuántas conversaciones había (#53), errores internos a la vista del estudiante (#54) y plurales (#55). Gasto de IA: 0 USD.
