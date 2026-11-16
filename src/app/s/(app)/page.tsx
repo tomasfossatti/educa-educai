@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight, BookOpen, Clock, User, CheckCircle2 } from "lucide-react";
+import { ArrowRight, User, CheckCircle2 } from "lucide-react";
 import { EvidenceRow, InferenceRow } from "@/components/domain/rows";
 import { LayerTag } from "@/components/domain/status";
 import { Badge } from "@/components/ui/badge";
@@ -101,19 +101,8 @@ export default async function StudentHome() {
       {/* Tarjeta heroica de la materia activa del día (hairline card refinada) */}
       <section className="relative rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-xs">
         <div className="relative z-10 space-y-5">
-          {/* Badge de estado en vivo */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Badge tone="success">
-              <span className="relative flex size-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                <span className="relative inline-flex rounded-full size-2 bg-success" />
-              </span>
-              <span>Cursada de hoy</span>
-            </Badge>
-            <span className="text-xs font-mono text-muted flex items-center gap-1.5">
-              <Clock className="size-3.5" />
-              <span>Turno: 8:30 a 10:30 hs</span>
-            </span>
+            <Badge tone="neutral">{TEXT.home.yourCourse}</Badge>
           </div>
 
           {/* Título y descripción de la materia */}
@@ -121,9 +110,7 @@ export default async function StudentHome() {
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
               {activeCourse.name}
             </h2>
-            <p className="text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">
-              {activeCourse.description || "Tomar decisiones de negocio con evidencia: segmentación, hipótesis falsables y experimentos simples."}
-            </p>
+            {activeCourse.description && <p className="text-sm sm:text-base text-ink-2 max-w-2xl leading-relaxed">{activeCourse.description}</p>}
           </div>
 
           {/* Metadatos pedagógicos */}
@@ -131,10 +118,6 @@ export default async function StudentHome() {
             <span className="flex items-center gap-1.5">
               <User className="size-3.5 text-muted" />
               <span>Docente: <strong className="text-ink font-medium">{activeCourse.teacher.user.name}</strong></span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <BookOpen className="size-3.5 text-muted" />
-              <span>Clase actual: <strong className="text-primary font-mono font-medium">Clase 4 de 8 (50%)</strong></span>
             </span>
           </div>
 
@@ -146,7 +129,7 @@ export default async function StudentHome() {
               size="md"
               className="gap-2"
             >
-              <span>Entrar a la clase de hoy</span>
+              <span>{TEXT.home.enterCourse}</span>
               <ArrowRight className="size-4" />
             </ButtonLink>
           </div>
@@ -207,16 +190,18 @@ export default async function StudentHome() {
 
         <Section
           title="Tu contexto declarado"
-          description="Lo que le contaste a Educai sobre tus objetivos y trabajo."
+          description="Lo que le contaste a Educai sobre vos. La IA saca los ejemplos del foco que elegiste."
           action={<TextLink href="/s/context">Editar</TextLink>}
         >
           <Card className="space-y-2 text-sm">
             <LayerTag layer="declared" />
             <dl className="space-y-1.5 text-ink-2 mt-2">
               {[
-                ["Contexto laboral", profile.declaredCurrentContext],
+                [TEXT.profile.focusLabel, TEXT.profile.focusShort[profile.personalizationFocus]],
+                [TEXT.profile.project, profile.projectDescription],
+                [TEXT.profile.work, profile.declaredCurrentContext],
                 ["Intereses", profile.declaredInterests],
-                ["Objetivo personal", profile.declaredGoals],
+                ["Objetivos", profile.declaredGoals],
               ]
                 .filter(([, v]) => v)
                 .map(([label, value]) => (

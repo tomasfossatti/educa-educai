@@ -108,9 +108,7 @@ export default async function TeacherHome() {
                       </span>
                     )}
                   </div>
-                  <p className="teacher-course-description">
-                    {c.description || "Tomar decisiones de negocio con evidencia: segmentación, hipótesis falsables y experimentos simples."}
-                  </p>
+                  {c.description && <p className="teacher-course-description">{c.description}</p>}
                   <div className="teacher-course-divider" aria-hidden="true" />
                   <div className="course-card-footer teacher-course-meta">
                     <span><strong>{c._count.enrollments}</strong> estudiantes</span>
