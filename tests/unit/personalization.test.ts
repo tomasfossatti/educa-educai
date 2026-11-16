@@ -8,7 +8,7 @@ describe("foco de personalización", () => {
     const text = personalizationPrompt({ ...profile, personalizationFocus: "PROJECT" });
     expect(text).toContain("kinesiología");
     expect(text).not.toContain("petrolera");
-    expect(text).toContain("No uses su trabajo actual");
+    expect(text).toContain("No uses lo que hace hoy");
   });
 
   it("con foco en el trabajo, el prompt solo lleva el trabajo", () => {

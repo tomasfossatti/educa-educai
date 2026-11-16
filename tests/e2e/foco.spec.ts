@@ -25,7 +25,7 @@ test("en el primer ingreso el estudiante elige de dónde salen los ejemplos", as
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: "Empezar" }).click();
-  await expect(page.getByText("Contanos en qué trabajás para poder usarlo en los ejemplos.").first()).toBeVisible();
+  await expect(page.getByText("Contanos qué hacés hoy para poder usarlo en los ejemplos.").first()).toBeVisible();
   await page.fill("#currentContext", "Analista de compras en una empresa petrolera.");
   await page.getByRole("button", { name: "Continuar" }).click();
   await page.getByRole("button", { name: "Continuar" }).click();

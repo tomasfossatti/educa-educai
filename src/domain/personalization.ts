@@ -1,6 +1,6 @@
 /**
- * Foco de personalización: el estudiante elige si los ejemplos de la IA salen de su trabajo actual
- * o de su proyecto personal. Nunca de los dos a la vez (decisión de Tomás para el MVP): mezclarlos
+ * Foco de personalización: el estudiante elige si los ejemplos de la IA salen de lo que hace hoy
+ * (trabajo, emprendimiento u organización, con o sin sueldo) o de su proyecto personal. Nunca de los dos a la vez (decisión de Tomás para el MVP): mezclarlos
  * confunde cuando no tienen relación, por ejemplo una petrolera y un centro de kinesiología.
  * Es la única fuente de ese contexto para todos los prompts (chat, detección de dudas y devolución).
  */
@@ -25,6 +25,6 @@ export function personalizationPrompt(profile: FocusProfile): string {
   const { focus, text } = focusText(profile);
   if (!text) return "";
   return focus === "WORK"
-    ? `FOCO PARA EJEMPLOS: el trabajo actual del estudiante («${text}»). Sacá los ejemplos y las aplicaciones de ese trabajo. No uses su proyecto personal salvo que él lo mencione.`
-    : `FOCO PARA EJEMPLOS: el proyecto personal del estudiante («${text}»). Sacá los ejemplos y las aplicaciones de ese proyecto. No uses su trabajo actual salvo que él lo mencione.`;
+    ? `FOCO PARA EJEMPLOS: lo que el estudiante hace hoy además de estudiar («${text}»). Sacá los ejemplos y las aplicaciones de eso. No uses su proyecto personal salvo que él lo mencione.`
+    : `FOCO PARA EJEMPLOS: el proyecto personal del estudiante («${text}»). Sacá los ejemplos y las aplicaciones de ese proyecto. No uses lo que hace hoy (trabajo u otra actividad) salvo que él lo mencione.`;
 }

@@ -136,7 +136,7 @@ export async function refreshSummaryIfStale(studentId: string, now: Date = new D
     messages: [
       {
         role: "user",
-        content: `PERFIL DECLARADO: carrera ${profile?.career ?? "—"}, año ${profile?.studyYear ?? "—"}, foco para ejemplos (${focus.focus === "WORK" ? "trabajo actual" : "proyecto personal"}): ${focus.text ?? "—"}\nHECHOS:\n${facts.map((f) => `- ${f.content}`).join("\n")}`,
+        content: `PERFIL DECLARADO: carrera ${profile?.career ?? "—"}, año ${profile?.studyYear ?? "—"}, foco para ejemplos (${focus.focus === "WORK" ? "lo que hace hoy" : "proyecto personal"}): ${focus.text ?? "—"}\nHECHOS:\n${facts.map((f) => `- ${f.content}`).join("\n")}`,
       },
     ],
     schema: summarySchema,
