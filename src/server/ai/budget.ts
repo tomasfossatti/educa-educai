@@ -18,7 +18,7 @@ import { AIError, type AIOperation } from "./types";
  */
 
 /** Operaciones que inicia el estudiante y que el tope frena. */
-export const STUDENT_INITIATED: ReadonlySet<AIOperation> = new Set<AIOperation>(["folder.chat", "tutor.reply", "quiz.generate", "profile.improve"]);
+export const STUDENT_INITIATED: ReadonlySet<AIOperation> = new Set<AIOperation>(["folder.chat", "tutor.reply", "quiz.generate", "profile.improve", "lms.assistant"]);
 
 export function weeklyStudentCapUsd(): number {
   return readUsd(process.env.AI_WEEKLY_STUDENT_CAP_USD, 2);

@@ -23,6 +23,7 @@ export const OPERATION_CONFIG: Record<AIOperation, { effort: Effort; maxTokens: 
   "context.summary": { effort: "low", maxTokens: 1500 },
   "slides.generate": { effort: "medium", maxTokens: 8000 },
   "profile.improve": { effort: "low", maxTokens: 1500 },
+  "lms.assistant": { effort: "low", maxTokens: 800 },
 };
 
 /**

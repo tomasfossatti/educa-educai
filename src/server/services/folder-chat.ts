@@ -104,7 +104,8 @@ export async function askInFolder(viewer: Viewer, conversationId: string, questi
   });
 
   const searchText = thread ? `${thread.anchor} ${text}` : text;
-  const hits = conversation.folder.courseId ? await searchMaterial(conversation.folder.courseId, searchText) : [];
+  // Materia de una cátedra: su material. Carpeta importada del LMS por el estudiante: el material de la carpeta.
+  const hits = await searchMaterial(conversation.folder.courseId ? { courseId: conversation.folder.courseId } : { folderId: conversation.folder.id }, searchText);
   const messages = history
     .reverse()
     .slice(0, -1)

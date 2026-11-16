@@ -20,6 +20,7 @@ El piloto es una cátedra de una materia, con 20 a 60 estudiantes, durante un cu
 | Resultados del análisis | Fragmentos textuales de las conversaciones usados como evidencia, dudas detectadas por tema con su nivel de confianza, conclusiones por tema, confirmaciones y respuestas del estudiante, revisiones y acciones del docente | Estudiantes (y docentes, sus revisiones) |
 | Contexto de carpeta | Registro de actividad de la carpeta, hechos que la IA aprendió del estudiante en esa materia (cada uno con su fuente) y un resumen corto que cruza carpetas | Estudiantes |
 | Práctica | Intentos de quiz y dominio por tema | Estudiantes |
+| Conexión con el LMS | Plataforma (Canvas o Moodle), dirección del campus, nombre de la cuenta y la credencial (token o cookie de sesión) cifrada con AES-256-GCM; nunca la contraseña. Las materias importadas y su material: en una cátedra si lo importa el docente, en una carpeta privada si lo importa el estudiante | Docentes y estudiantes que conectan su LMS |
 | Registro de accesos | Quién abrió la ficha o la evidencia de qué estudiante, en qué cátedra y cuándo | Docentes que abren, estudiantes abiertos |
 | Uso de la IA | Tokens y costo estimado de cada llamada, atribuidos al estudiante y a la cátedra; alertas de consumo | Estudiantes |
 | Métricas de uso | Eventos como "completó el onboarding" o "el docente abrió un tema", sin contenido de conversaciones | Estudiantes y docentes |
@@ -35,6 +36,7 @@ El material de la cátedra (programa, apuntes, presentaciones) lo carga el docen
 | El docente de la cátedra | Si el estudiante dio consentimiento: vista de la clase, ficha del estudiante con nombre, conversaciones de la carpeta de esa materia, dudas confirmadas (o de confianza alta sin respuesta en 7 días), perfil, y de la carpeta del proyecto solo lo que la IA vinculó con temas de su materia. Cada apertura de ficha o evidencia queda registrada | V1 a V6 |
 | El docente de otra materia | Nada de lo de esta materia | V3, V4, V12 |
 | Otro estudiante | Nada | V8, V13 |
+| Nadie más que el estudiante | El material que el estudiante trajo de su LMS a una carpeta propia y el estado de sus importaciones. Tampoco lo ve el docente | `tests/integration/lms-import.test.ts` |
 | El administrador del piloto | Cuentas, cátedras y material. No ve conversaciones | V14 |
 | La universidad | No tiene acceso a datos individuales en el piloto | V15 |
 | Personas con acceso técnico a producción (hoy, Tomás) | Técnicamente pueden leer la base de producción. No hay otra persona con esas credenciales; el agente que construye el código trabaja sin ellas y solo con datos sintéticos | Reglas 6 y 7 de `CLAUDE.md` |

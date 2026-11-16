@@ -79,7 +79,9 @@ export async function exportStudentData(viewer: { id: string; role: string }) {
         id: true,
         kind: true,
         name: true,
+        createdBy: true,
         createdAt: true,
+        materials: { orderBy: { fileName: "asc" }, select: { fileName: true, module: true, status: true, createdAt: true } },
         contexts: { orderBy: { createdAt: "asc" }, select: { layer: true, content: true, editedByStudent: true, archivedAt: true, createdAt: true } },
       },
     }),
@@ -111,11 +113,14 @@ export async function exportStudentData(viewer: { id: string; role: string }) {
     db.accessLog.findMany({ where: { studentId }, orderBy: { createdAt: "desc" }, select: { view: true, createdAt: true, viewer: { select: { name: true, role: true } } } }),
     db.aIUsageEvent.count({ where: { studentId } }),
   ]);
+  // La conexión con el LMS, sin la credencial (que va cifrada y nunca sale de la base).
+  const lmsConnection = await db.lmsConnection.findUnique({ where: { userId: studentId }, select: { provider: true, baseUrl: true, accountName: true, createdAt: true, lastUsedAt: true } });
   return {
     generatedAt: new Date().toISOString(),
     account: user,
     profile: { ...profile, userId: undefined },
     enrollments,
+    lmsConnection,
     folders,
     conversations,
     doubts: signals,

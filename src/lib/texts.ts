@@ -263,4 +263,69 @@ export const TEXT = {
     uploadTooLarge: (resets: string) =>
       `Analizar esta conversación superaría tu cupo semanal de IA. Probá con una parte más corta o subila desde el ${resets}.`,
   },
+  lms: {
+    title: "Asistente",
+    navLabel: "Asistente",
+    teacherDescription: "Conectá tu LMS y pedile al chat que cree una materia: Educai la arma y baja sus módulos y lecturas.",
+    studentDescription: "Conectá el campus de tu universidad y pedile al chat que traiga una materia: Educai arma la carpeta y baja sus módulos y lecturas, que solo ves vos.",
+    homeLink: "Traer una materia del LMS",
+    connection: {
+      title: "Conexión con tu LMS",
+      connectedAs: (provider: string, account: string, url: string) => `Conectado a ${provider} como ${account} (${url}).`,
+      notConnected: "Todavía no conectaste tu LMS.",
+      provider: "Plataforma",
+      providers: { CANVAS: "Canvas", MOODLE: "Moodle" },
+      baseUrl: "Dirección del campus",
+      baseUrlHint: "La que ves en el navegador cuando entrás, por ejemplo https://campus.tu-universidad.edu.ar.",
+      authKind: "Cómo te conectás",
+      authKinds: { token: "Token de acceso", cookie: "Cookie de sesión (Canvas)", password: "Usuario y contraseña (Moodle)" },
+      tokenLabel: "Token de acceso",
+      tokenHint: "En Canvas: Cuenta → Configuración → Nuevo token de acceso. En Moodle: Preferencias → Claves de seguridad.",
+      cookieLabel: "Cookie de sesión",
+      cookieHint: "Si tu universidad no deja crear tokens: copiá la cookie canvas_session desde las herramientas del navegador. Vence cuando cerrás la sesión.",
+      username: "Usuario",
+      password: "Contraseña",
+      passwordHint: "Se usa una sola vez para pedirle un token a Moodle. Educai no guarda tu contraseña.",
+      privacy: "La credencial se guarda cifrada y Educai solo la usa para leer tus materias y su material. Nunca publica ni entrega nada en tu nombre.",
+      connect: "Conectar",
+      connecting: "Conectando…",
+      reconnect: "Cambiar la conexión",
+      disconnect: "Desconectar",
+      connected: (account: string) => `Listo, conectado como ${account}.`,
+      failed: "No pudimos conectar con tu LMS.",
+    },
+    chat: {
+      placeholder: "Por ejemplo: creá la materia «Costos de proyectos»",
+      send: "Enviar",
+      sending: "Pensando…",
+      welcomeTeacher: "Hola. Decime qué materia querés traer de tu LMS y la armo en Educai con sus módulos y lecturas. Por ejemplo: creá la materia «Costos de proyectos».",
+      welcomeStudent: "Hola. Decime qué materia querés traer de tu campus y armo su carpeta con los módulos y las lecturas. Por ejemplo: creá la materia «Costos de proyectos».",
+      noConnection: "Primero conectá tu LMS con el formulario de esta página. Después pedime la materia.",
+      notFound: (name: string, available: string[]) =>
+        available.length
+          ? `No encontré «${name}» entre tus materias del LMS. Las que veo son: ${available.join(", ")}.`
+          : `No encontré «${name}» y tu LMS no me muestra ninguna materia.`,
+      ambiguous: (candidates: string[]) => `Encontré varias materias parecidas: ${candidates.join(", ")}. ¿Cuál querés?`,
+      courses: (names: string[]) => (names.length ? `Tus materias en el LMS: ${names.join(", ")}.` : "Tu LMS no me muestra ninguna materia."),
+      started: (name: string, reused: boolean) =>
+        reused
+          ? `Ya tenías «${name}» en Educai: le sumo el material del LMS que falte. Te aviso acá cuando termine.`
+          : `Creé la materia «${name}». Estoy bajando sus módulos y lecturas; te aviso acá cuando termine.`,
+      running: (name: string) => `Todavía estoy bajando «${name}». Esperá a que termine y pedime la siguiente.`,
+      teacherCourse: (name: string) => `«${name}» ya está en Educai con el material de tu docente: no hace falta traerla.`,
+      progress: (done: number, total: number) => (total ? `Bajando material: ${done} de ${total}…` : "Leyendo los módulos de la materia…"),
+      done: (name: string, done: number, modules: number, failed: number) =>
+        `Listo: «${name}» tiene ${done} ${done === 1 ? "archivo" : "archivos"} de ${modules} ${modules === 1 ? "módulo" : "módulos"}${failed ? `. ${failed} no se pudieron leer` : ""}.`,
+      upToDate: (name: string) => `«${name}» ya tenía todo el material del LMS.`,
+      failed: (name: string, error: string) => `No pude terminar de traer «${name}»: ${error}`,
+      open: "Abrir la materia",
+      error: "No pude procesar el pedido. Probá de nuevo en un rato.",
+      fallbackHelp: "Puedo traer materias de tu LMS. Pedímelo así: creá la materia «Costos de proyectos». También podés preguntarme qué materias tenés.",
+    },
+    material: {
+      title: "Material de la materia",
+      description: "Lo que trajiste de tu LMS. Solo lo ves vos, y la IA lo cita con archivo y página.",
+      empty: "Todavía no hay material. Pedíselo al asistente.",
+    },
+  },
 } as const;

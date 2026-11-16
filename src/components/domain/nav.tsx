@@ -29,6 +29,7 @@ export function StudentNav({ defaultCourseId }: { defaultCourseId: string | null
   return (
     <>
       <NavLink href="/s" label="Inicio" active={pathname === "/s"} />
+      <NavLink href="/s/asistente" label={TEXT.lms.navLabel} active={pathname === "/s/asistente"} />
       {base && (
         <>
           <NavLink

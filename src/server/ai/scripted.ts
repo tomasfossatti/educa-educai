@@ -254,6 +254,11 @@ function profileImprove(message: string) {
   return { suggestion: `${original} (redacción mejorada)`, tip: original.length < 15 ? "¿Podés contar un poco más?" : null };
 }
 
+/** Asistente del LMS: el proveedor de prueba no interpreta; contesta con la ayuda. */
+function lmsAssistant() {
+  return { action: "none", courseName: null, reply: "Puedo traer una materia desde tu LMS. Pedímelo así: creá la materia «Costos de proyectos». (Proveedor de prueba.)" };
+}
+
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
   "interpret.observe": observe,
@@ -267,6 +272,7 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "context.summary": contextSummary,
   "slides.generate": slidesGenerate,
   "profile.improve": profileImprove,
+  "lms.assistant": lmsAssistant,
 };
 
 /**
