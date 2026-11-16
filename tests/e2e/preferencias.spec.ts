@@ -4,7 +4,7 @@ import { db, login, world } from "./support";
 test("cómo preferís trabajar: opción múltiple que se guarda y se vuelve a mostrar", async ({ page }) => {
   const w = await world();
   await login(page, w.students[0]);
-  await page.goto("/s/context");
+  await page.goto("/s/mis-datos#perfil");
   await page.fill("#goals", "Aprender a validar un producto con usuarios.");
   await page.getByLabel("Con ejemplos prácticos primero").check();
   await page.getByLabel("En equipo, más que solo").check();

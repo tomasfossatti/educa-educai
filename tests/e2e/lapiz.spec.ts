@@ -4,7 +4,7 @@ import { login, world } from "./support";
 test("lápiz mágico: sugiere una mejor redacción y solo la aplica si el estudiante la usa", async ({ page }) => {
   const w = await world();
   await login(page, w.students[0]);
-  await page.goto("/s/context");
+  await page.goto("/s/mis-datos#perfil");
   const goals = page.locator("#goals");
   const wand = goals.locator("..").getByRole("button", { name: "Mejorar la redacción con IA" });
 

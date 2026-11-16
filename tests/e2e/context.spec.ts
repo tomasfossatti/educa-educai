@@ -1,39 +1,43 @@
 import { expect, test, type Page } from "@playwright/test";
-import { login, subjectFolderUrl, world } from "./support";
+import { login, world } from "./support";
 
-async function chatAndFinish(page: Page, folderUrl: string, questions: string[]) {
-  await page.goto(folderUrl);
-  await page.waitForLoadState("networkidle");
-  await page.getByRole("button", { name: "Nueva conversación" }).click();
-  await page.waitForURL("**/c/**");
+/** Una charla desde el inicio (el chat de la materia) y "Terminar", que la cierra y la analiza. */
+async function chatAndFinish(page: Page, questions: string[]) {
+  await page.goto("/s");
   await page.waitForLoadState("networkidle");
   for (const q of questions) {
-    await page.fill("textarea[name=question]", q);
+    await page.getByRole("textbox", { name: "Tu pregunta" }).fill(q);
     await page.getByRole("button", { name: "Preguntar", exact: true }).click();
     await expect(page.getByText(q)).toBeVisible();
-    await expect(page.locator("textarea[name=question]")).toHaveValue("");
+    await expect(page.getByRole("textbox", { name: "Tu pregunta" })).toHaveValue("");
   }
   await page.getByRole("button", { name: "Terminar", exact: true }).click();
-  await page.waitForLoadState("networkidle");
+  // La charla quedó cerrada cuando el chat ya no ofrece "Terminar".
+  await expect(page.getByRole("button", { name: "Terminar", exact: true })).toHaveCount(0, { timeout: 20_000 });
+  // El chat avisa mientras analiza la charla terminada; esperamos a que termine.
+  await expect(page.getByText("Estoy mirando la charla")).toHaveCount(0, { timeout: 20_000 });
 }
 
-test("la IA guarda hechos de la carpeta y la estudiante los corrige y borra", async ({ page }) => {
+test("la IA guarda lo que sabe de la estudiante y ella lo corrige y borra desde Mis datos", async ({ page }) => {
   const w = await world();
   await login(page, w.students[0]);
-  const folderUrl = await subjectFolderUrl(w.students[0].id, w.course.id);
+  // Lo que la IA sabe de la estudiante está en Mis datos (#ia abre esa sección).
+  const myDataUrl = "/s/mis-datos#ia";
 
-  await chatAndFinish(page, folderUrl, ["No sé cómo medir una hipótesis", "¿Sirven las encuestas?"]);
-  await chatAndFinish(page, folderUrl, ["Ahora pregunto por segmentación", "¿Por edad alcanza?"]);
+  await chatAndFinish(page, ["No sé cómo medir una hipótesis", "¿Sirven las encuestas?"]);
+  await chatAndFinish(page, ["Ahora pregunto por segmentación", "¿Por edad alcanza?"]);
 
   // Los hechos se generan después de responder: recargamos hasta verlos.
   await expect(async () => {
-    await page.goto(folderUrl);
+    await page.goto(myDataUrl);
+    await page.reload();
     await page.waitForLoadState("networkidle");
     // Esperamos el resultado de la segunda conversación: el hecho viejo archivado y uno nuevo.
     await expect(page.getByRole("textbox", { name: "Hecho", exact: true })).toHaveValue(/segmentación/);
   }).toPass({ timeout: 20_000 });
 
-  const facts = page.locator("section", { hasText: "Lo que la IA sabe de vos" });
+  const facts = page.locator("#ia");
+  await expect(facts.getByText("Lo que la IA sabe de mí")).toBeVisible();
   const fact = facts.locator("li", { has: page.getByRole("textbox", { name: "Hecho", exact: true }) });
   await fact.getByRole("textbox").fill("Ya sabe medir hipótesis con preventas");
   await fact.getByRole("button", { name: "Guardar" }).click();
@@ -45,7 +49,7 @@ test("la IA guarda hechos de la carpeta y la estudiante los corrige y borra", as
   await expect(page.getByRole("textbox", { name: "Resumen", exact: true })).toHaveCount(1);
 
   // Historial (traza): registra los cierres.
-  await facts.getByText("Historial de la carpeta").click();
+  await facts.getByText("Historial de esta materia").click();
   await expect(facts.getByText("Conversación cerrada").first()).toBeVisible();
 
   page.once("dialog", (d) => d.accept());

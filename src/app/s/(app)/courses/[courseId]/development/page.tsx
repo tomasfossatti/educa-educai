@@ -1,21 +1,12 @@
-import type { Metadata } from "next";
-import { DevelopmentView } from "@/components/domain/development-view";
-import { PageHeader } from "@/components/ui/layout";
+import { notFound, redirect } from "next/navigation";
 import { requireEnrolledStudent } from "@/server/auth/guards";
+import { db } from "@/server/db";
 
-export const metadata: Metadata = { title: "Desarrollo" };
-
-export default async function StudentDevelopmentPage({ params }: { params: Promise<{ courseId: string }> }) {
+/** Dirección vieja de "Desarrollo": las conclusiones están en Mis datos, en "Lo que ve mi docente sobre mí". */
+export default async function OldDevelopmentPage({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = await params;
-  const { user, course } = await requireEnrolledStudent(courseId);
-  return (
-    <>
-      <PageHeader
-        eyebrow={course.name}
-        title="Tu desarrollo"
-        description="Qué muestra la evidencia sobre lo que comprendés, aplicás y transferís, cuánta ayuda necesitás y cómo cambia con el tiempo. No es una nota ni una etiqueta: es una representación revisable."
-      />
-      <DevelopmentView studentId={user.id} courseId={courseId} viewer="student" base={`/s/courses/${courseId}`} />
-    </>
-  );
+  const { user } = await requireEnrolledStudent(courseId);
+  const folder = await db.folder.findFirst({ where: { studentId: user.id, courseId, kind: "SUBJECT" }, select: { id: true } });
+  if (!folder) notFound();
+  redirect(`/s/materia/${folder.id}?next=/s/mis-datos&seccion=docente`);
 }

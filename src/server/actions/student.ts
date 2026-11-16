@@ -209,7 +209,7 @@ export async function selectFolderAction(folderId: string, next: string): Promis
 }
 
 /** Pantallas del panel a las que vuelve el selector de materia. */
-const PANEL_PATHS = ["/s", "/s/practicar", "/s/avance"];
+const PANEL_PATHS = ["/s", "/s/practicar", "/s/avance", "/s/mis-datos"];
 
 export async function selectCourseAction(courseId: string): Promise<void> {
   await requireEnrolledStudent(courseId);

@@ -39,9 +39,9 @@ test.describe("en la computadora (1280 px)", () => {
     await page.goto("/s");
 
     await page.getByRole("button", { name: "Abrir menú de usuario" }).click();
-    await expect(page.getByRole("link", { name: "Mis datos" }).first()).toBeVisible();
-    await page.getByRole("link", { name: "Unirme a otra materia" }).click();
-    await expect(page).toHaveURL(/\/s\/join$/);
+    await page.getByRole("link", { name: "Mis datos" }).first().click();
+    await expect(page).toHaveURL(/\/s\/mis-datos$/);
+    await page.getByText("Unirme a otra materia").click();
     await page.getByLabel("Código").fill(second.course.joinCode!);
     await page.getByRole("button", { name: "Unirme" }).click();
 

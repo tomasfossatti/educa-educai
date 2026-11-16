@@ -5,8 +5,7 @@ import { requireStudent } from "@/server/auth/guards";
 import { EVENT, todayKey, track } from "@/server/events";
 import { getCurrentCourseId } from "@/server/services/student-home";
 
-/** Mientras Mis datos no tiene su página propia, vive en "Tu contexto" (PR 10 de la simplificación). */
-const MY_DATA_HREF = "/s/context";
+const MY_DATA_HREF = "/s/mis-datos";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const { user } = await requireStudent();
@@ -20,12 +19,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       userName={user.name}
       myDataHref={MY_DATA_HREF}
       menuLinks={
-        <>
-          <Link href={MY_DATA_HREF}>{t.nav.myData}</Link>
-          {courseId && <Link href={`/s/courses/${courseId}/ficha`}>{t.myData.teacherSees}</Link>}
-          <Link href="/s/join">{t.myData.join}</Link>
-          <Link href="/s/asistente">{t.myData.lms}</Link>
-        </>
+        <Link href={MY_DATA_HREF}>{t.nav.myData}</Link>
       }
     >
       {children}
