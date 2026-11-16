@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TextLink } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { AutoRefresh, ConfirmSubmit, SubmitButton } from "@/components/ui/client";
-import { EmptyState, List, ListItem, Notice, PageHeader, Quote, Section } from "@/components/ui/layout";
+import { EmptyState, PageHeader, Quote } from "@/components/ui/layout";
 import { cn } from "@/lib/cn";
 import { ChatMessages } from "@/components/student/chat-messages";
 import { TEXT } from "@/lib/texts";
 import { requireStudent } from "@/server/auth/guards";
-import { deleteFolderConversationAction, respondToDoubtAction } from "@/server/actions/folders";
+import { deleteFolderConversationAction } from "@/server/actions/folders";
+import { DoubtCards } from "@/components/student/doubt-cards";
 import { closeConversationAction } from "@/server/actions/student";
 import { listConversationDoubts } from "@/server/services/doubts";
 import { getOwnFolderConversation } from "@/server/services/folder-chat";
@@ -35,7 +35,6 @@ export default async function ConversationPage({
   if (!found) notFound();
   const { conversation, openThread, chunks, lastRun } = found;
   const t = TEXT.student.ask;
-  const d = TEXT.doubts;
   const doubts = await listConversationDoubts(viewer, conversation.id);
   const analyzing = lastRun?.status === "QUEUED" || lastRun?.status === "RUNNING";
   const base = `/s/c/${conversation.id}`;
@@ -87,42 +86,12 @@ export default async function ConversationPage({
         </form>
       )}
       <AutoRefresh active={analyzing} />
-      {analyzing && <p className="text-sm text-muted">{TEXT.student.doubtCard.analyzing}</p>}
-      {lastRun && !analyzing && (lastRun.statusNote || lastRun.error) && <Notice>{lastRun.statusNote ?? lastRun.error}</Notice>}
-
-      {conversation.courseId && (
-        <Section title={d.title} description={d.description}>
-          {doubts.length === 0 ? (
-            <p className="text-sm text-muted">{d.none}</p>
-          ) : (
-            <List>
-              {doubts.map((s) => (
-                <ListItem key={s.id} className="space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-ink">{s.curriculumItem ? d.topic(s.curriculumItem.title) : s.description}</span>
-                    <Badge tone={s.studentStatus === "CONFIRMED" ? "attention" : "muted"}>{d.status[s.studentStatus]}</Badge>
-                  </div>
-                  <Quote>{s.evidence.content}</Quote>
-                  {s.studentStatus === "PENDING" && (
-                    <div className="flex gap-2">
-                      <form action={respondToDoubtAction.bind(null, s.id, "CONFIRMED")}>
-                        <SubmitButton size="sm" variant="secondary">{d.confirm}</SubmitButton>
-                      </form>
-                      <form action={respondToDoubtAction.bind(null, s.id, "DISCARDED")}>
-                        <SubmitButton size="sm" variant="ghost">{d.discard}</SubmitButton>
-                      </form>
-                    </div>
-                  )}
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Section>
-      )}
+      {analyzing && <p className="text-sm text-muted" role="status">{TEXT.student.doubtCard.analyzing}</p>}
+      <DoubtCards doubts={doubts.filter((d) => d.studentStatus === "PENDING")} />
 
       <form action={deleteFolderConversationAction.bind(null, conversation.id)}>
-        <ConfirmSubmit variant="ghost" size="sm" message={d.deleteConfirm}>
-          {d.deleteConversation}
+        <ConfirmSubmit variant="ghost" size="sm" message={TEXT.student.myData.conversationsHint} className="min-h-11">
+          {TEXT.student.myData.deleteConversation}
         </ConfirmSubmit>
       </form>
     </div>

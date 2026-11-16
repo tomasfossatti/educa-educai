@@ -27,7 +27,6 @@ const TRANSITIONAL_BLOCKS: string[] = [
   "chat",
   "consent",
   "context",
-  "doubts",
   "file",
   "folders",
   "lms",
