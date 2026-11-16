@@ -9,10 +9,16 @@ import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = join(__dirname, "..", "..");
-const GUARD = /\b(requireUser|requireStudent|requireTeacher|requireCourseTeacher|requireEnrolledStudent|requireTeacherStudent|assertCanViewConversations|assertCanViewStudentFile|assertFolderOwner|assertCourseTeacher|getSessionUser)\s*\(/;
+const GUARD = /\b(requireUser|requireStudent|requireTeacher|requireCourseTeacher|requireEnrolledStudent|requireTeacherStudent|assertCanViewConversations|assertCanViewStudentFile|assertFolderOwner|assertCourseTeacher|assertExtensionKey|getSessionUser)\s*\(/;
 
 /** Lo único que puede responder sin sesión. */
-const PUBLIC = new Set(["src/app/(auth)/login/page.tsx", "src/app/(auth)/register/page.tsx", "src/app/api/health/route.ts"]);
+const PUBLIC = new Set([
+  "src/app/(auth)/login/page.tsx",
+  "src/app/(auth)/register/page.tsx",
+  "src/app/api/health/route.ts",
+  // La credencial es el código de un solo uso que Educai le dio al usuario logueado (10 minutos).
+  "src/app/api/lms/extension/link/route.ts",
+]);
 const PUBLIC_ACTIONS = new Set(["auth.ts:registerAction", "auth.ts:loginAction", "auth.ts:logoutAction"]);
 
 function walk(dir: string): string[] {

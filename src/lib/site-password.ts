@@ -5,9 +5,14 @@
  */
 export const SITE_REALM = "Educai staging";
 
-/** Rutas que responden sin contraseña: el chequeo de salud del proveedor. */
+/**
+ * Rutas que responden sin contraseña: el chequeo de salud del proveedor y las dos de la extensión del
+ * LMS, que tienen su propia credencial (código de un solo uso o clave) y no pueden mandar la de staging.
+ */
+const PUBLIC_PATHS = new Set(["/api/health", "/api/lms/extension/link", "/api/lms/extension/sync"]);
+
 export function isPublicPath(pathname: string): boolean {
-  return pathname === "/api/health";
+  return PUBLIC_PATHS.has(pathname);
 }
 
 function sameText(a: string, b: string): boolean {

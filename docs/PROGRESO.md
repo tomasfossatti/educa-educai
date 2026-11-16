@@ -7,12 +7,12 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 - Etapa en curso: 6. Abiertas: 1 (revisar la lista de esquema), 2 (prueba con IA real), 4 (medición de precisión con IA real) y 6 (producción). La 3 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
 - Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio). IA real con la cadena de respaldo gratuita (Groq y OpenRouter); `npm run test:staging` en verde con IA real.
 - IA real: cadena de proveedores gratuitos (`AI_PROVIDER=fallback`: Groq, Gemini, OpenRouter). DeepSeek queda en la cadena para cuando tenga saldo. Planes gratuitos: solo datos sintéticos.
-- Asistente del LMS (pedido de Tomás, fuera del spec original): docente y estudiante conectan Canvas o Moodle y piden por chat "crea la materia «Costos de proyectos»"; Educai la arma y baja módulos y lecturas. Probado con un Canvas y un Moodle de mentira; falta probarlo con el LMS real.
+- Asistente del LMS (pedido de Tomás, fuera del spec original): docente y estudiante conectan Canvas o Moodle y piden por chat "crea la materia «Costos de proyectos»"; Educai la arma y baja módulos y lecturas. Probado con un Canvas y un Moodle de mentira; falta probarlo con el LMS real. Para Canvas sin tokens (Siglo 21) hay una extensión de navegador que se vincula con un código y mantiene la sesión.
 - Pasos que dependen de Tomás:
   1. Revisar la muestra de etiquetas: la medición preliminar con Gemini dio 95,8% de precisión y la etapa 4 se cierra con esa revisión.
   2. Rotar las claves de Groq y OpenRouter, que quedaron escritas en el chat, y cargar las nuevas en Vercel y en la sesión.
   3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1).
-  4. Probar el asistente con su Canvas real: en staging, Asistente → conectar con un token de acceso (o la cookie `canvas_session` si Siglo 21 no deja crear tokens) y pedir "crea la materia «Costos de proyectos»".
+  4. Probar el asistente con su Canvas real: en staging, Asistente → «Extensión del navegador» → descargar e instalar la extensión, generar el código, pegarlo en la extensión con Canvas abierto, y pedir "crea la materia «Costos de proyectos»".
   5. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
 
 ## Etapas
@@ -71,6 +71,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
+- 2026-11-16 (continuación) · Extensión de navegador para Canvas sin tokens: vinculación por código de un solo uso, sesión al día y prueba de punta a punta con la extensión real cargada en Chromium. Gasto de IA: 0 USD.
 - 2026-11-16 · Inicio sin datos inventados (#41). Asistente del LMS para docente y estudiante: conexión cifrada con Canvas o Moodle, chat que entiende "crea la materia «…»", importación de módulos y lecturas (incluido el formato de Siglo 21 portado de mcp-siglo) a la cátedra o a una carpeta privada del estudiante, con LMS de mentira para los tests de integración y de punta a punta. La barra lateral del estudiante dejó de mostrar "Clase 4 de 8". Falta la prueba con el Canvas real de Tomás. Gasto de IA: 0 USD en los tests (proveedor guionado).
 
 - 2026-11-15 (continuación) · Staging en Vercel con Neon, contraseña de sitio y despliegue automático desde `main` (#32); prueba de humo por la interfaz en verde contra staging (#34); DeepSeek como proveedor provisorio, probado con la API simulada y con la API real hasta donde lo permite una cuenta sin saldo (#33). Tomás descartó el abogado y la revisión de seguridad externa. Gasto de IA: 0 USD.

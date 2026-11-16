@@ -267,3 +267,43 @@ export function parseRiseCourse(html: string, pageUrl: string): { title: string;
   }
   return { title, text: parts.join("\n\n").trim(), attachments };
 }
+
+/**
+ * Código de vinculación de la extensión: "educai1." + base64url de {s: origen de Educai, c: Canvas,
+ * k: secreto}. Lleva los dos orígenes para que la extensión pida permiso sobre esos dos sitios, y
+ * solo esos, antes de hacer cualquier pedido. La extensión lo decodifica igual (extension/codigo.js).
+ */
+export interface ExtensionCode {
+  server: string;
+  canvas: string;
+  secret: string;
+}
+
+const CODE_PREFIX = "educai1.";
+
+export function encodeExtensionCode(code: ExtensionCode): string {
+  const json = JSON.stringify({ s: code.server, c: code.canvas, k: code.secret });
+  return CODE_PREFIX + Buffer.from(json, "utf8").toString("base64url");
+}
+
+export function decodeExtensionCode(raw: string): ExtensionCode | null {
+  const text = raw.trim();
+  if (!text.startsWith(CODE_PREFIX)) return null;
+  try {
+    const data = JSON.parse(Buffer.from(text.slice(CODE_PREFIX.length), "base64url").toString("utf8")) as Record<string, unknown>;
+    if (typeof data.s !== "string" || typeof data.c !== "string" || typeof data.k !== "string") return null;
+    const server = new URL(data.s);
+    const canvas = new URL(data.c);
+    const local = (u: URL) => u.protocol === "http:" && (u.hostname === "localhost" || u.hostname === "127.0.0.1");
+    if ((server.protocol !== "https:" && !local(server)) || (canvas.protocol !== "https:" && !local(canvas))) return null;
+    if (data.k.length < 20) return null;
+    return { server: server.origin, canvas: `${canvas.origin}${canvas.pathname.replace(/\/+$/, "")}`, secret: data.k };
+  } catch {
+    return null;
+  }
+}
+
+/** Lo que alguien puede pegar por error en vez de la cookie: un link (por ejemplo, el de mcp-siglo). */
+export function looksLikeUrl(value: string): boolean {
+  return /^https?:\/\//i.test(value.trim());
+}

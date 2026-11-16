@@ -50,6 +50,7 @@ model User {
   aiUsageEvents  AIUsageEvent[]  @relation("AIUsageActor")
   lmsConnection  LmsConnection?
   lmsImports     LmsImport[]
+  lmsExtension   LmsExtensionLink?
 }
 
 /// La cookie guarda un token aleatorio; acá solo se persiste su SHA-256.
@@ -1281,4 +1282,21 @@ model LmsImport {
   finishedAt    DateTime?
 
   @@index([userId, createdAt])
+}
+
+/// Vínculo con la extensión de navegador que mantiene al día la sesión de Canvas cuando la
+/// universidad no deja crear tokens. Educai da un código de un solo uso (10 minutos); la extensión
+/// lo cambia por una clave propia. Del código y de la clave solo se guarda el SHA-256.
+model LmsExtensionLink {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  baseUrl       String
+  codeHash      String?   @unique
+  codeExpiresAt DateTime?
+  keyHash       String?   @unique
+  linkedAt      DateTime?
+  lastSyncAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
