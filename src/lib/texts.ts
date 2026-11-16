@@ -246,6 +246,10 @@ export const TEXT = {
     discard: "Descartar",
     unavailable: "No se pudo mejorar el texto ahora. Probá de nuevo en unos minutos.",
   },
+  home: {
+    yourCourse: "Tu materia",
+    enterCourse: "Entrar a la materia",
+  },
   myData: {
     title: "Descargar mis datos",
     description: "Una copia de todo lo que Educai guarda sobre vos, en un archivo JSON: perfil, carpetas, conversaciones, dudas, conclusiones, quizzes y quién abrió tu ficha.",
