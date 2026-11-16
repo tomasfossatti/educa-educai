@@ -14,7 +14,7 @@ export function CourseSelector({ options, current, next }: { options: PanelOptio
   return (
     <details className="group relative">
       <summary
-        className="flex min-h-11 cursor-pointer list-none items-center gap-1 rounded-xl px-2 text-xl font-bold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary sm:text-2xl [&::-webkit-details-marker]:hidden"
+        className="flex min-h-11 w-fit cursor-pointer list-none items-center gap-1 rounded-xl px-2 no-summary-marker text-xl font-bold text-ink hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-primary sm:text-2xl [&::-webkit-details-marker]:hidden"
         aria-label={`${TEXT.student.selector.label}: ${current.label}`}
       >
         <h1 className="inline">{current.label}</h1>

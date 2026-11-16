@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { db, login, world } from "./support";
+import { db, login, subjectFolder, world } from "./support";
 
 /** Un solo chat (PR 4 de la simplificación): las direcciones viejas llevan al chat nuevo. */
 test("las direcciones viejas del chat llevan al único chat y conservan el hilo abierto", async ({ page }) => {
   const w = await world();
   const ana = w.students[0];
   await login(page, ana);
-  const folder = await db.folder.findFirstOrThrow({ where: { studentId: ana.id, courseId: w.course.id } });
+  const folder = await subjectFolder(ana.id, w.course.id);
   const experience = await db.experience.create({ data: { courseId: w.course.id, studentId: ana.id, type: "AI_CONVERSATION", title: "Charla vieja" } });
   const conversation = await db.aIConversation.create({
     data: { experienceId: experience.id, courseId: w.course.id, studentId: ana.id, folderId: folder.id, title: "Charla vieja" },
@@ -42,7 +42,7 @@ test("otra estudiante no abre una charla ajena en la dirección nueva", async ({
   const [ana, bruno] = w.students;
   const anaPage = await browser.newPage();
   await login(anaPage, ana);
-  const folder = await db.folder.findFirstOrThrow({ where: { studentId: ana.id, courseId: w.course.id } });
+  const folder = await subjectFolder(ana.id, w.course.id);
   const experience = await db.experience.create({ data: { courseId: w.course.id, studentId: ana.id, type: "AI_CONVERSATION", title: "Privada" } });
   const conversation = await db.aIConversation.create({
     data: { experienceId: experience.id, courseId: w.course.id, studentId: ana.id, folderId: folder.id, title: "Privada" },

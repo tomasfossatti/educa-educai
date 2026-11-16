@@ -32,7 +32,7 @@ test("la página de la materia muestra solo datos reales y estados vacíos hones
     expect(html).not.toMatch(fake);
   }
   // El botón principal lleva al chat de la materia, que cita el material.
-  await page.getByRole("link", { name: "Preguntar" }).click();
+  await page.getByRole("main").getByRole("link", { name: "Preguntar" }).click();
   await expect(page).toHaveURL(/\/s\/folders\//);
 });
 
