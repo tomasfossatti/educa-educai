@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { aiMode } from "@/server/ai";
 import { ShellHeader } from "@/components/domain/shell-header";
+import type { SidebarFolder } from "@/lib/sidebar";
 
 /** Marco común: barra superior Obsidian + contenido centrado con ambientación. */
 export function AppShell({
@@ -11,6 +12,7 @@ export function AppShell({
   courseTitle,
   currentClassNumber,
   totalClasses,
+  folders,
   nav,
   userLinks,
   children,
@@ -22,6 +24,7 @@ export function AppShell({
   courseTitle?: string;
   currentClassNumber?: number;
   totalClasses?: number;
+  folders?: SidebarFolder[];
   nav?: ReactNode;
   userLinks?: ReactNode;
   children: ReactNode;
@@ -44,6 +47,7 @@ export function AppShell({
         courseTitle={courseTitle}
         currentClassNumber={currentClassNumber}
         totalClasses={totalClasses}
+        folders={folders}
         nav={nav}
         userLinks={userLinks}
       />

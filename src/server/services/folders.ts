@@ -35,3 +35,26 @@ export async function listStudentFolders(studentId: string) {
     },
   });
 }
+
+/**
+ * Carpetas del estudiante para la barra lateral: solo nombre y tipo. Si le falta la del proyecto
+ * o la de alguna materia (el layout se arma antes que el inicio que las crea), las crea primero.
+ */
+export async function listStudentFolderLinks(studentId: string) {
+  const read = () =>
+    db.folder.findMany({
+      where: { studentId },
+      orderBy: [{ kind: "asc" }, { createdAt: "asc" }],
+      select: { id: true, name: true, kind: true, courseId: true },
+    });
+  let folders = await read();
+  const enrollments = await db.enrollment.findMany({ where: { studentId, status: "ACTIVE" }, select: { courseId: true } });
+  const missing =
+    !folders.some((f) => f.kind === "PROJECT" && f.courseId === null) ||
+    enrollments.some((e) => !folders.some((f) => f.kind === "SUBJECT" && f.courseId === e.courseId));
+  if (missing) {
+    await ensureStudentFolders(studentId);
+    folders = await read();
+  }
+  return folders.map(({ id, name, kind }) => ({ id, name, kind }));
+}
