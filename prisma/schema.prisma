@@ -35,19 +35,19 @@ model Institution {
 }
 
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
+  id             String            @id @default(cuid())
+  email          String            @unique
   name           String
   passwordHash   String
   role           Role
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   sessions       Session[]
-  accessLogs     AccessLog[]     @relation("AccessViewer")
+  accessLogs     AccessLog[]       @relation("AccessViewer")
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
   productEvents  ProductEvent[]
-  aiUsageEvents  AIUsageEvent[]  @relation("AIUsageActor")
+  aiUsageEvents  AIUsageEvent[]    @relation("AIUsageActor")
   lmsConnection  LmsConnection?
   lmsImports     LmsImport[]
   lmsExtension   LmsExtensionLink?
@@ -90,6 +90,8 @@ model StudentProfile {
   personalizationFocus     PersonalizationFocus @default(PROJECT)
   shareContextWithTeachers Boolean              @default(false)
   onboardingCompletedAt    DateTime?
+  /// Preguntas del perfil progresivo (carrera, año, proyecto, foco) que el estudiante ya respondió o salteó en el chat.
+  profilePromptsDone       String[]             @default([])
 
   enrollments       Enrollment[]
   experiences       Experience[]
@@ -1023,16 +1025,16 @@ enum FolderCreator {
 
 /// Carpeta del estudiante: la de una materia (con Course) o la de su proyecto personal (sin Course).
 model Folder {
-  id            String           @id @default(cuid())
-  studentId     String
-  student       StudentProfile   @relation(fields: [studentId], references: [userId], onDelete: Cascade)
-  kind          FolderKind
-  name          String
-  createdBy     FolderCreator    @default(SYSTEM)
-  courseId      String?
-  course        Course?          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  studentId      String
+  student        StudentProfile   @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  kind           FolderKind
+  name           String
+  createdBy      FolderCreator    @default(SYSTEM)
+  courseId       String?
+  course         Course?          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   conversations  AIConversation[]
   contexts       FolderContext[]
   materials      Material[]

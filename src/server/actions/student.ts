@@ -3,6 +3,7 @@
 import { refresh } from "@/server/next-refresh";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { parseActivityPrompts } from "@/domain/activity";
 import { CONSENT_VERSION, CURRENT_COURSE_COOKIE, CURRENT_FOLDER_COOKIE } from "@/lib/constants";
@@ -17,6 +18,7 @@ import { setAnalysisConsent } from "@/server/services/consent";
 import { enrollWithCode } from "@/server/services/enrollment";
 import { startFolderConversation } from "@/server/services/folder-chat";
 import { ensureStudentFolders } from "@/server/services/folders";
+import { isProfilePrompt, type ProfilePrompt } from "@/domain/profile-prompts";
 import { deleteStudentAccount } from "@/server/services/privacy";
 import { ImproveTextError, improveProfileText } from "@/server/services/profile-writing";
 import { AIError } from "@/server/ai";
@@ -28,17 +30,12 @@ const declaredField = z.string().max(1500, "Máximo 1500 caracteres.").optional(
 const contextSchema = z.object({
   currentContext: declaredField,
   interests: declaredField,
-  goals: z.string().min(3, "Contanos al menos un objetivo.").max(1500),
+  goals: declaredField,
   strengths: declaredField,
   difficulties: declaredField,
   workPreferences: declaredField,
 });
 
-const profileSchema = z.object({
-  career: z.string().min(2, "Contanos qué carrera cursás.").max(120),
-  studyYear: z.coerce.number().int().min(1).max(10).optional(),
-  projectDescription: z.string().min(3, "Contanos brevemente tu proyecto.").max(600),
-});
 
 /**
  * Foco de personalización (trabajo o proyecto). Obligatorio y sin valor por defecto en el formulario;
@@ -51,13 +48,6 @@ function readFocus(formData: FormData, currentContext: string | undefined): { fo
   return { focus: value };
 }
 
-function readProfile(formData: FormData) {
-  return {
-    career: text(formData, "career"),
-    studyYear: text(formData, "studyYear") || undefined,
-    projectDescription: text(formData, "projectDescription"),
-  };
-}
 
 /** Casillas de "¿Cómo preferís trabajar?": solo valen las opciones ofrecidas, en su orden. */
 function readWorkPreferences(formData: FormData): string | undefined {
@@ -96,46 +86,22 @@ async function setCurrentCourse(courseId: string) {
   jar.delete(CURRENT_FOLDER_COOKIE);
 }
 
-export async function completeOnboardingAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+/**
+ * Alta mínima: una pantalla con el consentimiento y dos botones, "Acepto" y "No, gracias", sin nada
+ * premarcado. Después el inicio pide solo el código de la materia o aceptar la invitación. Carrera,
+ * año, proyecto y foco se piden de a uno en el chat (perfil progresivo).
+ */
+export async function chooseConsentAction(formData: FormData): Promise<void> {
   const { user } = await requireStudent({ allowIncompleteOnboarding: true });
-  const parsed = contextSchema.safeParse(readContext(formData));
-  const profileParsed = profileSchema.safeParse(readProfile(formData));
-  const consentChoice = text(formData, "consent");
-  const focus = readFocus(formData, parsed.success ? parsed.data.currentContext : undefined);
-  if (!parsed.success || !profileParsed.success || (consentChoice !== "yes" && consentChoice !== "no") || "error" in focus) {
-    return {
-      error: "Revisá los campos marcados.",
-      fieldErrors: {
-        ...(parsed.success ? {} : fieldErrorsFrom(parsed.error)),
-        ...(profileParsed.success ? {} : fieldErrorsFrom(profileParsed.error)),
-        ...(consentChoice === "yes" || consentChoice === "no" ? {} : { consent: TEXT.consent.required }),
-        ...("error" in focus ? { [focus.field]: focus.error } : {}),
-      },
-    };
-  }
-  // Consentimiento expreso: solo cuenta si el estudiante eligió "Acepto".
-  const consent = consentChoice === "yes";
-  const shareContext = formData.get("shareContext") === "on";
-
-  let courseId: string | null = null;
-  const joinCode = text(formData, "joinCode");
-  if (joinCode) {
-    const result = await enrollWithCode(user.id, joinCode);
-    if ("error" in result) return { error: result.error, fieldErrors: { joinCode: result.error } };
-    courseId = result.courseId;
-  }
-
+  const choice = text(formData, "consent");
+  if (choice !== "yes" && choice !== "no") redirect("/s/onboarding?error=consent");
+  // Consentimiento expreso: solo cuenta si el estudiante tocó "Acepto".
+  const consent = choice === "yes";
   await db.studentProfile.update({
     where: { userId: user.id },
     data: {
-      ...contextData(parsed.data),
-      career: profileParsed.data.career,
-      studyYear: profileParsed.data.studyYear ?? null,
-      projectDescription: profileParsed.data.projectDescription,
-      personalizationFocus: focus.focus,
       consentAnalysisAt: consent ? new Date() : null,
       consentVersion: consent ? CONSENT_VERSION : null,
-      shareContextWithTeachers: shareContext,
       onboardingCompletedAt: new Date(),
     },
   });
@@ -143,12 +109,55 @@ export async function completeOnboardingAction(_prev: ActionState | null, formDa
   await track(EVENT.studentOnboardingCompleted, {
     userId: user.id,
     studentId: user.id,
-    courseId,
     dedupeKey: `onboarding:${user.id}`,
-    properties: { consent, shareContext },
+    properties: { consent, shareContext: false },
   });
-  if (courseId) await setCurrentCourse(courseId);
   redirect("/s");
+}
+
+/** Marca una pregunta del perfil progresivo como respondida o salteada (no vuelve a aparecer). */
+async function markPromptDone(userId: string, prompt: ProfilePrompt) {
+  const profile = await db.studentProfile.findUniqueOrThrow({ where: { userId }, select: { profilePromptsDone: true } });
+  if (profile.profilePromptsDone.includes(prompt)) return;
+  await db.studentProfile.update({ where: { userId }, data: { profilePromptsDone: { push: prompt } } });
+}
+
+/** "Saltar" en una pregunta del perfil progresivo. */
+export async function skipProfilePromptAction(prompt: string): Promise<void> {
+  const { user } = await requireStudent();
+  if (!isProfilePrompt(prompt)) notFound();
+  await markPromptDone(user.id, prompt);
+  refresh();
+}
+
+/** "Guardar" en una pregunta del perfil progresivo: valida solo ese dato y lo guarda. */
+export async function answerProfilePromptAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
+  const { user } = await requireStudent();
+  const prompt = text(formData, "prompt");
+  if (!isProfilePrompt(prompt)) return { error: TEXT.student.profilePrompt.invalid };
+  const value = text(formData, "value");
+  const invalid = (message: string): ActionState => ({ error: message, fieldErrors: { value: message } });
+  let data: Prisma.StudentProfileUpdateInput;
+  if (prompt === "career") {
+    if (value.length < 2 || value.length > 120) return invalid(TEXT.student.profilePrompt.invalid);
+    data = { career: value };
+  } else if (prompt === "studyYear") {
+    const year = Number(value);
+    if (!Number.isInteger(year) || year < 1 || year > 10) return invalid(TEXT.student.profilePrompt.invalidYear);
+    data = { studyYear: year };
+  } else if (prompt === "project") {
+    if (value.length < 3 || value.length > 600) return invalid(TEXT.student.profilePrompt.invalid);
+    data = { projectDescription: value };
+  } else {
+    const work = text(formData, "currentContext");
+    if (value !== "WORK" && value !== "PROJECT") return invalid(TEXT.profile.focusRequired);
+    if (value === "WORK" && work.length < 3) return { error: TEXT.profile.workRequiredForFocus, fieldErrors: { currentContext: TEXT.profile.workRequiredForFocus } };
+    data = { personalizationFocus: value, ...(value === "WORK" ? { declaredCurrentContext: work.slice(0, 1500), declaredUpdatedAt: new Date() } : {}) };
+  }
+  await db.studentProfile.update({ where: { userId: user.id }, data });
+  await markPromptDone(user.id, prompt);
+  refresh();
+  return { ok: true };
 }
 
 export async function updateContextAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {

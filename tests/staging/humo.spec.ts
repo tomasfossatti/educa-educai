@@ -40,27 +40,14 @@ test("staging: materia con material, estudiante con consentimiento y respuesta c
   // Estudiante: registro, consentimiento explícito, código de la materia.
   const student = await (await browser.newContext()).newPage();
   await register(student, "Estudiante", "Estudiante Staging", `staging-estudiante-${uid}@test.educai`, pass());
-  await student.locator('input[name="consent"][value="yes"]').check();
-  await student.getByRole("button", { name: "Continuar" }).click();
-  await student.fill("#currentContext", "Estoy armando un emprendimiento de viandas.");
-  await student.fill("#career", "Administración");
-  await student.fill("#projectDescription", "Viandas saludables para oficinas.");
-  await student.locator('input[name="personalizationFocus"][value="PROJECT"]').check();
-  await student.getByRole("button", { name: "Continuar" }).click();
-  await student.fill("#goals", "Validar si hay demanda.");
-  await student.getByRole("button", { name: "Continuar" }).click();
-  await student.getByRole("button", { name: "Continuar" }).click();
-  await student.fill("#joinCode", code);
-  await student.getByRole("button", { name: "Empezar" }).click();
+  // Alta mínima: una pantalla de consentimiento y después solo el código.
+  await student.getByRole("button", { name: "Acepto" }).click();
   await student.waitForURL((u) => !u.pathname.startsWith("/s/onboarding"));
+  await student.getByLabel("Código").fill(code);
+  await student.getByRole("button", { name: "Unirme" }).click();
 
-  // Chat de la carpeta de la materia, con cita del material.
-  await student.goto("/s");
-  await student.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
-  await student.waitForURL("**/s/folders/**");
-  await student.getByRole("button", { name: "Nueva conversación" }).click();
-  await student.waitForURL("**/c/**");
-  await student.fill("textarea[name=question]", "¿Qué hace falsable a una hipótesis?");
+  // El inicio es el chat de la materia: se pregunta directo, con cita del material.
+  await student.getByRole("textbox", { name: "Tu pregunta" }).fill("¿Qué hace falsable a una hipótesis?");
   await student.getByRole("button", { name: "Preguntar", exact: true }).click();
   await expect(student.getByText("Fuentes:")).toBeVisible({ timeout: 90_000 });
   await expect(student.getByText(/programa\.pdf, pág\. 2/).first()).toBeVisible();

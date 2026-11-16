@@ -10,7 +10,7 @@ const L = TEXT.student.profileForm;
 const FIELDS = [
   { name: "currentContext", label: TEXT.profile.work, hint: TEXT.profile.workHint, required: false },
   { name: "interests", label: L.interests, hint: TEXT.profile.hints.interests, required: false },
-  { name: "goals", label: L.goals, hint: TEXT.profile.hints.goals, required: true },
+  { name: "goals", label: L.goals, hint: TEXT.profile.hints.goals, required: false },
   { name: "strengths", label: L.strengths, hint: TEXT.profile.hints.strengths, required: false },
   { name: "difficulties", label: L.difficulties, hint: TEXT.profile.hints.difficulties, required: false },
 ] as const;
