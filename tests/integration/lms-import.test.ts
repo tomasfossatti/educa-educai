@@ -153,6 +153,12 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     await expect(lms.getLmsImportStatus(asTeacher(t.id), status!.id)).rejects.toBeInstanceOf(guards.AccessDenied);
   });
 
+  it("acepta la cookie de sesión pegada sola, sin el nombre", async () => {
+    const s = await f.student();
+    const { accountName } = await lms.connectLms(asStudent(s.id), { provider: "CANVAS", baseUrl: fake.url, authKind: "cookie", token: FAKE_TOKENS.student });
+    expect(accountName).toBe("Estudiante Sintético");
+  });
+
   it("si la materia ya está en Educai con su docente, el estudiante no la duplica", async () => {
     const t = await f.teacher();
     const s = await f.student();

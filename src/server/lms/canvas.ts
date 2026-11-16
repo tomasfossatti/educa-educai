@@ -42,8 +42,10 @@ export class CanvasClient implements LmsClient {
   ) {
     this.headers = { accept: "application/json", "user-agent": "Educai (lectura de material)" };
     if (authKind === "cookie") {
-      this.headers.cookie = credential;
-      const csrf = credential.match(/(?:^|;\s*)_csrf_token=([^;]+)/)?.[1];
+      // Si se pegó solo el valor de la cookie, se le pone el nombre que usa Canvas.
+      const cookie = credential.replace(/^cookie:\s*/i, "").trim();
+      this.headers.cookie = cookie.includes("=") ? cookie : `canvas_session=${cookie}`;
+      const csrf = this.headers.cookie.match(/(?:^|;\s*)_csrf_token=([^;]+)/)?.[1];
       if (csrf) this.headers["x-csrf-token"] = safeDecode(csrf);
     } else {
       this.headers.authorization = `Bearer ${credential}`;
