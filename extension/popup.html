@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8" />
+<title>Educai · Canvas</title>
+<style>
+  :root { --bg: #fff; --fg: #0a0a0a; --mut: #5f5f5f; --edge: #d9d9d9; --err: #b42318; --ok: #067647; --accent: #4f46e5; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0b0b0c; --fg: #ededed; --mut: #a1a1a1; --edge: #333; --err: #ff6b6b; --ok: #47cd89; --accent: #8b87ff; } }
+  body { width: 320px; margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1 { font-size: 15px; font-weight: 650; margin: 0 0 2px; }
+  p { margin: 4px 0 10px; color: var(--mut); }
+  ol { margin: 4px 0 12px; padding-left: 18px; color: var(--mut); }
+  textarea { box-sizing: border-box; width: 100%; min-height: 64px; resize: vertical; border: 1px solid var(--edge); border-radius: 8px; background: transparent; color: var(--fg); font: 12px ui-monospace, Menlo, monospace; padding: 8px; }
+  button { width: 100%; height: 36px; margin-top: 8px; border: 1px solid var(--fg); border-radius: 8px; background: var(--fg); color: var(--bg); font: 500 14px system-ui, sans-serif; cursor: pointer; }
+  button.secondary { background: transparent; color: var(--fg); border-color: var(--edge); }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .status { border: 1px solid var(--edge); border-radius: 8px; padding: 10px; margin: 8px 0; }
+  .ok { color: var(--ok); font-weight: 600; }
+  .err { color: var(--err); }
+  .small { font-size: 12px; color: var(--mut); }
+  [hidden] { display: none !important; }
+</style>
+<h1>Educai · Conector de Canvas</h1>
+
+<section id="unlinked">
+  <p>Conecta tu sesión de Canvas con Educai cuando tu universidad no deja crear tokens.</p>
+  <ol>
+    <li>En Educai, entrá a Asistente y elegí «Extensión del navegador».</li>
+    <li>Tocá «Generar código» y después «Copiar código».</li>
+    <li>Pegalo acá y tocá Vincular.</li>
+  </ol>
+  <textarea id="code" aria-label="Código de Educai" placeholder="educai1.…"></textarea>
+  <button id="link">Vincular</button>
+</section>
+
+<section id="linked" hidden>
+  <div class="status" id="state"></div>
+  <p class="small" id="where"></p>
+  <button id="open" class="secondary" hidden>Abrir Canvas para iniciar sesión</button>
+  <button id="sync" class="secondary">Sincronizar ahora</button>
+  <button id="unlink" class="secondary">Desvincular</button>
+  <p class="small">Para revocar el acceso desde Educai: Asistente → Desconectar.</p>
+</section>
+
+<p id="msg" role="status"></p>
+<script type="module" src="popup.js"></script>
+</html>

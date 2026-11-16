@@ -9,6 +9,7 @@ interface Connection {
   provider: "CANVAS" | "MOODLE";
   baseUrl: string;
   accountName: string | null;
+  viaExtension?: boolean;
 }
 
 /** Pantalla del asistente: la conexión con el LMS arriba y el chat abajo. Sirve a docentes y estudiantes. */
@@ -20,10 +21,11 @@ export function LmsPanel({ connection, welcome }: { connection: Connection | nul
         {connection ? (
           <Card className="space-y-3">
             <Notice tone="success">{t.connectedAs(t.providers[connection.provider], connection.accountName ?? "tu cuenta", connection.baseUrl)}</Notice>
+            {connection.viaExtension && <p className="text-xs text-muted">{t.viaExtension}</p>}
             <details>
               <summary className="cursor-pointer text-sm text-primary">{t.reconnect}</summary>
               <div className="mt-4">
-                <LmsConnectForm defaultProvider={connection.provider} defaultBaseUrl={connection.baseUrl} />
+                <LmsConnectForm defaultProvider={connection.provider} defaultBaseUrl={connection.baseUrl} defaultAuthKind={connection.viaExtension ? "extension" : "token"} />
               </div>
             </details>
             <form action={disconnectLmsAction}>

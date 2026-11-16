@@ -59,3 +59,6 @@ docs/informes/*.tmp
 
 # backups locales (scripts/backup-db.sh)
 /backups/
+
+# extensión del navegador (la arma scripts/build-extension.mjs antes del build)
+/public/educai-canvas.zip

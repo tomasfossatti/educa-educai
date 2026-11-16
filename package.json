@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/build-extension.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
@@ -20,7 +21,8 @@
     "test:staging": "playwright test --config playwright.staging.config.ts",
     "test:load": "playwright test --config playwright.load.config.ts",
     "retention": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/retention.ts",
-    "eval:dudas": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/measure-precision.ts"
+    "eval:dudas": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/measure-precision.ts",
+    "build:extension": "node scripts/build-extension.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

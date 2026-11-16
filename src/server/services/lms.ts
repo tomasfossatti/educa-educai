@@ -1,6 +1,6 @@
 import "server-only";
 import type { LmsProvider } from "@prisma/client";
-import { matchCourse, normalizeName, planImport } from "@/domain/lms";
+import { looksLikeUrl, matchCourse, normalizeName, planImport } from "@/domain/lms";
 import { AccessDenied, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { clientForConnection, createLmsClient, LmsError, normalizeBaseUrl, type LmsClient, type LmsCourse, type LmsItem } from "@/server/lms";
@@ -37,10 +37,16 @@ function assertRole(viewer: Viewer) {
 
 export async function getLmsConnection(viewer: Viewer) {
   assertRole(viewer);
-  return db.lmsConnection.findUnique({
-    where: { userId: viewer.id },
-    select: { provider: true, baseUrl: true, authKind: true, accountName: true, lastUsedAt: true, createdAt: true },
-  });
+  const [connection, extension] = await Promise.all([
+    db.lmsConnection.findUnique({
+      where: { userId: viewer.id },
+      select: { provider: true, baseUrl: true, authKind: true, accountName: true, lastUsedAt: true, createdAt: true },
+    }),
+    db.lmsExtensionLink.findUnique({ where: { userId: viewer.id }, select: { keyHash: true, lastSyncAt: true } }),
+  ]);
+  if (!connection) return null;
+  // La conexión la mantiene la extensión si está vinculada y ya mandó la sesión.
+  return { ...connection, viaExtension: Boolean(extension?.keyHash && extension.lastSyncAt && connection.authKind === "cookie") };
 }
 
 /** Valida la credencial contra el LMS (pide el perfil) antes de guardarla. */
@@ -55,6 +61,11 @@ export async function connectLms(viewer: Viewer, input: ConnectInput, makeClient
     credential = await MoodleClient.requestToken(baseUrl, input.username.trim(), input.password);
   } else {
     credential = input.token?.trim() ?? "";
+    if (looksLikeUrl(credential)) {
+      throw new LmsServiceError(
+        "Eso es un link, no la credencial. Si es el link de mcp-siglo, en Educai usá la extensión del navegador (opción «Extensión del navegador») o pegá el valor de la cookie canvas_session.",
+      );
+    }
     if (credential.length < 8) throw new LmsServiceError(input.authKind === "cookie" ? "Pegá la cookie de sesión completa." : "Pegá el token de acceso completo.");
     if (input.authKind === "cookie") {
       if (input.provider !== "CANVAS") throw new LmsServiceError("La cookie de sesión es solo para Canvas.");
@@ -70,7 +81,7 @@ export async function connectLms(viewer: Viewer, input: ConnectInput, makeClient
 
 export async function disconnectLms(viewer: Viewer): Promise<void> {
   assertRole(viewer);
-  await db.lmsConnection.deleteMany({ where: { userId: viewer.id } });
+  await db.$transaction([db.lmsConnection.deleteMany({ where: { userId: viewer.id } }), db.lmsExtensionLink.deleteMany({ where: { userId: viewer.id } })]);
 }
 
 type ClientFactory = (connection: { provider: LmsProvider; baseUrl: string; credential: string; authKind: string }) => LmsClient;

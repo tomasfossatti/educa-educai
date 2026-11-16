@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Extensión de navegador para los Canvas que no dejan crear tokens
+Contexto: Siglo 21 no deja crear tokens y pegar la cookie a mano vence enseguida. Tomás compartió la extensión de mcp-siglo y pidió una nueva, optimizada.
+Alternativas: reusar la de mcp-siglo (crea una cuenta anónima por link, solo sirve para Siglo 21 y reenvía la cookie cada 10 minutos aunque no cambie); OAuth de Canvas (lo ideal, pero necesita una Developer Key que crea un administrador de la universidad).
+Decisión: extensión propia (`extension/`, Manifest V3) vinculada a la cuenta de Educai con un código de un solo uso que vence a los 10 minutos y que la extensión cambia por una clave propia. De los dos solo se guarda el SHA-256. El código lleva el origen de Educai y el del Canvas, y la extensión pide permiso solo sobre esos dos sitios en el momento de vincular. Manda la sesión cuando cambia la cookie y, si no cambió, como mucho cada 30 minutos. Cada 10 minutos usa Canvas para que no cierre la sesión. Educai verifica la cookie con Canvas antes de guardarla (cifrada, como un token). Un código nuevo o «Desconectar» invalidan la clave anterior. Las dos rutas de la extensión no piden la contraseña de staging porque tienen su propia credencial. El zip se arma en el build (`public/educai-canvas.zip`) con íconos generados, sin binarios en el repo.
+Consecuencias: migración aditiva `extension_canvas`. La extensión se instala como «descomprimida» en modo de desarrollador; publicarla en la Chrome Web Store necesita una cuenta de desarrollador de Tomás. La sesión se mantiene mientras Chrome esté abierto.
+
 ### 2026-11-16 · Asistente que trae materias del LMS por chat (cambio de alcance pedido por Tomás)
 Contexto: el spec dejaba la integración con Canvas y Moodle fuera del piloto ("alta manual, sin LMS") y solo pedía portar el cliente de Canvas de mcp-siglo. Tomás pidió que el docente y el estudiante conecten su LMS y le digan al chat "crea la materia «Costos de proyectos»" para que Educai la arme y baje sus 4 módulos con 4 lecturas cada uno.
 Alternativas: LTI 1.3 (lo que el spec proponía a futuro: requiere que la universidad registre la herramienta, fuera de nuestro control); login institucional con SSO y segundo factor como hace mcp-siglo (frágil y con contraseña del usuario de por medio); token de acceso del usuario. Para interpretar el pedido: dejarle la decisión a la IA con herramientas, o reconocer el pedido con código y usar la IA solo como respaldo.

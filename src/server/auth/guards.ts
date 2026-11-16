@@ -1,4 +1,5 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "@/server/db";
@@ -117,4 +118,19 @@ export async function assertCourseTeacher(viewer: Viewer, courseId: string) {
   const course = await db.course.findFirst({ where: { id: courseId, teacherId: viewer.id } });
   if (!course) throw new AccessDenied();
   return course;
+}
+
+/**
+ * Extensión de navegador del LMS: se autentica con la clave que recibió al vincularse (encabezado
+ * Authorization: Bearer). Solo puede actualizar la conexión con el LMS de su propio usuario.
+ */
+export async function assertExtensionKey(authorization: string | null) {
+  const key = authorization?.match(/^Bearer\s+(\S{20,})$/i)?.[1];
+  if (!key) throw new AccessDenied("Falta la clave de la extensión.");
+  const link = await db.lmsExtensionLink.findUnique({
+    where: { keyHash: createHash("sha256").update(key).digest("hex") },
+    include: { user: { select: { id: true, role: true } } },
+  });
+  if (!link || (link.user.role !== "TEACHER" && link.user.role !== "STUDENT")) throw new AccessDenied("La extensión no está vinculada.");
+  return { viewer: { id: link.user.id, role: link.user.role } as Viewer, link };
 }

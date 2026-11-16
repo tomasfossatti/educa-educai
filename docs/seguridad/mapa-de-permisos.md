@@ -60,6 +60,8 @@ Las páginas bajo `/s` pasan por el layout `src/app/s/(app)/layout.tsx` (`requir
 | `/t/courses/[courseId]/clases/[sessionId]/pptx` (ruta) | `getSessionUser` y `exportSlidesPptx`, que verifica que el docente sea de la cátedra |
 | `/api/tutor/[conversationId]` (ruta, tutor heredado) | `getSessionUser`, rol estudiante, conversación propia, chequeo de origen, límite diario y tope semanal de IA |
 | `/api/health` (ruta) | Pública. Solo devuelve `ok`, la última migración y la versión |
+| `/api/lms/extension/link` (ruta) | Sin sesión: la credencial es el código de un solo uso (10 minutos) que Educai le mostró al usuario logueado. Se canjea una sola vez por la clave de la extensión |
+| `/api/lms/extension/sync` (ruta) | `assertExtensionKey` (clave de la extensión, Bearer). Solo actualiza la conexión con el LMS de ese usuario, después de verificar la cookie con Canvas |
 
 ## Acciones del servidor
 
