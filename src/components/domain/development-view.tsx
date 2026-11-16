@@ -6,6 +6,7 @@ import { EmptyState, List, ListItem, Section } from "@/components/ui/layout";
 import { snapshotDimensionLabel, supportStatusLabel } from "@/domain/labels";
 import { formatDateTime } from "@/lib/format";
 import { getActiveInferences, getEvidenceList, getSnapshots, type Viewer } from "@/server/services/development";
+import { TEXT } from "@/lib/texts";
 
 const SYMBOL: Record<SupportStatus, string> = { CONSISTENT: "●", PARTIAL: "◐", INSUFFICIENT: "○", CONTRADICTORY: "◑" };
 
@@ -28,7 +29,7 @@ export async function DevelopmentView({ studentId, courseId, viewer, base }: { s
         title="Snapshot de desarrollo"
         description={
           latest
-            ? `Calculado ${formatDateTime(latest.createdAt)} a partir de ${latest.evidenceCount} evidencias en ${latest.experienceCount} experiencias. Cada dimensión muestra la evidencia que la sostiene.`
+            ? TEXT.development.snapshotBasis(formatDateTime(latest.createdAt), latest.evidenceCount, latest.experienceCount)
             : undefined
         }
         action={<LayerTag layer="inferred" />}
