@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { makePdf } from "./documents";
-import { db, login, subjectFolderUrl, world } from "./support";
+import { db, login, world } from "./support";
 
-test("el docente sube material y la estudiante hace un quiz del tema y ve su dominio", async ({ browser }) => {
+test("el docente sube material y la estudiante practica un tema con un quiz que actualiza su avance", async ({ browser }) => {
   const w = await world();
 
   const teacher = await browser.newPage();
@@ -18,22 +18,28 @@ test("el docente sube material y la estudiante hace un quiz del tema y ve su dom
 
   const student = await browser.newPage();
   await login(student, w.students[0]);
-  await student.goto(await subjectFolderUrl(w.students[0].id, w.course.id));
-  const topic = student.locator("li", { hasText: "Hipotesis falsables" });
-  await expect(topic.getByText("Sin intentos")).toBeVisible();
-  await topic.getByRole("button", { name: "Hacer quiz" }).click();
-  await student.waitForURL("**/quiz/**");
+  // Practicar: los temas de la materia; tocar uno arma el quiz.
+  await student.getByRole("link", { name: "Practicar" }).click();
+  await student.waitForURL("**/s/practicar");
+  await student.getByRole("button", { name: "Practicar: Hipotesis falsables" }).click();
+  await student.waitForURL(/\/s\/practicar\/.+/);
 
   // Antes de entregar, la página no trae las respuestas correctas.
   expect(await student.content()).not.toContain("correctIndex");
-  await expect(student.getByText("Fuente: programa.pdf, pág. 1").first()).toBeVisible();
+  await expect(student.getByText("Sale de: programa.pdf, pág. 1").first()).toBeVisible();
   const questions = await student.locator("fieldset").count();
   expect(questions).toBeGreaterThanOrEqual(3);
   for (let i = 0; i < questions; i++) await student.locator(`input[name=q${i}]`).first().check();
   await student.getByRole("button", { name: "Entregar" }).click();
 
-  await expect(student.getByText(`${questions} de ${questions} correctas`)).toBeVisible();
-  await expect(student.getByText("Dominio 50%")).toBeVisible(); // tope con un solo intento
+  // Un solo mensaje y un botón; el detalle queda detrás de "Ver más".
+  await expect(student.getByRole("heading", { name: `Acertaste ${questions} de ${questions}.` })).toBeVisible();
+  await expect(student.getByText("%")).toHaveCount(0);
+  await expect(student.getByText("Tu respuesta").first()).toBeHidden();
+  await student.getByText("Ver más").click();
+  await expect(student.getByText("Tu respuesta").first()).toBeVisible();
+  await student.getByRole("link", { name: "Seguir" }).click();
+  await student.waitForURL("**/s/practicar");
 
   const course = await db.course.findUniqueOrThrow({ where: { id: w.course.id } });
   await student.goto(`/s/courses/${course.id}/ficha`);

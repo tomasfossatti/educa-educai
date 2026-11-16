@@ -41,3 +41,5 @@ details>summary{list-style:none}details>summary::-webkit-details-marker{display:
 
 /* Selector de materia del estudiante: usa su propio ícono, sin la flecha global de <summary>. */
 details>summary.no-summary-marker::after{content:none}
+/* Enlaces con forma de botón primario en el panel del estudiante: la regla global a{color:inherit} les quitaba el blanco. */
+a.text-on-primary{color:#fff}

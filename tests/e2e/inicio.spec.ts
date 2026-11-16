@@ -18,22 +18,20 @@ test("el inicio del estudiante es el chat de su materia, con datos reales", asyn
   }
 });
 
-test("la página de la materia muestra solo datos reales y estados vacíos honestos", async ({ page }) => {
+test("la dirección vieja de una materia abre su chat, sin datos inventados", async ({ page }) => {
   const w = await world();
+  const other = await world({ students: 0 });
+  await db.enrollment.create({ data: { courseId: other.course.id, studentId: w.students[0].id } });
   await login(page, w.students[0]);
-  await page.goto(`/s/courses/${w.course.id}`);
-  await expect(page.getByRole("heading", { name: w.course.name })).toBeVisible();
-  // Sin clase aprobada, sin tareas y sin conversaciones: lo dice en vez de inventar.
-  await expect(page.getByText("Tu docente todavía no publicó la próxima clase.")).toBeVisible();
-  await expect(page.getByText("Tu docente todavía no publicó tareas.")).toBeVisible();
-  await expect(page.getByText("Todavía no conversaste sobre esta materia.")).toBeVisible();
+  // La segunda materia se vuelve la actual al abrir su dirección vieja.
+  await page.goto(`/s/courses/${other.course.id}`);
+  await expect(page).toHaveURL(/\/s$/);
+  await expect(page.getByRole("main").getByRole("heading", { name: other.course.name })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Tu pregunta" })).toBeVisible();
   const html = await page.content();
   for (const fake of [/hipótesis falsables/i, /Rosario/, /e-commerce/i, /última milla/i, /Clase \d+ de \d+/, /Simular/]) {
     expect(html).not.toMatch(fake);
   }
-  // El botón principal lleva al chat de la materia, que cita el material.
-  await page.getByRole("main").getByRole("link", { name: "Preguntar" }).click();
-  await expect(page).toHaveURL(/\/s\/folders\//);
 });
 
 test("sin materia, el inicio pide solo el código y entra al chat", async ({ page }) => {

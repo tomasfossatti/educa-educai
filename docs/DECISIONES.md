@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Practicar: un botón por tema, resultado en una pantalla
+Contexto: el quiz vivía dentro de la página de la carpeta, con el porcentaje de dominio a la vista. El diseño nuevo pide una lista de temas, que tocar uno arranque el quiz y un resultado con un solo mensaje y "Seguir".
+Alternativas: arrancar el quiz con un enlace (`/s/practicar?tema=…`); con un botón que llama a la acción.
+Decisión: cada tema es un botón que llama a `startQuizAction`. Un enlace se puede precargar y armaría quizzes (y gastaría IA) sin que nadie toque nada. Se reusa el quiz existente sin cambios: respuestas ocultas hasta entregar, mínimo de tres preguntas con fuente, tope de dominio y registro de intentos. El resultado dice "Acertaste N de M" y una frase: "¡Muy bien!" si acertó todas, "Vas bien" si no. No muestra porcentajes. El detalle de cada pregunta queda detrás de "Ver más". Si no se puede armar el quiz, Practicar lo avisa en una frase: falta material, el tope semanal o la IA no respondió. Las tareas del docente aparecen al pie solo si hay alguna.
+Consecuencias: sin migración. `/s/folders/[f]/quiz/[q]` redirige a `/s/practicar/[q]`. `/s/courses/[id]` elige esa materia (con `/s/materia/[folderId]`, que solo guarda la cookie de navegación) y abre su chat. La página de la materia del PR 2 deja de existir, y su test de datos inventados sigue cubriendo las pantallas del estudiante. La carpeta ya no muestra el quiz.
+
 ### 2026-11-16 · El inicio es el chat y la materia actual es una carpeta
 Contexto: el inicio tenía tarjetas de carpetas, "Tu desarrollo" y "Tu contexto declarado". El diseño nuevo pide que `/s` ya sea el chat, con la caja grande, como mucho dos toques entre el login y la primera pregunta, y un selector de materia arriba.
 Alternativas: abrir el chat en `/s/c/[id]` después de la primera pregunta (cambia la dirección y obliga a volver); quedarse en `/s` con la última charla abierta.
