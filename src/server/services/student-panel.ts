@@ -169,3 +169,10 @@ export async function listMyConclusions(viewer: Viewer, courseId: string) {
     select: { id: true, statement: true, studentStatement: true, curriculumItem: { select: { title: true } } },
   });
 }
+
+/** ¿Ya preguntó algo alguna vez? El perfil progresivo empieza después de la primera charla. */
+export async function hasAskedBefore(viewer: Viewer): Promise<boolean> {
+  if (viewer.role !== "STUDENT") return false;
+  const count = await db.message.count({ where: { role: "STUDENT", conversation: { studentId: viewer.id, origin: "CHAT" } } });
+  return count > 0;
+}

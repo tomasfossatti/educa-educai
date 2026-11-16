@@ -4,4 +4,4 @@ export const CURRENT_COURSE_COOKIE = "educai_course";
 export const CURRENT_FOLDER_COOKIE = "educai_folder";
 
 /** Versión del aviso de consentimiento que acepta el estudiante. */
-export const CONSENT_VERSION = "2026-11";
+export const CONSENT_VERSION = "2026-11b";

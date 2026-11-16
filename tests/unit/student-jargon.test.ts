@@ -24,14 +24,12 @@ const FICHA_ALLOWED_FILES = [/^src\/app\/s\/\(app\)\/mis-datos\//];
 
 /** Bloques de TEXT que usan pantallas viejas, en transición. Se vacía en el PR 12. */
 const TRANSITIONAL_BLOCKS: string[] = [
-  "consent",
   "lms",
 ];
 /** Archivos de pantallas viejas, en transición. Se vacía en el PR 12. */
 const TRANSITIONAL_FILES: string[] = [
   "src/app/s/(app)/courses/[courseId]/activities/[activityId]/submission-form.tsx",
   "src/app/s/(app)/courses/[courseId]/activities/page.tsx",
-  "src/app/s/onboarding/onboarding-form.tsx",
 ];
 
 function normalize(text: string): string {

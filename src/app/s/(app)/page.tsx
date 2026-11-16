@@ -5,6 +5,8 @@ import { ChatMessages } from "@/components/student/chat-messages";
 import { CourseSelector } from "@/components/student/course-selector";
 import { SelectionAsk } from "@/components/student/selection-ask";
 import { DoubtCards } from "@/components/student/doubt-cards";
+import { ProfilePromptCard } from "@/components/student/profile-prompt-card";
+import { nextProfilePrompt } from "@/domain/profile-prompts";
 import { AutoRefresh, SubmitButton } from "@/components/ui/client";
 import { formatDate } from "@/lib/format";
 import { TEXT } from "@/lib/texts";
@@ -14,7 +16,7 @@ import { closeInactiveConversations, expireStaleRuns } from "@/server/engine/tri
 import { nextApprovedSession } from "@/server/services/class-sessions";
 import { getPendingInvites } from "@/server/services/student-home";
 import { listPendingDoubts } from "@/server/services/doubts";
-import { citedChunks, getActiveConversation, getPanelState, isAnalyzingLastConversation } from "@/server/services/student-panel";
+import { citedChunks, getActiveConversation, getPanelState, hasAskedBefore, isAnalyzingLastConversation } from "@/server/services/student-panel";
 import { JoinForm } from "./join/join-form";
 
 export const metadata: Metadata = { title: "Preguntar" };
@@ -24,7 +26,7 @@ export const metadata: Metadata = { title: "Preguntar" };
  * Una caja grande y un botón. Sin materia, una sola pantalla con el código.
  */
 export default async function StudentHome() {
-  const { user } = await requireStudent();
+  const { user, profile } = await requireStudent();
   const viewer = { id: user.id, role: user.role };
   await closeInactiveConversations({ studentId: user.id });
   await expireStaleRuns(user.id);
@@ -55,12 +57,15 @@ export default async function StudentHome() {
     );
   }
 
-  const [conversation, nextClass, doubts, analyzing] = await Promise.all([
+  const [conversation, nextClass, doubts, analyzing, askedBefore] = await Promise.all([
     getActiveConversation(viewer, current.folderId),
     current.courseId ? nextApprovedSession(current.courseId) : null,
     listPendingDoubts(viewer, current.folderId),
     isAnalyzingLastConversation(viewer, current.folderId),
+    hasAskedBefore(viewer),
   ]);
+  // Perfil progresivo: de a una pregunta, después de la primera charla, y nunca junto a una duda.
+  const profilePrompt = doubts.length === 0 ? nextProfilePrompt(profile, askedBefore) : null;
   const chunks = conversation ? await citedChunks(current, conversation.messages.map((m) => m.citations)) : new Map<string, string>();
   const hasMessages = Boolean(conversation && conversation.messages.length > 0);
 
@@ -84,6 +89,7 @@ export default async function StudentHome() {
       <AutoRefresh active={analyzing} />
       {analyzing && <p className="text-sm text-muted" role="status">{s.doubtCard.analyzing}</p>}
       <DoubtCards doubts={doubts} />
+      {profilePrompt && <ProfilePromptCard key={profilePrompt} prompt={profilePrompt} />}
       <AskForm conversationId={conversation?.id} folderId={current.folderId} autoFocus />
       {conversation && hasMessages && (
         <form action={closeConversationAction.bind(null, conversation.id)}>
