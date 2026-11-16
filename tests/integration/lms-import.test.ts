@@ -95,10 +95,23 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     const hits = await material.searchMaterial(course.id, "curva");
     expect(hits[0]?.fileName).toMatch(/Curva S/);
 
-    // Pedirla de nuevo no duplica: reutiliza la cátedra y no baja lo que ya está.
+    // Sin programa cargado, la IA propone los temas con las lecturas; el docente los revisa y confirma.
+    expect(status?.note).toMatch(/armo una propuesta de temas a partir de las lecturas/);
+    const withCurriculum = await db.course.findUniqueOrThrow({ where: { id: course.id } });
+    expect(withCurriculum.curriculumStatus).toBe("IN_REVIEW");
+    expect(withCurriculum.programText).toMatch(/^Esta materia no tiene programa cargado\./);
+    expect(withCurriculum.programText).toContain("- Módulo 1 Fundamentos de costos · Costos fijos y variables\n  Comienzo: ");
+    const proposed = await db.curriculumItem.findMany({ where: { courseId: course.id } });
+    expect(proposed.length).toBeGreaterThan(0);
+    expect(proposed.every((i) => i.origin === "AI_PROPOSED" && i.status === "PROPOSED")).toBe(true);
+    const usage = await db.aIUsageEvent.count({ where: { courseId: course.id, operation: "curriculum.extract" } });
+    expect(usage).toBe(1);
+
+    // Pedirla de nuevo no duplica: reutiliza la cátedra, no baja lo que ya está y no pisa la currícula en revisión.
     const again = await importByChat(asTeacher(t.id), "creá la materia costos de proyectos");
     expect(again.turn.reply).toMatch(/Ya tenías «Costos de Proyectos»/);
-    expect(again.status).toMatchObject({ status: "DONE", total: 0 });
+    expect(again.status).toMatchObject({ status: "DONE", total: 0, note: null });
+    expect(await db.curriculumItem.count({ where: { courseId: course.id } })).toBe(proposed.length);
     expect(await db.course.count({ where: { teacherId: t.id } })).toBe(1);
     expect(await db.material.count({ where: { courseId: course.id } })).toBe(16);
   });
@@ -129,7 +142,7 @@ describe.skipIf(!TEST_DB)("importación desde el LMS (integración)", () => {
     expect(files.find((m) => m.fileName.startsWith("Módulo 3 · Lectura 1"))).toMatchObject({ fileName: "Módulo 3 · Lectura 1 - Canales y relaciones.pdf", mimeType: "application/pdf", pageCount: 2 });
     // Si el PDF es escaneado, se usa el texto de la página y se avisa.
     expect(files.find((m) => m.fileName.startsWith("Módulo 3 · Lectura 2"))).toMatchObject({ fileName: "Módulo 3 · Lectura 2 - Métricas de tracción.txt", mimeType: "text/plain" });
-    expect(status?.note).toMatch(/^3 lecturas entraron como texto porque no tienen PDF o es escaneado: en esas, la IA cita secciones del texto en vez de páginas del PDF\.$/);
+    expect(status?.note).toMatch(/^3 lecturas entraron como texto porque no tienen PDF o es escaneado: en esas, la IA cita secciones del texto en vez de páginas del PDF\. Como la materia no tiene programa cargado, armo una propuesta de temas/);
   });
 
   it("reemplaza las lecturas que una importación anterior guardó como texto", async () => {

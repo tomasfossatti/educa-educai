@@ -97,3 +97,59 @@ export async function runCurriculumExtraction(courseId: string, teacherId: strin
     });
   }
 }
+
+/** Caracteres del comienzo de cada lectura que se le pasan a la IA, y tope total. */
+const EXCERPT_CHARS = 1500;
+const MAX_MATERIAL_PROGRAM = 50_000;
+
+/** Encabezado del texto armado con el material: deja claro que no es el programa oficial. */
+export const MATERIAL_PROGRAM_HEADER =
+  "Esta materia no tiene programa cargado. Lo que sigue es el material de lectura importado del LMS, en orden, con el comienzo de cada lectura. Proponé los temas a partir de esas lecturas.";
+
+/**
+ * Texto para proponer la currícula cuando no hay programa: una línea por archivo del material
+ * (módulo, lectura y título) con el comienzo de su texto. Devuelve null si no hay material listo.
+ */
+export async function programTextFromMaterial(courseId: string): Promise<string | null> {
+  const materials = await db.material.findMany({
+    where: { courseId, status: "READY" },
+    orderBy: [{ module: "asc" }, { fileName: "asc" }],
+    select: { fileName: true, chunks: { orderBy: [{ page: "asc" }, { position: "asc" }], select: { text: true }, take: 4 } },
+  });
+  if (materials.length === 0) return null;
+  const lines = [MATERIAL_PROGRAM_HEADER, ""];
+  let size = MATERIAL_PROGRAM_HEADER.length;
+  for (const m of materials) {
+    const title = m.fileName.replace(/\.[a-z0-9]+$/i, "");
+    let excerpt = "";
+    for (const c of m.chunks) {
+      if (excerpt.length >= EXCERPT_CHARS) break;
+      excerpt += ` ${c.text}`;
+    }
+    excerpt = excerpt.replace(/\s+/g, " ").trim().slice(0, EXCERPT_CHARS);
+    const block = `- ${title}\n  Comienzo: ${excerpt}`;
+    if (size + block.length > MAX_MATERIAL_PROGRAM) break;
+    lines.push(block);
+    size += block.length;
+  }
+  return lines.join("\n");
+}
+
+/**
+ * Después de traer una materia del LMS: si el docente todavía no cargó el programa, la IA propone los
+ * temas a partir del material importado. Quedan "propuestos" hasta que el docente los revise y confirme,
+ * como con el programa. No toca una currícula en revisión o ya configurada.
+ */
+export async function proposeCurriculumFromMaterial(courseId: string, teacherId: string): Promise<boolean> {
+  const course = await db.course.findUnique({ where: { id: courseId }, select: { teacherId: true, curriculumStatus: true } });
+  if (!course || course.teacherId !== teacherId) return false;
+  if (course.curriculumStatus !== "NOT_STARTED" && course.curriculumStatus !== "FAILED") return false;
+  const programText = await programTextFromMaterial(courseId);
+  if (!programText) return false;
+  await db.course.update({
+    where: { id: courseId },
+    data: { curriculumStatus: "EXTRACTING", curriculumError: null, programText, programFileName: null },
+  });
+  await runCurriculumExtraction(courseId, teacherId, null);
+  return true;
+}

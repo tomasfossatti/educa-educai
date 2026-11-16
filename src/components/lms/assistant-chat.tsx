@@ -46,7 +46,7 @@ export function LmsAssistantChat({ welcome }: { welcome: string }) {
           ? t.progress(status.done + status.failed, status.total)
           : status.status === "DONE"
             ? status.total === 0
-              ? t.upToDate(status.name)
+              ? `${t.upToDate(status.name)}${status.note ? ` ${status.note}` : ""}`
               : `${t.done(status.name, status.done, status.modules, status.failed)}${status.note ? ` ${status.note}` : ""}`
             : t.failed(status.name, status.error ?? "");
       setEntries((list) => list.map((e) => (e.id === tracking.entryId ? { ...e, content: `${e.content.split("\n")[0]}\n${line}`, href: status.href } : e)));

@@ -70,6 +70,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
+- 2026-11-16 (continuación) · La importación del LMS propone los temas con las lecturas cuando la cátedra no tiene programa (pedido de Tomás: «Currícula sin cargar» después de traer «Costos de proyectos»). Quedan en revisión para que el docente los confirme. Gasto de IA: 0 USD en los tests (proveedor guionado).
 - 2026-11-16 (continuación) · Tomás confirmó en staging «Costos de proyectos» con 12 PDF y 4 textos, todos con título. Los archivos sin páginas (TXT, MD, DOCX) citan "sección" en vez de "pág." en toda la interfaz y en lo que recibe la IA. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Lecturas de Siglo 21 con su PDF. La prueba real de Tomás bajó las 16 lecturas de «Costos de proyectos» como texto: las lecturas de meca no eran Articulate Rise. Se verificó contra las 16 lecturas reales (contenido completo y en el orden correcto; los 4 PDF del módulo 1 son escaneados). Ahora se baja el PDF si tiene texto, con el título real, se avisa cuando entra como texto y la nueva importación reemplaza la anterior. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Extensión de navegador para Canvas sin tokens: vinculación por código de un solo uso, sesión al día y prueba de punta a punta con la extensión real cargada en Chromium. Gasto de IA: 0 USD.

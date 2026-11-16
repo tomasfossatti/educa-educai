@@ -1,12 +1,14 @@
 import "server-only";
 import type { LmsProvider } from "@prisma/client";
 import { looksLikeUrl, matchCourse, normalizeName, planImport } from "@/domain/lms";
+import { isAIConfigured } from "@/server/ai";
 import { AccessDenied, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { clientForConnection, createLmsClient, LmsError, normalizeBaseUrl, type LmsClient, type LmsCourse, type LmsItem } from "@/server/lms";
 import { encryptSecret } from "@/server/lms/crypto";
 import { MoodleClient } from "@/server/lms/moodle";
 import { createCourseForTeacher } from "./courses";
+import { proposeCurriculumFromMaterial } from "./curriculum";
 import { ingestMaterial } from "./material";
 
 /**
@@ -220,20 +222,38 @@ export async function runLmsImport(importId: string, factory?: ClientFactory): P
     const final = await db.lmsImport.findUniqueOrThrow({ where: { id: job.id } });
     const nothing = final.total === 0 && already.size === 0;
     const allFailed = final.total > 0 && final.done === 0;
+    // En la cátedra de un docente sin programa cargado, la IA propone los temas con el material traído.
+    const proposeTopics = !nothing && !allFailed && job.courseId && isAIConfigured() ? await curriculumPending(job.courseId) : false;
+    const notices = [readingsNotice(asText), proposeTopics ? CURRICULUM_NOTICE : null].filter(Boolean).join(" ");
     await db.lmsImport.update({
       where: { id: job.id },
       data: {
         status: nothing || allFailed ? "FAILED" : "DONE",
-        // Con la importación terminada bien, `error` guarda un aviso (lecturas que entraron como texto).
-        error: nothing ? "La materia no tiene archivos ni lecturas que Educai pueda leer." : allFailed ? "No se pudo bajar ningún archivo de la materia." : readingsNotice(asText),
+        // Con la importación terminada bien, `error` guarda los avisos (lecturas como texto, temas propuestos).
+        error: nothing ? "La materia no tiene archivos ni lecturas que Educai pueda leer." : allFailed ? "No se pudo bajar ningún archivo de la materia." : notices || null,
         finishedAt: new Date(),
       },
     });
+    if (proposeTopics && job.courseId) {
+      // La importación ya quedó lista: si la propuesta falla, la materia queda con la currícula en error
+      // y el docente la puede pedir de nuevo desde «Currícula».
+      await proposeCurriculumFromMaterial(job.courseId, job.userId).catch((error) =>
+        console.error("[lms] propuesta de temas fallida", error instanceof Error ? error.message : error),
+      );
+    }
   } catch (error) {
     const message = error instanceof LmsError || error instanceof LmsServiceError ? error.message : "No se pudo completar la importación.";
     if (!(error instanceof LmsError)) console.error("[lms] importación fallida", error instanceof Error ? error.message : error);
     await db.lmsImport.update({ where: { id: job.id }, data: { status: "FAILED", error: message, finishedAt: new Date() } });
   }
+}
+
+const CURRICULUM_NOTICE =
+  "Como la materia no tiene programa cargado, armo una propuesta de temas a partir de las lecturas: la vas a ver en «Currícula» en un minuto para revisarla y confirmarla.";
+
+async function curriculumPending(courseId: string): Promise<boolean> {
+  const course = await db.course.findUnique({ where: { id: courseId }, select: { curriculumStatus: true } });
+  return course?.curriculumStatus === "NOT_STARTED" || course?.curriculumStatus === "FAILED";
 }
 
 /**
