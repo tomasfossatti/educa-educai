@@ -1,6 +1,7 @@
 "use client";
 
-import { Field, Input, Textarea } from "@/components/ui/field";
+import { ImprovableTextarea } from "@/components/student/improvable-textarea";
+import { Field, Input } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
 import { TEXT } from "@/lib/texts";
 import { deleteAccountAction, updateContextAction } from "@/server/actions/student";
@@ -33,7 +34,7 @@ export function ContextForm({ defaults, focus }: { defaults: Defaults; focus: "W
       </fieldset>
       {FIELDS.map((f) => (
         <Field key={f.name} label={f.label} htmlFor={f.name} hint={f.hint || undefined} optional={!f.required} error={state?.fieldErrors?.[f.name]}>
-          <Textarea id={f.name} name={f.name} defaultValue={defaults[f.name]} required={f.required} maxLength={1500} className="min-h-16" />
+          <ImprovableTextarea field={f.name} id={f.name} name={f.name} defaultValue={defaults[f.name]} required={f.required} maxLength={1500} className="min-h-16" />
         </Field>
       ))}
       <PendingButton pending={pending}>Guardar cambios</PendingButton>

@@ -16,6 +16,9 @@ import { EVENT, track } from "@/server/events";
 import { setAnalysisConsent } from "@/server/services/consent";
 import { ensureStudentFolders } from "@/server/services/folders";
 import { deleteExperienceCascade, deleteStudentAccount } from "@/server/services/privacy";
+import { ImproveTextError, improveProfileText } from "@/server/services/profile-writing";
+import { AIError } from "@/server/ai";
+import { budgetResetLabel } from "@/server/ai/budget";
 
 
 const declaredField = z.string().max(1500, "Máximo 1500 caracteres.").optional();
@@ -440,4 +443,25 @@ export async function deleteAccountAction(_prev: ActionState | null, formData: F
   await deleteStudentAccount(user.id, user.email);
   await destroySession();
   redirect("/login?deleted=1");
+}
+
+/** Lápiz mágico: sugerencia de redacción para un campo del perfil. El estudiante decide si la usa. */
+export async function improveTextAction(
+  field: string,
+  value: string,
+  context: { career?: string; projectDescription?: string; currentContext?: string } = {},
+): Promise<{ suggestion: string; tip: string | null } | { error: string }> {
+  const { user } = await requireStudent({ allowIncompleteOnboarding: true });
+  const str = (v: unknown) => (typeof v === "string" ? v.slice(0, 600) : undefined);
+  try {
+    return await improveProfileText({ id: user.id, role: user.role }, field, value, {
+      career: str(context.career),
+      projectDescription: str(context.projectDescription),
+      currentContext: str(context.currentContext),
+    });
+  } catch (error) {
+    if (error instanceof ImproveTextError) return { error: error.message };
+    if (error instanceof AIError) return { error: error.kind === "budget_exceeded" ? TEXT.budget.exceeded(budgetResetLabel()) : TEXT.improve.unavailable };
+    throw error;
+  }
 }

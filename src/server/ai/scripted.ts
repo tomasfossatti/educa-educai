@@ -248,6 +248,12 @@ function slidesGenerate(message: string) {
   };
 }
 
+/** Lápiz mágico: devuelve el texto del estudiante con una marca, sin inventar nada. */
+function profileImprove(message: string) {
+  const original = /TEXTO DEL ESTUDIANTE: «([\s\S]*)»/.exec(message)?.[1]?.trim() ?? "";
+  return { suggestion: `${original} (redacción mejorada)`, tip: original.length < 15 ? "¿Podés contar un poco más?" : null };
+}
+
 const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: string) => unknown>> = {
   "curriculum.extract": curriculumExtract,
   "interpret.observe": observe,
@@ -260,6 +266,7 @@ const HANDLERS: Partial<Record<StructuredCall<unknown>["operation"], (message: s
   "context.facts": contextFacts,
   "context.summary": contextSummary,
   "slides.generate": slidesGenerate,
+  "profile.improve": profileImprove,
 };
 
 /**

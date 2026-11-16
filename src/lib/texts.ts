@@ -220,6 +220,15 @@ export const TEXT = {
     missing: "Elegí un archivo .txt o pegá el texto.",
     onlyTxt: "Solo se aceptan archivos .txt.",
   },
+  improve: {
+    button: "Mejorar la redacción con IA",
+    needsText: "Escribí algo primero: el lápiz mejora y desarrolla lo que escribiste, no escribe desde cero.",
+    working: "Mejorando…",
+    suggestion: "Sugerencia",
+    use: "Usar",
+    discard: "Descartar",
+    unavailable: "No se pudo mejorar el texto ahora. Probá de nuevo en unos minutos.",
+  },
   myData: {
     title: "Descargar mis datos",
     description: "Una copia de todo lo que Educai guarda sobre vos, en un archivo JSON: perfil, carpetas, conversaciones, dudas, conclusiones, quizzes y quién abrió tu ficha.",

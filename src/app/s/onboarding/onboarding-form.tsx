@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox, Field, Input, Textarea } from "@/components/ui/field";
+import { ImprovableTextarea } from "@/components/student/improvable-textarea";
+import { Checkbox, Field, Input } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
 import { Notice } from "@/components/ui/layout";
 import { cn } from "@/lib/cn";
@@ -125,10 +126,10 @@ export function OnboardingForm({
           </Field>
         </div>
         <Field label={TEXT.profile.project} htmlFor="projectDescription" hint={TEXT.profile.projectHint} error={state?.fieldErrors?.projectDescription}>
-          <Textarea id="projectDescription" name="projectDescription" required minLength={3} maxLength={600} className="min-h-20" />
+          <ImprovableTextarea field="projectDescription" id="projectDescription" name="projectDescription" required minLength={3} maxLength={600} className="min-h-20" />
         </Field>
         <Field label={TEXT.profile.work} htmlFor="currentContext" hint={TEXT.profile.workHint} optional error={state?.fieldErrors?.currentContext}>
-          <Textarea id="currentContext" name="currentContext" maxLength={1500} placeholder={TEXT.profile.workPlaceholder} />
+          <ImprovableTextarea field="currentContext" id="currentContext" name="currentContext" maxLength={1500} placeholder={TEXT.profile.workPlaceholder} />
         </Field>
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium text-ink">{TEXT.profile.focusQuestion}</legend>
@@ -146,7 +147,7 @@ export function OnboardingForm({
       <section data-step="2" className={panel(2)}>
         <h2 className="text-lg font-semibold">Intereses y objetivos</h2>
         <Field label="¿Qué te interesa?" htmlFor="interests" hint="Problemas, industrias, disciplinas, tipos de actividad." optional error={state?.fieldErrors?.interests}>
-          <Textarea id="interests" name="interests" maxLength={1500} />
+          <ImprovableTextarea field="interests" id="interests" name="interests" maxLength={1500} />
         </Field>
         <Field
           label="¿Qué querés lograr?"
@@ -154,7 +155,7 @@ export function OnboardingForm({
           hint="Capacidades que querés desarrollar, roles o proyectos a futuro."
           error={state?.fieldErrors?.goals}
         >
-          <Textarea id="goals" name="goals" required minLength={3} maxLength={1500} />
+          <ImprovableTextarea field="goals" id="goals" name="goals" required minLength={3} maxLength={1500} />
         </Field>
       </section>
 
@@ -166,13 +167,13 @@ export function OnboardingForm({
           </p>
         </div>
         <Field label="¿En qué te sentís fuerte?" htmlFor="strengths" optional error={state?.fieldErrors?.strengths}>
-          <Textarea id="strengths" name="strengths" maxLength={1500} />
+          <ImprovableTextarea field="strengths" id="strengths" name="strengths" maxLength={1500} />
         </Field>
         <Field label="¿Qué te cuesta?" htmlFor="difficulties" optional error={state?.fieldErrors?.difficulties}>
-          <Textarea id="difficulties" name="difficulties" maxLength={1500} />
+          <ImprovableTextarea field="difficulties" id="difficulties" name="difficulties" maxLength={1500} />
         </Field>
         <Field label="¿Cómo preferís trabajar?" htmlFor="workPreferences" optional error={state?.fieldErrors?.workPreferences}>
-          <Textarea id="workPreferences" name="workPreferences" maxLength={1500} className="min-h-16" />
+          <ImprovableTextarea field="workPreferences" id="workPreferences" name="workPreferences" maxLength={1500} className="min-h-16" />
         </Field>
       </section>
 

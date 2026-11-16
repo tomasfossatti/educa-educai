@@ -17,7 +17,8 @@ export type AIOperation =
   | "quiz.generate"
   | "context.facts"
   | "context.summary"
-  | "slides.generate";
+  | "slides.generate"
+  | "profile.improve";
 
 export type Effort = "low" | "medium" | "high";
 
