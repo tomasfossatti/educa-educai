@@ -1,4 +1,6 @@
 import "server-only";
+import { TEXT } from "@/lib/texts";
+import { StudentInputError } from "@/server/services/student-errors";
 import { z } from "zod";
 import { generateStructured } from "@/server/ai";
 import { assertStudentBudget, estimateUploadAnalysisUsd } from "@/server/ai/budget";
@@ -80,7 +82,7 @@ export const MAX_ANCHOR_CHARS = 2000;
 export async function startThread(viewer: Viewer, conversationId: string, anchor: string) {
   const conversation = await ownedConversation(viewer, conversationId);
   const text = anchor.replace(/\s+/g, " ").trim();
-  if (text.length < 3) throw new Error("Seleccioná un fragmento un poco más largo.");
+  if (text.length < 3) throw new StudentInputError(TEXT.thread.tooShort);
   return db.conversationThread.create({ data: { conversationId: conversation.id, anchor: text.slice(0, MAX_ANCHOR_CHARS) } });
 }
 
@@ -92,7 +94,7 @@ export async function startThread(viewer: Viewer, conversationId: string, anchor
 export async function askInFolder(viewer: Viewer, conversationId: string, question: string, threadId?: string) {
   const conversation = await ownedConversation(viewer, conversationId);
   const text = question.trim();
-  if (!text) throw new Error("La pregunta está vacía.");
+  if (!text) throw new StudentInputError(TEXT.chat.emptyQuestion);
   const thread = threadId ? await db.conversationThread.findFirst({ where: { id: threadId, conversationId: conversation.id } }) : null;
   if (threadId && !thread) throw new AccessDenied();
 
@@ -154,9 +156,9 @@ export function parseExternalConversation(raw: string): { role: "STUDENT" | "TUT
 /** Sube una conversación de otra IA (.txt o texto pegado) a una carpeta. Se procesa al recibirla. */
 export async function uploadExternalConversation(viewer: Viewer, folderId: string, input: { title?: string; text: string }) {
   const folder = await assertFolderOwner(viewer, folderId);
-  if (new TextEncoder().encode(input.text).byteLength > MAX_UPLOAD_BYTES) throw new Error("La conversación supera los 2 MB.");
+  if (new TextEncoder().encode(input.text).byteLength > MAX_UPLOAD_BYTES) throw new StudentInputError(TEXT.upload.tooBig);
   const messages = parseExternalConversation(input.text);
-  if (messages.length === 0) throw new Error("La conversación está vacía.");
+  if (messages.length === 0) throw new StudentInputError(TEXT.upload.empty);
   // Una subida se analiza entera al recibirla: si ese análisis pasaría el tope semanal, no se acepta.
   if (folder.courseId) {
     const profile = await db.studentProfile.findUnique({ where: { userId: viewer.id }, select: { consentAnalysisAt: true } });

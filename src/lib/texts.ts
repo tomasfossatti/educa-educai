@@ -10,6 +10,9 @@ function cite(fileName: string, n: number): string {
 }
 
 export const TEXT = {
+  common: {
+    unexpected: "Algo salió mal y no se guardó. Probá de nuevo en un rato.",
+  },
   curriculum: {
     fromMaterial: {
       title: "Proponer los temas con el material",
@@ -157,6 +160,7 @@ export const TEXT = {
     removeConfirm: "Se borra este dato del contexto. No se puede deshacer.",
     trace: "Historial de la carpeta",
     noConsent: "No diste consentimiento de análisis: la IA no guarda contexto sobre vos.",
+    emptyText: "El texto no puede quedar vacío.",
   },
   quiz: {
     practiceTitle: "Practicar un tema",
@@ -231,6 +235,7 @@ export const TEXT = {
     list: "Hilos sobre fragmentos",
     placeholder: "¿Qué querés saber de este fragmento?",
     showSource: "Ver fragmento",
+    tooShort: "Seleccioná un fragmento un poco más largo.",
   },
   chat: {
     placeholder: "Escribí tu pregunta…",
@@ -258,6 +263,9 @@ export const TEXT = {
     done: "Listo: la conversación quedó en la carpeta.",
     missing: "Elegí un archivo .txt o pegá el texto.",
     onlyTxt: "Solo se aceptan archivos .txt.",
+    tooBig: "La conversación supera los 2 MB.",
+    tooBigField: "Máximo 2 MB.",
+    empty: "La conversación está vacía.",
   },
   improve: {
     button: "Mejorar la redacción con IA",

@@ -12,6 +12,7 @@ import { respondToSignal } from "@/server/services/doubts";
 import { askInFolder, MAX_UPLOAD_BYTES, startFolderConversation, startThread, uploadExternalConversation } from "@/server/services/folder-chat";
 import { deleteContextItem, editContextItem } from "@/server/services/folder-context";
 import { deleteExperienceCascade } from "@/server/services/privacy";
+import { StudentInputError, studentErrorMessage } from "@/server/services/student-errors";
 import { createQuiz, QuizError, submitQuiz } from "@/server/services/quiz";
 
 async function viewer() {
@@ -44,7 +45,7 @@ export async function askInFolderAction(_prev: ActionState | null, formData: For
   try {
     await askInFolder(v, conversationId, question.slice(0, 4000), threadId);
   } catch (error) {
-    if (error instanceof AIError) return { error: aiErrorMessage(error) };
+    if (error instanceof AIError || error instanceof StudentInputError) return { error: studentErrorMessage(error, "folder.ask") };
     denyAsNotFound(error);
   }
   refresh();
@@ -58,7 +59,7 @@ export async function uploadConversationAction(_prev: ActionState | null, formDa
   let body = text(formData, "text");
   if (file instanceof File && file.size > 0) {
     if (!file.name.toLowerCase().endsWith(".txt")) return { error: TEXT.upload.onlyTxt, fieldErrors: { file: TEXT.upload.onlyTxt } };
-    if (file.size > MAX_UPLOAD_BYTES) return { error: "La conversación supera los 2 MB.", fieldErrors: { file: "Máximo 2 MB." } };
+    if (file.size > MAX_UPLOAD_BYTES) return { error: TEXT.upload.tooBig, fieldErrors: { file: TEXT.upload.tooBigField } };
     body = await file.text();
   }
   if (!body.trim()) return { error: TEXT.upload.missing };
@@ -66,8 +67,7 @@ export async function uploadConversationAction(_prev: ActionState | null, formDa
     await uploadExternalConversation(v, folderId, { title: text(formData, "title"), text: body });
   } catch (error) {
     if (error instanceof AccessDenied) notFound();
-    if (error instanceof AIError && error.kind === "budget_exceeded") return { error: TEXT.budget.uploadTooLarge(budgetResetLabel()) };
-    return { error: error instanceof Error ? error.message : String(error) };
+    return { error: studentErrorMessage(error, "upload", { budgetMessage: TEXT.budget.uploadTooLarge }) };
   }
   refresh();
   return { ok: true, message: TEXT.upload.done };
@@ -125,7 +125,7 @@ export async function editContextAction(_prev: ActionState | null, formData: For
     await editContextItem(v, text(formData, "contextId"), text(formData, "content"));
   } catch (error) {
     if (error instanceof AccessDenied) notFound();
-    return { error: error instanceof Error ? error.message : String(error) };
+    return { error: studentErrorMessage(error, "context.edit") };
   }
   refresh();
   return { ok: true };
@@ -146,7 +146,7 @@ export async function startThreadAction(_prev: ActionState | null, formData: For
     threadId = (await startThread(v, conversationId, text(formData, "anchor"))).id;
   } catch (error) {
     if (error instanceof AccessDenied) notFound();
-    return { error: error instanceof Error ? error.message : String(error) };
+    return { error: studentErrorMessage(error, "thread.start") };
   }
   redirect(`/s/folders/${folderId}/c/${conversationId}?hilo=${threadId}`);
 }
