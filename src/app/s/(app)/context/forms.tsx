@@ -2,10 +2,11 @@
 
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
+import { TEXT } from "@/lib/texts";
 import { deleteAccountAction, updateContextAction } from "@/server/actions/student";
 
 const FIELDS = [
-  { name: "currentContext", label: "Contexto actual", hint: "Trabajo, organización, rol, proyectos.", required: true },
+  { name: "currentContext", label: TEXT.profile.work, hint: TEXT.profile.workHint, required: false },
   { name: "interests", label: "Intereses", hint: "Problemas, industrias, disciplinas, actividades.", required: false },
   { name: "goals", label: "Objetivos", hint: "Qué querés desarrollar o lograr.", required: true },
   { name: "strengths", label: "Fortalezas que percibís", hint: "", required: false },
@@ -15,11 +16,21 @@ const FIELDS = [
 
 type Defaults = Record<(typeof FIELDS)[number]["name"], string>;
 
-export function ContextForm({ defaults }: { defaults: Defaults }) {
+export function ContextForm({ defaults, focus }: { defaults: Defaults; focus: "WORK" | "PROJECT" }) {
   const { state, pending, onSubmit } = useActionForm(updateContextAction);
   return (
     <form method="post" onSubmit={onSubmit} className="space-y-4">
       <FormMessage state={state} />
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium text-ink">{TEXT.profile.focusQuestion}</legend>
+        <p className="text-xs text-muted">{TEXT.profile.focusHint}</p>
+        {(["PROJECT", "WORK"] as const).map((value) => (
+          <label key={value} className="flex items-center gap-2 text-sm">
+            <input type="radio" name="personalizationFocus" value={value} defaultChecked={focus === value} required /> {TEXT.profile.focus[value]}
+          </label>
+        ))}
+        {state?.fieldErrors?.personalizationFocus && <p className="text-xs text-attention">{state.fieldErrors.personalizationFocus}</p>}
+      </fieldset>
       {FIELDS.map((f) => (
         <Field key={f.name} label={f.label} htmlFor={f.name} hint={f.hint || undefined} optional={!f.required} error={state?.fieldErrors?.[f.name]}>
           <Textarea id={f.name} name={f.name} defaultValue={defaults[f.name]} required={f.required} maxLength={1500} className="min-h-16" />

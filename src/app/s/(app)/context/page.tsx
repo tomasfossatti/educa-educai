@@ -30,6 +30,7 @@ export default async function ContextPage() {
           action={<LayerTag layer="declared" />}
         >
           <ContextForm
+            focus={profile.personalizationFocus}
             defaults={{
               currentContext: profile.declaredCurrentContext ?? "",
               interests: profile.declaredInterests ?? "",

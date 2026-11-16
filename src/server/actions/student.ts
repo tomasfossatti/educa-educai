@@ -21,7 +21,7 @@ import { deleteExperienceCascade, deleteStudentAccount } from "@/server/services
 const declaredField = z.string().max(1500, "Máximo 1500 caracteres.").optional();
 
 const contextSchema = z.object({
-  currentContext: z.string().min(3, "Contanos brevemente en qué estás hoy.").max(1500),
+  currentContext: declaredField,
   interests: declaredField,
   goals: z.string().min(3, "Contanos al menos un objetivo.").max(1500),
   strengths: declaredField,
@@ -34,6 +34,17 @@ const profileSchema = z.object({
   studyYear: z.coerce.number().int().min(1).max(10).optional(),
   projectDescription: z.string().min(3, "Contanos brevemente tu proyecto.").max(600),
 });
+
+/**
+ * Foco de personalización (trabajo o proyecto). Obligatorio y sin valor por defecto en el formulario;
+ * si el estudiante elige el trabajo, el trabajo tiene que estar escrito.
+ */
+function readFocus(formData: FormData, currentContext: string | undefined): { focus: "WORK" | "PROJECT" } | { error: string; field: string } {
+  const value = text(formData, "personalizationFocus");
+  if (value !== "WORK" && value !== "PROJECT") return { error: TEXT.profile.focusRequired, field: "personalizationFocus" };
+  if (value === "WORK" && (currentContext?.trim().length ?? 0) < 3) return { error: TEXT.profile.workRequiredForFocus, field: "currentContext" };
+  return { focus: value };
+}
 
 function readProfile(formData: FormData) {
   return {
@@ -56,7 +67,7 @@ function readContext(formData: FormData) {
 
 function contextData(v: z.infer<typeof contextSchema>) {
   return {
-    declaredCurrentContext: v.currentContext,
+    declaredCurrentContext: v.currentContext ?? null,
     declaredInterests: v.interests ?? null,
     declaredGoals: v.goals,
     declaredStrengths: v.strengths ?? null,
@@ -89,13 +100,15 @@ export async function completeOnboardingAction(_prev: ActionState | null, formDa
   const parsed = contextSchema.safeParse(readContext(formData));
   const profileParsed = profileSchema.safeParse(readProfile(formData));
   const consentChoice = text(formData, "consent");
-  if (!parsed.success || !profileParsed.success || (consentChoice !== "yes" && consentChoice !== "no")) {
+  const focus = readFocus(formData, parsed.success ? parsed.data.currentContext : undefined);
+  if (!parsed.success || !profileParsed.success || (consentChoice !== "yes" && consentChoice !== "no") || "error" in focus) {
     return {
       error: "Revisá los campos marcados.",
       fieldErrors: {
         ...(parsed.success ? {} : fieldErrorsFrom(parsed.error)),
         ...(profileParsed.success ? {} : fieldErrorsFrom(profileParsed.error)),
         ...(consentChoice === "yes" || consentChoice === "no" ? {} : { consent: TEXT.consent.required }),
+        ...("error" in focus ? { [focus.field]: focus.error } : {}),
       },
     };
   }
@@ -118,6 +131,7 @@ export async function completeOnboardingAction(_prev: ActionState | null, formDa
       career: profileParsed.data.career,
       studyYear: profileParsed.data.studyYear ?? null,
       projectDescription: profileParsed.data.projectDescription,
+      personalizationFocus: focus.focus,
       consentAnalysisAt: consent ? new Date() : null,
       consentVersion: consent ? CONSENT_VERSION : null,
       shareContextWithTeachers: shareContext,
@@ -140,7 +154,9 @@ export async function updateContextAction(_prev: ActionState | null, formData: F
   const { user } = await requireStudent();
   const parsed = contextSchema.safeParse(readContext(formData));
   if (!parsed.success) return { error: "Revisá los campos marcados.", fieldErrors: fieldErrorsFrom(parsed.error) };
-  await db.studentProfile.update({ where: { userId: user.id }, data: contextData(parsed.data) });
+  const focus = readFocus(formData, parsed.data.currentContext);
+  if ("error" in focus) return { error: focus.error, fieldErrors: { [focus.field]: focus.error } };
+  await db.studentProfile.update({ where: { userId: user.id }, data: { ...contextData(parsed.data), personalizationFocus: focus.focus } });
   refresh();
   return { ok: true, message: "Contexto actualizado." };
 }

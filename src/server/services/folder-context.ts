@@ -4,6 +4,7 @@ import { planFactsUpdate, summaryIsStale, type ActiveFact } from "@/domain/folde
 import { generateStructured } from "@/server/ai";
 import { AccessDenied, assertFolderOwner, hasActiveConsent, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { focusText, personalizationPrompt } from "@/domain/personalization";
 
 /**
  * Contexto de cada carpeta en tres capas (modelo de DeepTutor, reimplementado):
@@ -124,14 +125,18 @@ export async function refreshSummaryIfStale(studentId: string, now: Date = new D
   ]);
   if (!summaryIsStale(summary, facts[0]?.createdAt ?? null, now)) return false;
 
-  const profile = await db.studentProfile.findUnique({ where: { userId: studentId }, select: { career: true, studyYear: true, projectDescription: true } });
+  const profile = await db.studentProfile.findUnique({
+    where: { userId: studentId },
+    select: { career: true, studyYear: true, projectDescription: true, declaredCurrentContext: true, personalizationFocus: true },
+  });
+  const focus = profile ? focusText(profile) : { focus: "PROJECT" as const, text: null };
   const output = await generateStructured({
     operation: "context.summary",
     system: SUMMARY_SYSTEM,
     messages: [
       {
         role: "user",
-        content: `PERFIL DECLARADO: carrera ${profile?.career ?? "—"}, año ${profile?.studyYear ?? "—"}, proyecto: ${profile?.projectDescription ?? "—"}\nHECHOS:\n${facts.map((f) => `- ${f.content}`).join("\n")}`,
+        content: `PERFIL DECLARADO: carrera ${profile?.career ?? "—"}, año ${profile?.studyYear ?? "—"}, foco para ejemplos (${focus.focus === "WORK" ? "lo que hace hoy" : "proyecto personal"}): ${focus.text ?? "—"}\nHECHOS:\n${facts.map((f) => `- ${f.content}`).join("\n")}`,
       },
     ],
     schema: summarySchema,
@@ -146,13 +151,17 @@ export async function refreshSummaryIfStale(studentId: string, now: Date = new D
 
 /** Lo que entra al prompt de una carpeta: resumen cruzado y hechos activos de esa carpeta. */
 export async function contextForPrompt(folderId: string, studentId: string): Promise<string> {
-  const [summary, facts] = await Promise.all([
+  const [summary, facts, profile] = await Promise.all([
     db.folderContext.findFirst({ where: { folder: { studentId, kind: "PROJECT" }, layer: "SUMMARY", archivedAt: null }, orderBy: { createdAt: "desc" }, select: { content: true } }),
     db.folderContext.findMany({ where: { folderId, layer: "FACTS", archivedAt: null }, orderBy: { createdAt: "asc" }, take: 30, select: { content: true } }),
+    db.studentProfile.findUnique({ where: { userId: studentId }, select: { personalizationFocus: true, declaredCurrentContext: true, projectDescription: true } }),
   ]);
-  if (!summary && facts.length === 0) return "";
+  // El foco elegido manda sobre el resumen: es la única fuente de ejemplos.
+  const focusLine = profile ? personalizationPrompt(profile) : "";
+  if (!summary && facts.length === 0 && !focusLine) return "";
   return [
     "CONTEXTO DEL ESTUDIANTE (corregible por él; usalo para adaptar ejemplos, no lo cites como fuente):",
+    focusLine,
     summary ? `Resumen: ${summary.content}` : "",
     facts.length ? `Hechos de esta carpeta:\n${facts.map((f) => `- ${f.content}`).join("\n")}` : "",
   ]

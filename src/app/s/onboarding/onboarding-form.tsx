@@ -17,6 +17,7 @@ const FIELD_STEP: Record<string, number> = {
   studyYear: 1,
   projectDescription: 1,
   currentContext: 1,
+  personalizationFocus: 1,
   interests: 2,
   goals: 2,
   strengths: 3,
@@ -115,14 +116,6 @@ export function OnboardingForm({
           <h2 className="text-lg font-semibold">Tu contexto actual</h2>
           <p className="mt-1 text-sm text-ink-2">Sirve para que los ejemplos tengan relación con lo que vivís. No es una evaluación.</p>
         </div>
-        <Field
-          label="¿En qué estás hoy?"
-          htmlFor="currentContext"
-          hint="Trabajo, organización, industria, rol, proyectos o emprendimientos."
-          error={state?.fieldErrors?.currentContext}
-        >
-          <Textarea id="currentContext" name="currentContext" required minLength={3} maxLength={1500} placeholder="Ej.: Trabajo en el área comercial de un restaurante y estoy armando un emprendimiento de catering." />
-        </Field>
         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
           <Field label={TEXT.profile.career} htmlFor="career" error={state?.fieldErrors?.career}>
             <Input id="career" name="career" required minLength={2} maxLength={120} placeholder={TEXT.profile.careerPlaceholder} />
@@ -134,6 +127,20 @@ export function OnboardingForm({
         <Field label={TEXT.profile.project} htmlFor="projectDescription" hint={TEXT.profile.projectHint} error={state?.fieldErrors?.projectDescription}>
           <Textarea id="projectDescription" name="projectDescription" required minLength={3} maxLength={600} className="min-h-20" />
         </Field>
+        <Field label={TEXT.profile.work} htmlFor="currentContext" hint={TEXT.profile.workHint} optional error={state?.fieldErrors?.currentContext}>
+          <Textarea id="currentContext" name="currentContext" maxLength={1500} placeholder={TEXT.profile.workPlaceholder} />
+        </Field>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-ink">{TEXT.profile.focusQuestion}</legend>
+          <p className="text-xs text-muted">{TEXT.profile.focusHint}</p>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name="personalizationFocus" value="PROJECT" required /> {TEXT.profile.focus.PROJECT}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name="personalizationFocus" value="WORK" required /> {TEXT.profile.focus.WORK}
+          </label>
+          {state?.fieldErrors?.personalizationFocus && <p className="text-xs text-attention">{state.fieldErrors.personalizationFocus}</p>}
+        </fieldset>
       </section>
 
       <section data-step="2" className={panel(2)}>

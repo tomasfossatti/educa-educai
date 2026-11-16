@@ -45,6 +45,7 @@ test("staging: materia con material, estudiante con consentimiento y respuesta c
   await student.fill("#currentContext", "Estoy armando un emprendimiento de viandas.");
   await student.fill("#career", "Administración");
   await student.fill("#projectDescription", "Viandas saludables para oficinas.");
+  await student.locator('input[name="personalizationFocus"][value="PROJECT"]').check();
   await student.getByRole("button", { name: "Continuar" }).click();
   await student.fill("#goals", "Validar si hay demanda.");
   await student.getByRole("button", { name: "Continuar" }).click();

@@ -51,7 +51,7 @@ async function buildStudentFile(studentId: string, courseId: string) {
   const [profile, topics, evidence, conversations, mastery] = await Promise.all([
     db.studentProfile.findUniqueOrThrow({
       where: { userId: studentId },
-      select: { userId: true, career: true, studyYear: true, projectDescription: true, user: { select: { name: true } } },
+      select: { userId: true, career: true, studyYear: true, projectDescription: true, personalizationFocus: true, user: { select: { name: true } } },
     }),
     db.curriculumItem.findMany({
       where: { courseId, status: "ACCEPTED" },
@@ -90,6 +90,7 @@ async function buildStudentFile(studentId: string, courseId: string) {
       career: profile.career,
       studyYear: profile.studyYear,
       projectDescription: profile.projectDescription,
+      personalizationFocus: profile.personalizationFocus,
     },
     topics: topics.map((t) => ({
       id: t.id,

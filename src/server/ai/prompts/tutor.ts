@@ -66,7 +66,7 @@ export function buildTutorSystem(ctx: TutorContext): string {
   }
   if (ctx.declaredContext) {
     const parts = [
-      ctx.declaredContext.currentContext && `contexto actual: ${ctx.declaredContext.currentContext}`,
+      ctx.declaredContext.currentContext && `foco para ejemplos (elegido por el estudiante): ${ctx.declaredContext.currentContext}`,
       ctx.declaredContext.interests && `intereses: ${ctx.declaredContext.interests}`,
       ctx.declaredContext.goals && `objetivos: ${ctx.declaredContext.goals}`,
     ].filter(Boolean);
