@@ -160,6 +160,42 @@ export function embeddedReadings(pageBody: string, allowedHosts: string[], allow
   return out.sort((a, b) => a.module - b.module || a.reading - b.reading);
 }
 
+/**
+ * Lectura en HTML común (el formato de las lecturas de Siglo 21 en meca.ues21.edu.ar): el título está
+ * en el cabezal ("titulomateria") y el PDF de descarga es un enlace al lado de la página, con el ícono
+ * de PDF. Solo se aceptan PDF del mismo servidor: los de la bibliografía apuntan a otros sitios.
+ */
+export function readingPage(html: string, pageUrl: string): { title: string | null; pdfUrl: string | null } {
+  const rawTitle =
+    /class="[^"]*\btitulomateria\b[^"]*"[^>]*>([\s\S]*?)<\/(?:div|h\d|span|p)>/i.exec(html)?.[1] ??
+    /<title>([\s\S]*?)<\/title>/i.exec(html)?.[1] ??
+    /<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html)?.[1] ??
+    "";
+  const title = htmlToText(rawTitle).replace(/\s+/g, " ").trim().slice(0, 120) || null;
+
+  let page: URL;
+  try {
+    page = new URL(pageUrl);
+  } catch {
+    return { title, pdfUrl: null };
+  }
+  const candidates: { url: string; icon: boolean }[] = [];
+  for (const m of html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
+    const href = /\bhref="([^"]+)"/i.exec(m[1])?.[1];
+    if (!href) continue;
+    let url: URL;
+    try {
+      url = new URL(href.replace(/&amp;/g, "&"), page);
+    } catch {
+      continue;
+    }
+    if (url.host !== page.host || !/\.pdf$/i.test(url.pathname)) continue;
+    candidates.push({ url: url.href, icon: /class="[^"]*\bpdf\b|logo_pdf/i.test(m[2]) });
+  }
+  const best = candidates.find((c) => c.icon) ?? candidates[0];
+  return { title, pdfUrl: best?.url ?? null };
+}
+
 export type LmsItemKind = "file" | "page" | "reading";
 
 export interface PlannedItem {
@@ -168,6 +204,12 @@ export interface PlannedItem {
   kind: LmsItemKind;
   /** Para deduplicar: no se baja dos veces la misma dirección. */
   key: string;
+  /**
+   * Claves de importaciones anteriores del mismo contenido. Si la nueva queda lista, el material
+   * guardado con esas claves se reemplaza (por ejemplo, una lectura que antes entró como texto y
+   * ahora entra con su PDF).
+   */
+  replaces?: string[];
 }
 
 export const MAX_IMPORT_ITEMS = 80;

@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Lecturas de Siglo 21: el PDF primero y el texto con aviso
+Contexto: en la primera importación real («Costos de proyectos», 16 lecturas) todo entró como `.txt` con nombres genéricos ("Módulo 1 · Lectura 1"). Las lecturas de meca.ues21.edu.ar no son Articulate Rise, como suponía el código portado de mcp-siglo: son HTML común con el título en el cabezal (`titulomateria`) y el PDF enlazado al lado con un ícono. Al entrar como texto, las "páginas" citadas son secciones de 3.000 caracteres que no coinciden con el PDF que ve el estudiante. Además, los 4 PDF del módulo 1 son escaneados (16 a 18 páginas sin texto); los otros 12 tienen texto y contienen todo lo de la página web.
+Alternativas: guardar siempre el PDF (el módulo 1 quedaría sin texto); OCR de los escaneados (dependencia pesada y costo por lectura); usar siempre el texto de la página (citas con páginas que no existen).
+Decisión: se usa el PDF del mismo servidor que la lectura si tiene texto en al menos la mitad de sus páginas; si no hay PDF o es escaneado, el texto de la página, y la importación lo avisa en el chat. El archivo lleva el título real de la lectura. Las lecturas pasan a la clave `reading2:` y, cuando la nueva queda lista, reemplazan lo guardado con la clave anterior, así que alcanza con volver a pedir la materia.
+Consecuencias: sin migración (el aviso usa `LmsImport.error` cuando la importación termina bien). En las lecturas que entran como texto, la cita dice "pág." pero es una sección del texto; queda pendiente mostrarlo como "sección" en esos archivos.
+
 ### 2026-11-16 · La extensión avisa en qué paso falló y usa el navegador real
 En la primera prueba de Tomás con Siglo 21 la pantalla quedó en «Esperando a la extensión…» sin decir por qué. Ahora Educai guarda el último error al recibir la sesión (`LmsExtensionLink.lastError`, sin la cookie) y el asistente muestra en qué paso está: código sin usar, extensión vinculada sin sesión, o el motivo del fallo con el código HTTP de Canvas. Además, la extensión manda el user agent del navegador y Educai consulta Canvas con ese mismo valor (`LmsConnection.userAgent`), como hacía mcp-siglo con un user agent de Chrome. Con cookie y sin dato, se usa uno de Chrome. Migración aditiva `extension_diagnostico`. Extensión 1.0.1: hay que volver a descargarla.
 

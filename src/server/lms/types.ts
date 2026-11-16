@@ -13,6 +13,11 @@ export interface DownloadedItem {
   data: Uint8Array;
   fileName: string;
   mimeType: string;
+  /**
+   * Una lectura que entró como texto en vez de PDF: "no_pdf" si no tenía PDF que se pudiera bajar,
+   * "scanned_pdf" si el PDF es una imagen escaneada. Sirve para avisar que las páginas no son las del PDF.
+   */
+  fallback?: "no_pdf" | "scanned_pdf";
 }
 
 /** Algo que se puede bajar y leer: un archivo, una página del curso o una lectura incrustada. */

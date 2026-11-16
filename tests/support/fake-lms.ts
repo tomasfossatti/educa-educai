@@ -59,6 +59,7 @@ const COURSE_101 = TOPICS.map(([name, readings], m) => {
   return { id: 700 + m, name: `Módulo ${m + 1}: ${name}`, items };
 });
 
+const SIGLO_PDF = addFile("Canales y relaciones.pdf", "Canales y relaciones: el canal es cómo llega la propuesta de valor al cliente. Texto sintético.");
 const RISE_PDF = addFile("Lectura con PDF.pdf", "Validación de negocios: la hipótesis del cliente se prueba con entrevistas. Texto sintético.");
 
 const COURSES = [
@@ -129,6 +130,25 @@ function handle(req: IncomingMessage, res: ServerResponse, base: string, altBase
     if (id === "m1l1") return send(res, 200, riseHtml("Hipótesis y experimentos", LONG("Hipótesis y experimentos"), "assets/lectura.pdf"));
     if (id === "m1l2") return send(res, 200, riseHtml("Propuesta de valor", LONG("Propuesta de valor")));
     if (id === "m2l1") return send(res, 200, `<html><body><article><h1>Modelo de negocio</h1><p>${LONG("Modelo de negocio")}</p></article></body></html>`);
+    // Formato real de Siglo 21: HTML común con el título en el cabezal y el PDF al lado, con su ícono.
+    // La bibliografía enlaza PDF de otros sitios, que no se tienen que confundir con el de la lectura.
+    if (id === "m3l1" || id === "m3l2") {
+      if (path.endsWith(".pdf")) {
+        // m3l1: PDF con texto; m3l2: PDF escaneado (páginas sin texto, como el módulo 1 de Costos de proyectos).
+        return send(res, 200, id === "m3l1" ? files.get(SIGLO_PDF)!.data : makePdf(["", ""]), { "content-type": "application/pdf" });
+      }
+      const title = id === "m3l1" ? "Canales y relaciones" : "Métricas de tracción";
+      return send(
+        res,
+        200,
+        `<!doctype html><html><head><link rel="stylesheet" href="./css/style.css"></head><body>` +
+          `<div id="intro" class="row cabezal"><div class="cell"><div id="iebh" class="titulomateria">${title}</div></div></div>` +
+          `<div class="texto_simple">${LONG(title)}</div>` +
+          `<div class="texto_simple">Referencias: <a href="https://biblioteca.example.org/otro.pdf">otro.pdf</a></div>` +
+          `<a target="_blank" href="${id}.pdf" class="link borrar"><img src="https://content.example.org/logo_PDF.png" class="pdf"/></a>` +
+          `</body></html>`,
+      );
+    }
     if (id === "m2l2") return send(res, 200, `<html><body><p>Corto.</p></body></html>`);
     return send(res, 404, "no");
   }
@@ -181,7 +201,7 @@ function handle(req: IncomingMessage, res: ServerResponse, base: string, altBase
     if (id === 101 && slug === "lecciones-aprendidas") return send(res, 200, { title: "Lecciones aprendidas", body: PAGE_TEXT("Lecciones aprendidas") });
     if (id === 104 && slug === "modulos") {
       const reading = (m: number, l: number) => `<div id="lectura${l}m${m}"><a href="#">Lectura ${l}</a></div><div id="lectura${l}m${m}"><iframe src="${base}/meca/m${m}l${l}/"></iframe></div>`;
-      return send(res, 200, { title: "Módulos", body: `<h1>Módulos</h1>${reading(1, 1)}${reading(1, 2)}${reading(2, 1)}${reading(2, 2)}` });
+      return send(res, 200, { title: "Módulos", body: `<h1>Módulos</h1>${reading(1, 1)}${reading(1, 2)}${reading(2, 1)}${reading(2, 2)}${reading(3, 1)}${reading(3, 2)}` });
     }
     return send(res, 404, { errors: [{ message: "The specified resource does not exist." }] });
   }
