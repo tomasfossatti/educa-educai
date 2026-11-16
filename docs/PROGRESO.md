@@ -4,12 +4,13 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 
 ## Estado actual
 
-- Etapa en curso: 6. Abiertas: 2 (prueba con IA real) y 6 (producción). La 1, la 3, la 4 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
+- Etapa en curso: 6, y en paralelo la simplificación del panel del estudiante (pedido de Tomás del 2026-11-16). Abiertas: 2 (prueba con IA real) y 6 (producción). La 1, la 3, la 4 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
 - Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio). IA real con la cadena de respaldo gratuita (Groq y OpenRouter); `npm run test:staging` en verde con IA real.
 - IA real: cadena de proveedores gratuitos (`AI_PROVIDER=fallback`: Groq, Gemini, OpenRouter). DeepSeek queda en la cadena para cuando tenga saldo. Planes gratuitos: solo datos sintéticos.
 - Asistente del LMS (pedido de Tomás, fuera del spec original): docente y estudiante conectan Canvas o Moodle y piden por chat "crea la materia «Costos de proyectos»"; Educai la arma y baja módulos y lecturas. Para Canvas sin tokens (Siglo 21) hay una extensión de navegador que se vincula con un código y mantiene la sesión. Primera prueba real de Tomás con «Costos de proyectos»: se conectó y bajó las 16 lecturas, pero como texto; corregido para que baje el PDF y confirmado por Tomás en staging (ver `DECISIONES.md`, 2026-11-16).
 - Pasos que dependen de Tomás:
-  1. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
+  1. Decidir si el docente debe ver las dudas sin confirmar o descartadas. Hoy el detalle de una evidencia (`getEvidenceDetail`, `src/server/services/development.ts`) las lista todas, y las estadísticas de la clase (`getCourseOverview`, `src/server/services/attention.ts`) las cuentan todas. Los porcentajes de la vista macro y la ficha ya cuentan solo lo que llega al docente (`countsForTeacher`). No se tocó porque es del panel del docente; la frase del consentimiento quedó escrita para que sea verdadera con el comportamiento actual.
+  2. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
 
 ## Etapas
 
@@ -63,10 +64,34 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 - [x] Tope de costo por estudiante y alerta de consumo (2 USD por semana y estudiante, aviso al 80%, alertas por log y webhook; falta que Tomás cree el webhook y lo cargue en `AI_ALERT_WEBHOOK_URL`)
 - [x] Prueba de carga con 60 estudiantes simulados (`docs/informes/carga-etapa-6.md`: sin errores ni pérdida de datos; con 2 CPU cumple todos los criterios, con 1 CPU el login simultáneo de los 60 tarda 7 s)
 
+### Simplificación del panel del estudiante
+Pedido de Tomás del 2026-11-16 (ver `DECISIONES.md`). Hay un PR en borrador por paso, con las ramas encadenadas.
+- [x] 1. Docs y decisión: `DECISIONES.md`, `SPEC.md` (Panel del estudiante) y esta etapa
+- [ ] 2. Fuera datos inventados en la página de la materia, con un test que falla si reaparecen
+- [ ] 3. Textos del panel simple centralizados y test de jerga prohibida
+- [ ] 4. Un solo chat (el de la carpeta de la materia), sin perder conversaciones y con las URLs viejas redirigidas
+- [ ] 5. Inicio = chat de la materia actual, con selector arriba
+- [ ] 6. Navegación con 3 destinos y Mis datos (barra inferior en el celular, lateral en la computadora)
+- [ ] 7. Practicar: temas y quiz con un solo resultado y "Seguir"
+- [ ] 8. Mi avance: semáforo con umbrales fijos y tests de los bordes
+- [ ] 9. Dudas dentro del chat con "Sí" y "No"
+- [ ] 10. Mis datos en una sola página, con V7, V9, V10 y V11 probados desde ahí
+- [ ] 11. Consentimiento en una pantalla y alta mínima con perfil progresivo
+- [ ] 12. QA de punta a punta, capturas a 375 y 1280 px e informe
+
+Criterios de cierre:
+- [ ] Los 3 destinos y Mis datos son lo único en la navegación del estudiante
+- [ ] Del login a la primera pregunta enviada, 2 toques como máximo
+- [ ] Ninguna función del spec quedó inalcanzable y V1 a V15 están en verde sin modificar
+- [ ] Ningún dato inventado en pantalla y ninguna palabra de la lista de jerga
+- [ ] La frase de consentimiento es verdadera respecto de lo que ve el docente
+- [ ] Los e2e del estudiante pasan en el CI sobre el build de producción
+
 ## Bitácora de sesiones
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
+- 2026-11-16 (continuación) · Arranca la simplificación del panel del estudiante (decisión de Tomás). PR 1: relevamiento de rutas, chats, acciones y tests; spec, decisiones y etapa nueva. Hallazgo: las vistas del docente muestran y cuentan dudas sin confirmar (en "Pasos que dependen de Tomás"). Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · El estudiante que ya tenía una materia no encontraba cómo sumarse a otra (pregunta de Tomás). «Unirme a otra materia» queda siempre en la barra lateral y en el inicio; la barra muestra la materia de la página abierta. Se corrigió también que el menú lateral se cerraba solo al abrirlo después de navegar por la barra de arriba. Tests en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · La barra lateral del estudiante solo mostraba «Asistente» (reporte de Tomás). Ahora lleva Inicio, Asistente, la materia con Materia, Actividades, Desarrollo y Mi ficha, sus carpetas (incluidas las traídas del LMS) y Tu contexto; sin materias, ofrece sumarse con un código. Las carpetas que falten se crean al armar la barra, porque el layout se arma antes que el inicio. Test de punta a punta en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Ronda de QA en local con datos sintéticos (`docs/informes/qa-local-2026-11-16.md`): suites en verde y recorrido completo con Playwright. Seis hallazgos, cada uno con su PR: la ficha contaba dudas sin confirmar (#50), un estudiante quitado volvía solo con el código (#51), la lista de estudiantes ocultaba a quien no dio consentimiento (#52), la ficha sin consentimiento mostraba cuántas conversaciones había (#53), errores internos a la vista del estudiante (#54) y plurales (#55). Gasto de IA: 0 USD.
