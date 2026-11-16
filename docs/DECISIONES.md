@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · La importación del LMS propone los temas sin pedir el programa
+Contexto: Tomás trajo «Costos de proyectos» con el asistente y la materia quedó en «Currícula sin cargar». Para tener temas había que subir el programa a mano, cuando el pedido era justamente que lo hiciera el asistente. Sin temas aprobados no hay dudas por tema, dominio, quiz ni slides.
+Alternativas: buscar el programa en Canvas (no todas las cátedras lo publican y en Siglo 21 no está confirmado); proponer los temas con las lecturas importadas; aprobar los temas sin revisión (el spec pide que el docente los apruebe).
+Decisión: al terminar la importación en una cátedra del docente sin programa (currícula sin cargar o con error), Educai arma un texto con cada lectura (módulo, título y sus primeros 1.500 caracteres, hasta 50.000 en total) y corre la misma extracción que con el programa. Los temas quedan propuestos y la currícula en revisión: el docente los acepta, edita o descarta y confirma. El chat lo avisa. No toca una currícula en revisión o configurada, ni las carpetas de los estudiantes. Volver a pedir una materia ya importada también dispara la propuesta si faltaba.
+Consecuencias: sin migración. El texto armado queda como `programText`, con un encabezado que aclara que no es el programa oficial; las citas de los temas se validan contra ese texto. Una llamada a la IA por materia, registrada en `AIUsageEvent`.
+
 ### 2026-11-16 · "Sección" en vez de "pág." en los archivos sin páginas
 Contexto: TXT, MD y DOCX no tienen páginas; Educai los parte en secciones de 3.000 caracteres y las citaba como "pág. N", que no coincide con nada que vea la persona (por ejemplo, las 4 lecturas escaneadas del módulo 1 de «Costos de proyectos», que entran como texto).
 Alternativas: OCR de los PDF escaneados para tener páginas reales (dependencia pesada o costo por lectura); dejar "pág.".
