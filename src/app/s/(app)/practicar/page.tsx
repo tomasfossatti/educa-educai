@@ -43,8 +43,10 @@ export default async function PracticePage({ searchParams }: { searchParams: Pro
                   aria-label={`${t.start}: ${topic.title}`}
                   className="flex min-h-14 w-full items-center justify-between gap-3 px-4 text-left text-base"
                 >
-                  <span>{topic.title}</span>
-                  <ChevronRight className="size-5 shrink-0" aria-hidden />
+                  <span className="flex w-full items-center justify-between gap-3">
+                    <span className="whitespace-normal">{topic.title}</span>
+                    <ChevronRight className="size-5 shrink-0" aria-hidden />
+                  </span>
                 </SubmitButton>
               </form>
             </li>
