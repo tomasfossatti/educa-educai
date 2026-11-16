@@ -150,36 +150,53 @@ Cada regla es un caso verificable y tiene que existir como test antes de cerrar 
 
 ## Panel del estudiante
 
-El estudiante entra a sus carpetas, conversa con la IA sobre la materia y su proyecto, y ve lo mismo que su docente ve sobre él.
+El chat es la app. El estudiante entra y ya está en el chat de su materia, con una caja de texto grande ("¿Qué querés aprender hoy?"). Todo lo demás es secundario. La vara: alguien de 5 años tiene que poder usarlo sin explicación. (Decisión de Tomás del 2026-11-16, ver `DECISIONES.md`; reemplaza la pantalla de inicio y la navegación anteriores.)
+
+### Tres destinos
+
+1. **Preguntar.** El chat de la materia actual y la pantalla de inicio. Responde con el material de la cátedra y cita archivo y página ("sección" si el archivo no tiene páginas). Si no hay fuente, lo dice. Al seleccionar texto de una respuesta se abre un hilo corto sobre ese fragmento sin perder la conversación principal.
+2. **Practicar.** Lista de temas aprobados de la materia. Al tocar uno arranca un quiz de tres a cinco preguntas generadas desde el material, con las respuestas ocultas hasta entregar. Cada intento actualiza el avance del tema. El resultado es una sola pantalla con un mensaje y el botón "Seguir". Si el docente publicó tareas, aparecen abajo.
+3. **Mi avance.** Lista de temas con un semáforo: verde ("lo domino"), amarillo ("en camino") y gris ("sin empezar"). Lo calcula el código con umbrales fijos a partir de `MasteryRecord`, nunca el modelo. Sin porcentajes. Al tocar un tema se abre Practicar sobre ese tema.
+
+Arriba, un selector cambia de materia ("Costos de proyectos ▾"). Lista las materias, las traídas del LMS y "Mi proyecto" (la carpeta del proyecto personal), y solo aparece si hay dos opciones o más. El estudiante nunca ve la palabra "carpeta".
+
+### Mis datos
+
+Un solo lugar chico, en el menú de arriba a la derecha, que agrupa todo lo demás sin perder ninguna función:
+
+- **Lo que la IA sabe de mí.** Resumen y hechos de la materia, en lenguaje claro. Puede corregir o borrar cualquiera.
+- **Lo que ve mi docente sobre mí.** La misma ficha que ve el docente, con los mismos datos (V7) y rótulos en palabras simples: estado por tema, perfil, actividad reciente, los fragmentos que la respaldan y las conclusiones, a las que puede responder o marcar que falta contexto. Incluye quién la abrió y cuándo (V9).
+- **Consentimiento.** Ver la elección y retirarla (V11).
+- **Mis conversaciones.** Borrar una conversación y todo lo derivado (V10).
+- **Mis dudas.** El historial de dudas confirmadas y descartadas.
+- **Descargar mis datos.**
+- **Unirme a otra materia** con un código.
+- **Traer una materia desde Canvas o Moodle** (asistente del LMS).
+- **Subir una conversación externa.** Archivo .txt o texto pegado, hasta 2 MB, asignada a la materia actual.
+- **Mi perfil** y borrar la cuenta.
+
+### Dudas dentro del chat
+
+Al terminar una conversación, cada duda detectada aparece en el chat como una tarjeta: "Parece que te costó «tema». ¿Es así?", con dos botones grandes, "Sí" y "No". Las que quedan sin responder vuelven a aparecer en el inicio. La regla del motor no cambia: solo lo confirmado, o lo no respondido en 7 días con confianza alta, entra en los porcentajes del docente. Lo confirmado alimenta el resumen y el panel del docente.
 
 ### Primer ingreso
 
-1. Acepta la invitación de la cátedra y crea su cuenta.
-2. Lee el aviso de consentimiento, que explica qué ve el docente (conversaciones, dudas detectadas, perfil y proyecto) y qué no ve nadie más. Acepta o rechaza. Si rechaza, puede usar el chat y el material, pero nada se analiza ni llega al docente.
-3. Completa carrera, año y una descripción corta de su proyecto. El cuestionario completo por carrera y la promesa del cursado quedan para después del piloto.
-4. Se crean dos carpetas: la de la materia del piloto y la de su proyecto personal.
+1. Acepta la invitación de la cátedra o crea su cuenta.
+2. Consentimiento en una pantalla, con una frase corta que dice la verdad sobre lo que ve el docente y dos botones, "Acepto" y "No, gracias", ninguno premarcado. El detalle completo queda en "Ver más" y coincide con `docs/legal/aviso-de-consentimiento.md`. Si no acepta, puede usar el chat y el material igual, pero nada se analiza ni llega al docente.
+3. Pide solo el código de la materia, o aceptar la invitación pendiente.
+4. Se crean dos carpetas, la de la materia y la del proyecto personal, sin que el estudiante tenga que saberlo.
+5. Carrera, año, proyecto y de dónde salen los ejemplos son opcionales. Se piden de a uno, dentro del chat, después de la primera conversación, con "Saltar".
 
-### Pantalla de inicio
+### Reglas de la interfaz
 
-- Sus carpetas, con la última conversación de cada una.
-- La próxima clase: tema y objetivo, tomados de la `ClassSession` aprobada por el docente.
-- Sus temas con más dudas y una sugerencia de repaso para cada uno.
-
-### Dentro de una carpeta
-
-- **Chat con la IA.** Responde usando el material de la cátedra y cita archivo y página. Si no encuentra fuente, lo dice.
-- **Pregunta sobre un fragmento.** Al seleccionar texto de una respuesta o del material, abre un hilo corto sobre ese fragmento sin perder la conversación principal.
-- **Quiz por tema.** Tres a cinco preguntas generadas desde el material. Cada intento actualiza su dominio del tema.
-- **Subir una conversación externa.** Archivo .txt o texto pegado, hasta 2 MB, que se asigna a esta carpeta.
-- **Contexto de la carpeta.** Lo que la IA sabe de él en esta materia, en lenguaje claro. Puede corregir o borrar cualquier hecho.
-
-### Después de cada conversación
-
-El estudiante ve las dudas detectadas, cada una con su tema y el fragmento que la respalda, y puede confirmarla, descartarla o borrar la conversación. Lo confirmado alimenta su resumen y el panel del docente.
-
-### Mi ficha
-
-Muestra exactamente lo que ve el docente: estado por tema, perfil, actividad reciente y evidencia. El estudiante puede responder a una conclusión o marcar que falta contexto, y ve la lista de accesos a su ficha.
+1. Una pantalla, una acción principal, un solo botón grande.
+2. Cero jerga en lo que ve el estudiante: nada de "inferencia", "evidencia", "contexto declarado", "carpeta", "dominio", "AccessLog" ni "curricular". "Ficha" solo dentro de Mis datos. Se usa "lo que te cuesta", "lo que ya sabés", "tu avance". Un test lo verifica.
+3. Una frase por explicación. Lo demás va detrás de "Ver más".
+4. Mobile primero. En el celular, los tres destinos van en una barra inferior; en la computadora, en una barra lateral con Mis datos. Se prueba a 375 px y a 1280 px.
+5. Desde el login hasta enviar la primera pregunta, como máximo dos toques.
+6. Botones con verbos cortos ("Preguntar", "Practicar", "Sí", "No"), de al menos 44 px, con contraste AA, foco visible y etiquetas accesibles.
+7. Ningún dato inventado en pantalla: si no hay dato, un estado vacío honesto.
+8. Las direcciones anteriores (`/s/courses/...`, `/s/folders/...`, `/s/context`) redirigen a las nuevas.
 
 ## Panel del docente
 

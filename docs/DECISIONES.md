@@ -14,6 +14,40 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Panel del estudiante simplificado: el chat es la app (decisión de Tomás)
+Contexto: el estudiante se perdía. Había dos chats paralelos (el tutor de la materia en `/s/courses/[id]/tutor`, sin material ni citas, y el de las carpetas en `/s/folders/[id]/c`), una página de materia con datos inventados y una barra lateral con diez entradas.
+Alternativas: ordenar la barra actual; mantener el inicio con tarjetas y sumar un acceso directo al chat; rehacer la navegación alrededor del chat.
+Decisión: Tomás decidió que el chat es la app. Hay tres destinos (Preguntar, Practicar y Mi avance) y un menú "Mis datos" que agrupa todo lo demás sin perder funciones. La vara es que alguien de 5 años lo use sin explicación, y hay como máximo dos toques entre el login y la primera pregunta. Reemplaza la sección "Panel del estudiante" del spec en lo que toca al inicio y la navegación. Las reglas V1 a V15 no cambian. No se toca el panel del docente.
+Consecuencias: la sección del spec se reescribe; la etapa "Simplificación del panel del estudiante" se suma a `PROGRESO.md`, con un PR por paso. Las URLs viejas redirigen.
+
+### 2026-11-16 · Frase de consentimiento fiel a lo que hoy ve el docente
+Contexto: el aviso decía que el docente ve "tus conversaciones de la carpeta" y "las dudas que se detecten (después de que las confirmes)". En el código, ninguna pantalla del docente muestra una conversación completa. Muestra los fragmentos usados como evidencia, con los mensajes de donde salen, el avance por tema, la carrera, el año y el proyecto. Además, el detalle de una evidencia (`getEvidenceDetail`, `src/server/services/development.ts`) lista todas las dudas de esa evidencia, también las no confirmadas o descartadas, y las estadísticas de `attention.ts` cuentan todas las dudas.
+Alternativas: escribir la frase según el código; filtrar las dudas no confirmadas en las vistas del docente (toca el panel del docente, que quedó fuera de este trabajo); mantener "tus conversaciones" (exagera).
+Decisión (Tomás): la frase sigue al código: "Tu docente ve partes de tus charlas, las dudas que detecte la IA, tu avance, tu carrera y tu proyecto". El panel del docente no se toca. El hallazgo queda en `PROGRESO.md` para que Tomás decida si el docente debe ver las dudas sin confirmar.
+Consecuencias: la frase y el detalle de "Ver más" cambian en `src/lib/texts.ts` y en `docs/legal/aviso-de-consentimiento.md`. Sube la versión del aviso.
+
+### 2026-11-16 · "Mi proyecto" y las materias del LMS van en el selector de materia
+Contexto: el diseño nuevo muestra el selector solo si hay más de una materia. Con una sola, el chat del proyecto personal, que el spec pide, quedaba inalcanzable.
+Alternativas: el selector solo para materias y el proyecto en Mis datos; retirar el chat del proyecto.
+Decisión (Tomás): el selector lista las materias, las traídas del LMS y "Mi proyecto", y aparece cuando hay dos opciones o más. Con una materia y el proyecto ya son dos.
+Consecuencias: la "materia actual" pasa a ser una carpeta (cookie propia, con la de curso como respaldo).
+
+### 2026-11-16 · "Lo que ve mi docente sobre mí": mismos datos, rótulos simples
+Contexto: la ficha (V7) usa el mismo componente que el docente, con palabras como "evidencia", "dominio" y "conclusión", que el diseño nuevo prohíbe en lo que ve el estudiante.
+Alternativas: mostrar los rótulos del docente y exceptuar la sección del test de jerga.
+Decisión (Tomás): el mismo componente y los mismos datos, con rótulos simples cuando la mira el estudiante. Los rótulos del docente no cambian, y V7 sigue comparando el contenido.
+Consecuencias: `StudentFileView` recibe los rótulos por parámetro.
+
+### 2026-11-16 · Tareas en Practicar; desarrollo y conclusiones en Mis datos
+Contexto: al dejar solo tres destinos, salen del menú Actividades y Desarrollo, que vienen de educa-educai y no figuran en el spec como destinos propios.
+Alternativas: un cuarto destino; esconderlas detrás de Mis datos; quitarlas.
+Decisión: las tareas que publica el docente aparecen al pie de Practicar, solo si hay alguna. Practicar es el lugar de "hacer algo con la materia". El desarrollo y las conclusiones van en Mis datos, dentro de "Lo que ve mi docente sobre mí", porque el docente los ve en su ficha y el spec pide que el estudiante pueda responder a una conclusión.
+Consecuencias: ninguna función queda inalcanzable; las páginas viejas redirigen o se enlazan desde esos dos lugares.
+
+### 2026-11-16 · Ramas encadenadas y PR en borrador para la simplificación
+Contexto: son doce pasos que dependen uno del otro, y Tomás pidió no abrir PR a `main` sin su pedido.
+Decisión (Tomás): cada rama sale de la anterior. Hay un PR en borrador por paso: el primero contra `main` y cada uno de los demás contra la rama anterior, así cada diff es chico. No se fusiona nada.
+
 ### 2026-11-16 · Un estudiante quitado vuelve solo si el docente lo invita
 Contexto: en la ronda de QA, el docente quitó a una estudiante ("Dejarás de ver su información en este curso") y ella volvió a entrar con el código de la materia, sin que el docente hiciera nada. Al revés, invitarla de nuevo por email no hacía nada, porque su invitación ya figuraba como aceptada. El spec no dice qué pasa al quitar a alguien.
 Alternativas: dejar que el código la reactive (el docente pierde el control de quién está); cambiar el código de la materia cada vez que se quita a alguien (afecta a toda la clase); bloquear el código para quien fue quitado y reabrir la invitación por email.
