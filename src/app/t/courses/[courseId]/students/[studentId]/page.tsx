@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { TextLink } from "@/components/ui/button";
 import { KeyValue, List, ListItem, Notice, PageHeader, Section } from "@/components/ui/layout";
 import { runStatusLabel } from "@/domain/labels";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate, formatDateTime, plural } from "@/lib/format";
 import { AccessDenied, requireTeacherStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { StudentFileView } from "@/components/domain/student-file-view";
@@ -39,7 +39,7 @@ export default async function TeacherStudentPage({ params }: { params: Promise<{
       include: { targets: { include: { student: { include: { user: { select: { name: true } } } } } } },
     }),
     db.activity.findMany({ where: { courseId, status: "PUBLISHED" }, select: { id: true, title: true } }),
-    db.aIConversation.count({ where: { courseId, studentId } }),
+    ficha ? db.aIConversation.count({ where: { courseId, studentId } }) : 0,
   ]);
 
   return (
@@ -47,7 +47,12 @@ export default async function TeacherStudentPage({ params }: { params: Promise<{
       <PageHeader
         eyebrow={<TextLink href={`${base}/students`}>← Estudiantes</TextLink>}
         title={student.user.name}
-        description={`${submissions.length} entregas · ${conversations} conversaciones con el tutor (solo ves la evidencia derivada, no las conversaciones completas).`}
+        description={
+          // Sin consentimiento, ni siquiera la cantidad de conversaciones: es actividad del chat (V6).
+          ficha
+            ? `${plural(submissions.length, "entrega", "entregas")} · ${plural(conversations, "conversación", "conversaciones")} con el tutor (solo ves la evidencia derivada, no las conversaciones completas).`
+            : `${plural(submissions.length, "entrega", "entregas")}.`
+        }
       />
       <div className="space-y-10">
         {ficha ? <StudentFileView file={ficha[0]} projectLinks={ficha[1]} /> : <Notice tone="attention">{TEXT.file.noConsent}</Notice>}
