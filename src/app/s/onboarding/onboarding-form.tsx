@@ -118,10 +118,10 @@ export function OnboardingForm({
           <p className="mt-1 text-sm text-ink-2">Sirve para que los ejemplos tengan relación con lo que vivís. No es una evaluación.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-          <Field label={TEXT.profile.career} htmlFor="career" error={state?.fieldErrors?.career}>
+          <Field label={TEXT.profile.career} htmlFor="career" hint={TEXT.profile.hints.career} error={state?.fieldErrors?.career}>
             <Input id="career" name="career" required minLength={2} maxLength={120} placeholder={TEXT.profile.careerPlaceholder} />
           </Field>
-          <Field label={TEXT.profile.year} htmlFor="studyYear" optional error={state?.fieldErrors?.studyYear}>
+          <Field label={TEXT.profile.year} htmlFor="studyYear" hint={TEXT.profile.hints.studyYear} optional error={state?.fieldErrors?.studyYear}>
             <Input id="studyYear" name="studyYear" type="number" min={1} max={10} />
           </Field>
         </div>
@@ -146,13 +146,13 @@ export function OnboardingForm({
 
       <section data-step="2" className={panel(2)}>
         <h2 className="text-lg font-semibold">Intereses y objetivos</h2>
-        <Field label="¿Qué te interesa?" htmlFor="interests" hint="Problemas, industrias, disciplinas, tipos de actividad." optional error={state?.fieldErrors?.interests}>
+        <Field label="¿Qué te interesa?" htmlFor="interests" hint={TEXT.profile.hints.interests} optional error={state?.fieldErrors?.interests}>
           <ImprovableTextarea field="interests" id="interests" name="interests" maxLength={1500} />
         </Field>
         <Field
           label="¿Qué querés lograr?"
           htmlFor="goals"
-          hint="Capacidades que querés desarrollar, roles o proyectos a futuro."
+          hint={TEXT.profile.hints.goals}
           error={state?.fieldErrors?.goals}
         >
           <ImprovableTextarea field="goals" id="goals" name="goals" required minLength={3} maxLength={1500} />
@@ -166,15 +166,21 @@ export function OnboardingForm({
             Es tu punto de partida declarado. Más adelante vas a poder contrastarlo con lo que muestra la evidencia.
           </p>
         </div>
-        <Field label="¿En qué te sentís fuerte?" htmlFor="strengths" optional error={state?.fieldErrors?.strengths}>
+        <Field label="¿En qué te sentís fuerte?" htmlFor="strengths" hint={TEXT.profile.hints.strengths} optional error={state?.fieldErrors?.strengths}>
           <ImprovableTextarea field="strengths" id="strengths" name="strengths" maxLength={1500} />
         </Field>
-        <Field label="¿Qué te cuesta?" htmlFor="difficulties" optional error={state?.fieldErrors?.difficulties}>
+        <Field label="¿Qué te cuesta?" htmlFor="difficulties" hint={TEXT.profile.hints.difficulties} optional error={state?.fieldErrors?.difficulties}>
           <ImprovableTextarea field="difficulties" id="difficulties" name="difficulties" maxLength={1500} />
         </Field>
-        <Field label="¿Cómo preferís trabajar?" htmlFor="workPreferences" optional error={state?.fieldErrors?.workPreferences}>
-          <ImprovableTextarea field="workPreferences" id="workPreferences" name="workPreferences" maxLength={1500} className="min-h-16" />
-        </Field>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-ink">
+            ¿Cómo preferís trabajar? <span className="font-normal text-muted">(opcional)</span>
+          </legend>
+          <p className="text-xs text-muted">{TEXT.profile.hints.workPreferences}</p>
+          {TEXT.profile.workPreferenceOptions.map((option) => (
+            <Checkbox key={option} name="workPreferences" value={option} label={option} />
+          ))}
+        </fieldset>
       </section>
 
       <section data-step="4" className={panel(4)}>

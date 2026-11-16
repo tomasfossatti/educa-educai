@@ -1,21 +1,20 @@
 "use client";
 
 import { ImprovableTextarea } from "@/components/student/improvable-textarea";
-import { Field, Input } from "@/components/ui/field";
+import { Checkbox, Field, Input } from "@/components/ui/field";
 import { FormMessage, PendingButton, useActionForm } from "@/components/ui/client";
 import { TEXT } from "@/lib/texts";
 import { deleteAccountAction, updateContextAction } from "@/server/actions/student";
 
 const FIELDS = [
   { name: "currentContext", label: TEXT.profile.work, hint: TEXT.profile.workHint, required: false },
-  { name: "interests", label: "Intereses", hint: "Problemas, industrias, disciplinas, actividades.", required: false },
-  { name: "goals", label: "Objetivos", hint: "Qué querés desarrollar o lograr.", required: true },
-  { name: "strengths", label: "Fortalezas que percibís", hint: "", required: false },
-  { name: "difficulties", label: "Dificultades que percibís", hint: "", required: false },
-  { name: "workPreferences", label: "Cómo preferís trabajar", hint: "", required: false },
+  { name: "interests", label: "Intereses", hint: TEXT.profile.hints.interests, required: false },
+  { name: "goals", label: "Objetivos", hint: TEXT.profile.hints.goals, required: true },
+  { name: "strengths", label: "Fortalezas que percibís", hint: TEXT.profile.hints.strengths, required: false },
+  { name: "difficulties", label: "Dificultades que percibís", hint: TEXT.profile.hints.difficulties, required: false },
 ] as const;
 
-type Defaults = Record<(typeof FIELDS)[number]["name"], string>;
+type Defaults = Record<(typeof FIELDS)[number]["name"] | "workPreferences", string>;
 
 export function ContextForm({ defaults, focus }: { defaults: Defaults; focus: "WORK" | "PROJECT" }) {
   const { state, pending, onSubmit } = useActionForm(updateContextAction);
@@ -37,6 +36,13 @@ export function ContextForm({ defaults, focus }: { defaults: Defaults; focus: "W
           <ImprovableTextarea field={f.name} id={f.name} name={f.name} defaultValue={defaults[f.name]} required={f.required} maxLength={1500} className="min-h-16" />
         </Field>
       ))}
+      <fieldset className="space-y-2">
+        <legend className="text-sm font-medium text-ink">Cómo preferís trabajar</legend>
+        <p className="text-xs text-muted">{TEXT.profile.hints.workPreferences}</p>
+        {TEXT.profile.workPreferenceOptions.map((option) => (
+          <Checkbox key={option} name="workPreferences" value={option} label={option} defaultChecked={defaults.workPreferences.split("; ").includes(option)} />
+        ))}
+      </fieldset>
       <PendingButton pending={pending}>Guardar cambios</PendingButton>
     </form>
   );
