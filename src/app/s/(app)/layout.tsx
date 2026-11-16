@@ -27,6 +27,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       courseId={courseId ?? undefined}
       courseTitle={courseTitle}
       folders={folders}
+      courses={enrollments.map((e) => ({ id: e.courseId, name: e.course.name }))}
       nav={<StudentNav defaultCourseId={courseId} />}
       userLinks={
         <Link href="/s/context" className="text-ink-2 hover:text-ink">

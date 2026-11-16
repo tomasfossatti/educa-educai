@@ -308,12 +308,15 @@ export const TEXT = {
     noFolders: "Tus carpetas aparecen acá cuando te sumás a una materia.",
     context: "Tu contexto",
     join: "Unirme con un código",
+    joinAnother: "Unirme a otra materia",
     logout: "Salir",
   },
   home: {
     welcome: "Te damos la bienvenida a Educai.",
     yourCourse: "Tu materia",
     enterCourse: "Entrar a la materia",
+    otherCourses: "Otras materias inscriptas",
+    anotherCourse: "¿Cursás otra materia?",
   },
   myData: {
     title: "Descargar mis datos",

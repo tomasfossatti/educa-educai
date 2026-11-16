@@ -5,6 +5,12 @@ export interface SidebarFolder {
   kind: "SUBJECT" | "PROJECT";
 }
 
+/** Materia en la que está inscripto el estudiante, para la barra lateral. */
+export interface SidebarCourse {
+  id: string;
+  name: string;
+}
+
 export const OPEN_SIDEBAR_EVENT = "educai:open-sidebar";
 
 export function triggerOpenSidebar() {
