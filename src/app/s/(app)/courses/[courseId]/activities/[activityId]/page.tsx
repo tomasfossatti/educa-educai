@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ExperienceResults } from "@/components/domain/experience-results";
-import { LayerTag } from "@/components/domain/status";
+import { TaskResult } from "@/components/student/task-result";
 import { SubmitButton } from "@/components/ui/client";
-import { KeyValue, Notice, PageHeader, Section } from "@/components/ui/layout";
+import { KeyValue, Notice } from "@/components/ui/layout";
 import { parseActivityPrompts, parseAnswers } from "@/domain/activity";
-import { activityKindLabel, confidenceLabel, declaredAssistanceLabel } from "@/domain/labels";
 import { formatDateTime } from "@/lib/format";
+import { TEXT } from "@/lib/texts";
 import { startConversationAction, startNewAttemptAction } from "@/server/actions/student";
 import { requireEnrolledStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { SubmissionForm } from "./submission-form";
 
-export const metadata: Metadata = { title: "Actividad" };
+export const metadata: Metadata = { title: "Tarea" };
 
 export default async function StudentActivityPage({ params }: { params: Promise<{ courseId: string; activityId: string }> }) {
   const { courseId, activityId } = await params;
@@ -32,86 +31,89 @@ export default async function StudentActivityPage({ params }: { params: Promise<
   const criteria = activity.curriculumLinks.map((l) => l.curriculumItem).filter((i) => i.kind === "CRITERION" && i.status === "ACCEPTED");
   const canWork = activity.status === "PUBLISHED" && (!latest || latest.status === "DRAFT");
 
-  return (
-    <>
-      <PageHeader eyebrow={`${course.name} · ${activityKindLabel[activity.kind]}`} title={activity.title} />
-      <div className="space-y-10">
-        <Section title="Situación">
-          <p className="prose-plain text-sm text-ink">{activity.scenario}</p>
-          <p className="prose-plain text-sm text-ink-2">{activity.instructions}</p>
-          {(worked.length > 0 || criteria.length > 0) && (
-            <dl className="border-t border-line pt-2">
-              {worked.length > 0 && <KeyValue label="Trabaja">{worked.map((w) => w.title).join(" · ")}</KeyValue>}
-              {criteria.length > 0 && <KeyValue label="Criterios">{criteria.map((c) => c.title).join(" · ")}</KeyValue>}
-            </dl>
-          )}
-          {activity.status === "PUBLISHED" && (
-            <form action={startConversationAction} className="pt-1">
-              <input type="hidden" name="courseId" value={courseId} />
-              <input type="hidden" name="activityId" value={activity.id} />
-              <SubmitButton variant="secondary" size="sm" pendingText="Abriendo…">
-                Pensarla con el tutor
-              </SubmitButton>
-            </form>
-          )}
-        </Section>
+  const t = TEXT.student.task;
 
-        {canWork ? (
-          <Section
-            title="Tu respuesta"
-            description="Explicá tus decisiones y su porqué: eso es lo que permite observar cómo aplicás lo que sabés. Podés guardar un borrador."
-          >
-            <SubmissionForm
-              activityId={activity.id}
-              prompts={prompts}
-              draft={
-                latest
-                  ? {
-                      answers: parseAnswers(latest.answers),
-                      declaredAssistance: latest.declaredAssistance,
-                      assistanceNote: latest.assistanceNote,
-                      confidence: latest.confidence,
-                    }
-                  : null
-              }
-            />
-          </Section>
-        ) : latest ? (
-          <>
-            <Section
-              title={`Tu entrega${submissions.length > 1 ? ` (intento ${latest.attempt})` : ""}`}
-              description={`Enviada el ${formatDateTime(latest.submittedAt)} · la producción original se conserva tal como la enviaste.`}
-              action={<LayerTag layer="observed" />}
-            >
-              <div className="space-y-4 rounded-lg border border-line bg-surface p-4">
-                {prompts.map((p) => (
-                  <div key={p.key} className="space-y-1">
-                    <p className="text-sm font-medium text-ink">{p.label}</p>
-                    <p className="prose-plain text-sm text-ink-2">{parseAnswers(latest.answers)[p.key] || "—"}</p>
-                  </div>
-                ))}
-                <dl className="border-t border-line pt-2">
-                  <KeyValue label="Ayuda declarada">
-                    {latest.declaredAssistance ? declaredAssistanceLabel[latest.declaredAssistance] : "No declarada"}
-                    {latest.assistanceNote ? ` — ${latest.assistanceNote}` : ""}
-                  </KeyValue>
-                  {latest.confidence && <KeyValue label="Confianza declarada">{confidenceLabel[latest.confidence]}</KeyValue>}
-                </dl>
-              </div>
-              {activity.status === "PUBLISHED" && (
-                <form action={startNewAttemptAction.bind(null, activity.id)}>
-                  <SubmitButton variant="ghost" size="sm">
-                    Hacer un nuevo intento
-                  </SubmitButton>
-                </form>
-              )}
-            </Section>
-            <ExperienceResults experienceId={latest.experienceId} studentId={user.id} courseId={courseId} />
-          </>
-        ) : (
-          <Notice>Esta actividad está cerrada.</Notice>
-        )}
+  return (
+    <div className="shell mx-auto max-w-3xl space-y-8">
+      <div className="space-y-1">
+        <p className="text-sm text-muted">
+          {course.name} · {t.kind[activity.kind]}
+        </p>
+        <h1 className="text-xl font-bold text-ink sm:text-2xl">{activity.title}</h1>
       </div>
-    </>
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold text-ink">{t.situation}</h2>
+        <p className="prose-plain text-base text-ink">{activity.scenario}</p>
+        <p className="prose-plain text-base text-ink-2">{activity.instructions}</p>
+        {(worked.length > 0 || criteria.length > 0) && (
+          <dl className="border-t border-line pt-2">
+            {worked.length > 0 && <KeyValue label={t.topics}>{worked.map((w) => w.title).join(" · ")}</KeyValue>}
+            {criteria.length > 0 && <KeyValue label={t.criteria}>{criteria.map((c) => c.title).join(" · ")}</KeyValue>}
+          </dl>
+        )}
+        {activity.status === "PUBLISHED" && (
+          <form action={startConversationAction} className="pt-1">
+            <input type="hidden" name="courseId" value={courseId} />
+            <input type="hidden" name="activityId" value={activity.id} />
+            <SubmitButton variant="secondary" pendingText={t.opening} className="min-h-11">
+              {t.thinkWithAI}
+            </SubmitButton>
+          </form>
+        )}
+      </section>
+
+      {canWork ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-ink">{t.answer}</h2>
+          <p className="text-sm text-muted">{t.answerHint}</p>
+          <SubmissionForm
+            activityId={activity.id}
+            prompts={prompts}
+            draft={
+              latest
+                ? {
+                    answers: parseAnswers(latest.answers),
+                    declaredAssistance: latest.declaredAssistance,
+                    assistanceNote: latest.assistanceNote,
+                    confidence: latest.confidence,
+                  }
+                : null
+            }
+          />
+        </section>
+      ) : latest ? (
+        <>
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-ink">{t.delivered(submissions.length > 1 ? latest.attempt : null)}</h2>
+            <p className="text-sm text-muted">{t.sentOn(formatDateTime(latest.submittedAt))}</p>
+            <div className="space-y-4 rounded-lg border border-line bg-surface p-4">
+              {prompts.map((p) => (
+                <div key={p.key} className="space-y-1">
+                  <p className="text-sm font-medium text-ink">{p.label}</p>
+                  <p className="prose-plain text-sm text-ink-2">{parseAnswers(latest.answers)[p.key] || "—"}</p>
+                </div>
+              ))}
+              <dl className="border-t border-line pt-2">
+                <KeyValue label={t.helpUsed}>
+                  {latest.declaredAssistance ? t.helpOptions[latest.declaredAssistance] : t.noHelp}
+                  {latest.assistanceNote ? ` — ${latest.assistanceNote}` : ""}
+                </KeyValue>
+                {latest.confidence && <KeyValue label={t.sureUsed}>{t.sureOptions[latest.confidence]}</KeyValue>}
+              </dl>
+            </div>
+            {activity.status === "PUBLISHED" && (
+              <form action={startNewAttemptAction.bind(null, activity.id)}>
+                <SubmitButton variant="ghost" className="min-h-11">
+                  {t.retry}
+                </SubmitButton>
+              </form>
+            )}
+          </section>
+          <TaskResult experienceId={latest.experienceId} studentId={user.id} courseId={courseId} />
+        </>
+      ) : (
+        <Notice>{t.closed}</Notice>
+      )}
+    </div>
   );
 }

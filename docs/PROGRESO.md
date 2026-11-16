@@ -65,7 +65,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 - [x] Prueba de carga con 60 estudiantes simulados (`docs/informes/carga-etapa-6.md`: sin errores ni pérdida de datos; con 2 CPU cumple todos los criterios, con 1 CPU el login simultáneo de los 60 tarda 7 s)
 
 ### Simplificación del panel del estudiante
-Pedido de Tomás del 2026-11-16 (ver `DECISIONES.md`). Hay un PR en borrador por paso, con las ramas encadenadas.
+Pedido de Tomás del 2026-11-16 (ver `DECISIONES.md`). Hay un PR en borrador por paso, con las ramas encadenadas (#60 a #71, sin fusionar). Informe: `docs/informes/panel-simple-qa.md`.
 - [x] 1. Docs y decisión: `DECISIONES.md`, `SPEC.md` (Panel del estudiante) y esta etapa
 - [x] 2. Fuera datos inventados en la página de la materia, con un test que falla si reaparecen
 - [x] 3. Textos del panel simple centralizados y test de jerga prohibida
@@ -77,21 +77,21 @@ Pedido de Tomás del 2026-11-16 (ver `DECISIONES.md`). Hay un PR en borrador por
 - [x] 9. Dudas dentro del chat con "Sí" y "No"
 - [x] 10. Mis datos en una sola página, con V7, V9, V10 y V11 probados desde ahí
 - [x] 11. Consentimiento en una pantalla y alta mínima con perfil progresivo
-- [ ] 12. QA de punta a punta, capturas a 375 y 1280 px e informe
+- [x] 12. QA de punta a punta, capturas a 375 y 1280 px e informe
 
 Criterios de cierre:
-- [ ] Los 3 destinos y Mis datos son lo único en la navegación del estudiante
-- [ ] Del login a la primera pregunta enviada, 2 toques como máximo
-- [ ] Ninguna función del spec quedó inalcanzable y V1 a V15 están en verde sin modificar
-- [ ] Ningún dato inventado en pantalla y ninguna palabra de la lista de jerga
+- [x] Los 3 destinos y Mis datos son lo único en la navegación del estudiante
+- [x] Del login a la primera pregunta enviada, 2 toques como máximo
+- [x] Ninguna función del spec quedó inalcanzable y V1 a V15 están en verde sin modificar
+- [x] Ningún dato inventado en pantalla y ninguna palabra de la lista de jerga
 - [x] La frase de consentimiento es verdadera respecto de lo que ve el docente (verificada contra `development.ts`, `attention.ts`, `student-file.ts` y `doubts.ts`; ver `docs/legal/aviso-de-consentimiento.md`)
-- [ ] Los e2e del estudiante pasan en el CI sobre el build de producción
+- [x] Los e2e del estudiante pasan en el CI sobre el build de producción
 
 ## Bitácora de sesiones
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
-- 2026-11-16 (continuación) · Arranca la simplificación del panel del estudiante (decisión de Tomás). PR 1: relevamiento de rutas, chats, acciones y tests; spec, decisiones y etapa nueva. Hallazgo: las vistas del docente muestran y cuentan dudas sin confirmar (en "Pasos que dependen de Tomás"). PR 2: la página de la materia queda solo con datos reales; se borran el tablero de clase de relleno y el tutor flotante, que llamaba a una ruta inexistente. PR 3: bloque `TEXT.student` y test de jerga, con una lista de transición que se vacía en el PR 12. PR 4: un solo chat en `/s/c/[id]`, migración `unificar_chat` y redirecciones. PR 5: el inicio es el chat de la materia actual, con selector arriba, código si no hay materia e invitaciones con «Unirme». PR 6: navegación con Preguntar, Practicar y Mi avance (barra inferior en el celular, lateral en la computadora) y Mis datos arriba a la derecha. PR 7: Practicar con un botón por tema, el resultado en una pantalla con «Seguir» y las tareas del docente al pie. PR 8: Mi avance con un semáforo por tema (umbral de verde 0,8, en código) que abre una práctica al tocarlo. PR 9: las dudas se confirman en el chat con tarjetas «Sí» y «No»; la regla de 7 días no cambia. PR 10: Mis datos en una sola página con secciones plegables; V7, V9, V10 y V11 probados desde ahí. PR 11: alta en una pantalla de consentimiento más el código; carrera, año, proyecto y foco de a uno en el chat con «Saltar» (migración aditiva `perfil_progresivo`). Gasto de IA: 0 USD.
+- 2026-11-16 (continuación) · Arranca la simplificación del panel del estudiante (decisión de Tomás). PR 1: relevamiento de rutas, chats, acciones y tests; spec, decisiones y etapa nueva. Hallazgo: las vistas del docente muestran y cuentan dudas sin confirmar (en "Pasos que dependen de Tomás"). PR 2: la página de la materia queda solo con datos reales; se borran el tablero de clase de relleno y el tutor flotante, que llamaba a una ruta inexistente. PR 3: bloque `TEXT.student` y test de jerga, con una lista de transición que se vacía en el PR 12. PR 4: un solo chat en `/s/c/[id]`, migración `unificar_chat` y redirecciones. PR 5: el inicio es el chat de la materia actual, con selector arriba, código si no hay materia e invitaciones con «Unirme». PR 6: navegación con Preguntar, Practicar y Mi avance (barra inferior en el celular, lateral en la computadora) y Mis datos arriba a la derecha. PR 7: Practicar con un botón por tema, el resultado en una pantalla con «Seguir» y las tareas del docente al pie. PR 8: Mi avance con un semáforo por tema (umbral de verde 0,8, en código) que abre una práctica al tocarlo. PR 9: las dudas se confirman en el chat con tarjetas «Sí» y «No»; la regla de 7 días no cambia. PR 10: Mis datos en una sola página con secciones plegables; V7, V9, V10 y V11 probados desde ahí. PR 11: alta en una pantalla de consentimiento más el código; carrera, año, proyecto y foco de a uno en el chat con «Saltar» (migración aditiva `perfil_progresivo`). PR 12: tareas sin jerga, recorrido completo a 375 y 1280 px, capturas e informe (`docs/informes/panel-simple-qa.md`); 39 e2e y 453 tests en verde, la lista de jerga quedó vacía. La etapa queda completa, con los PR en borrador esperando a Tomás. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · El estudiante que ya tenía una materia no encontraba cómo sumarse a otra (pregunta de Tomás). «Unirme a otra materia» queda siempre en la barra lateral y en el inicio; la barra muestra la materia de la página abierta. Se corrigió también que el menú lateral se cerraba solo al abrirlo después de navegar por la barra de arriba. Tests en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · La barra lateral del estudiante solo mostraba «Asistente» (reporte de Tomás). Ahora lleva Inicio, Asistente, la materia con Materia, Actividades, Desarrollo y Mi ficha, sus carpetas (incluidas las traídas del LMS) y Tu contexto; sin materias, ofrece sumarse con un código. Las carpetas que falten se crean al armar la barra, porque el layout se arma antes que el inicio. Test de punta a punta en `tests/e2e/barra-lateral.spec.ts`. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Ronda de QA en local con datos sintéticos (`docs/informes/qa-local-2026-11-16.md`): suites en verde y recorrido completo con Playwright. Seis hallazgos, cada uno con su PR: la ficha contaba dudas sin confirmar (#50), un estudiante quitado volvía solo con el código (#51), la lista de estudiantes ocultaba a quien no dio consentimiento (#52), la ficha sin consentimiento mostraba cuántas conversaciones había (#53), errores internos a la vista del estudiante (#54) y plurales (#55). Gasto de IA: 0 USD.

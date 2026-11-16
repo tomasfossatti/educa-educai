@@ -14,6 +14,11 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Las tareas del docente, en palabras simples
+Contexto: las tareas (actividades de educa-educai) quedaron al pie de Practicar. Su página y la entrega hablaban de "evidencia" y mostraban al estudiante el componente del docente con inferencias, evaluaciones y evidencia.
+Decisión: la página de la tarea usa `TEXT.student.task`. La devolución es un componente propio (`TaskResult`): el párrafo de la devolución y, detrás de "Ver más", lo que se miró de cada criterio. Lo que el docente concluye sobre el estudiante se responde en Mis datos. "Pensarla con el tutor" pasa a "Pensarla con la IA" y abre el chat único. `/s/courses/[id]/activities` lleva a Practicar en esa materia.
+Consecuencias: sin migración. Los datos y las acciones de la entrega no cambian. La lista de transición del test de jerga queda vacía.
+
 ### 2026-11-16 · Alta mínima, consentimiento en una pantalla y perfil progresivo
 Contexto: el primer ingreso tenía cinco pasos, con carrera y proyecto obligatorios (zod en `completeOnboardingAction`), objetivos obligatorios y el foco sin valor por defecto. El diseño nuevo pide pedir solo el código de la materia, una pantalla de consentimiento con "Acepto" y "No, gracias", y el resto de a uno, dentro del chat, con "Saltar".
 Verificación previa: en el esquema, `career`, `studyYear` y `projectDescription` ya admitían nulos, y `ensureStudentFolders` no los necesita. Lo obligatorio estaba solo en zod. No hizo falta relajar ninguna restricción de la base.
