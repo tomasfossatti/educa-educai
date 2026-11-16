@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Educai · Conector de Canvas",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Mantiene conectada tu sesión de Canvas con Educai cuando tu universidad no deja crear tokens.",
   "minimum_chrome_version": "116",
   "permissions": ["cookies", "storage", "alarms"],

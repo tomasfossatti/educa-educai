@@ -11,6 +11,8 @@ export class LmsError extends Error {
   constructor(
     message: string,
     readonly kind: "auth" | "not_found" | "network" | "invalid_url" | "too_large" | "other" = "other",
+    /** Código HTTP con el que respondió el LMS, si lo hubo. */
+    readonly status?: number,
   ) {
     super(message);
   }
@@ -119,8 +121,8 @@ export async function readLimited(response: Response, maxBytes: number): Promise
 }
 
 export function statusError(status: number, what: string): LmsError {
-  if (status === 401) return new LmsError("El LMS rechazó la credencial: puede haber vencido. Volvé a conectarlo.", "auth");
-  if (status === 403) return new LmsError(`El LMS no te deja ver ${what}.`, "auth");
-  if (status === 404) return new LmsError(`El LMS no encontró ${what}.`, "not_found");
-  return new LmsError(`El LMS respondió con un error (${status}) al pedir ${what}.`, "network");
+  if (status === 401) return new LmsError("El LMS rechazó la credencial: puede haber vencido. Volvé a conectarlo.", "auth", status);
+  if (status === 403) return new LmsError(`El LMS no te deja ver ${what} (403).`, "auth", status);
+  if (status === 404) return new LmsError(`El LMS no encontró ${what}.`, "not_found", status);
+  return new LmsError(`El LMS respondió con un error (${status}) al pedir ${what}.`, "network", status);
 }

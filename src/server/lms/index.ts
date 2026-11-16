@@ -7,12 +7,12 @@ import type { LmsClient, LmsProviderName } from "./types";
 export { LmsError, normalizeBaseUrl } from "./net";
 export type { LmsClient, LmsCourse, LmsModule, LmsItem, LmsProviderName } from "./types";
 
-export function createLmsClient(params: { provider: LmsProviderName; baseUrl: string; credential: string; authKind?: string }): LmsClient {
+export function createLmsClient(params: { provider: LmsProviderName; baseUrl: string; credential: string; authKind?: string; userAgent?: string | null }): LmsClient {
   if (params.provider === "MOODLE") return new MoodleClient(params.baseUrl, params.credential);
-  return new CanvasClient(params.baseUrl, params.credential, params.authKind === "cookie" ? "cookie" : "token");
+  return new CanvasClient(params.baseUrl, params.credential, params.authKind === "cookie" ? "cookie" : "token", params.userAgent);
 }
 
 /** Cliente a partir de la conexión guardada (credencial cifrada). */
-export function clientForConnection(connection: { provider: LmsProviderName; baseUrl: string; credential: string; authKind: string }): LmsClient {
+export function clientForConnection(connection: { provider: LmsProviderName; baseUrl: string; credential: string; authKind: string; userAgent?: string | null }): LmsClient {
   return createLmsClient({ ...connection, credential: decryptSecret(connection.credential) });
 }

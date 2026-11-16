@@ -96,7 +96,7 @@ describe.skipIf(!TEST_DB)("extensión de Canvas (integración)", () => {
     expect(noSession.status).toBe(422);
     const expired = await syncRoute.POST(post({ cookies: "canvas_session=vencida" }, key));
     expect(expired.status).toBe(422);
-    expect(((await expired.json()) as { error: string }).error).toMatch(/Canvas cerró la sesión/);
+    expect(((await expired.json()) as { error: string }).error).toMatch(/Canvas no aceptó la sesión \(401\)/);
     expect(await db.lmsConnection.count({ where: { userId: s.id } })).toBe(0);
   });
 
@@ -121,6 +121,38 @@ describe.skipIf(!TEST_DB)("extensión de Canvas (integración)", () => {
     expect(await db.lmsConnection.count({ where: { userId: b.s.id } })).toBe(0);
     const { viewer } = await guards.assertExtensionKey(`Bearer ${a.key}`);
     expect(viewer.id).toBe(a.s.id);
+  });
+
+  it("cuando la sesión falla, guarda el motivo y el asistente lo muestra en vez de esperar", async () => {
+    const { s, key } = await linkStudent();
+    const viewer = { id: s.id, role: "STUDENT" as const };
+    expect((await ext.getExtensionStatus(viewer)).stage).toBe("linked");
+    await syncRoute.POST(post({ cookies: "canvas_session=vencida" }, key));
+    const status = await ext.getExtensionStatus(viewer);
+    expect(status.stage).toBe("error");
+    expect(status.error).toMatch(/Canvas no aceptó la sesión \(401\)/);
+    const assistant = await import("@/server/services/lms-assistant");
+    const turn = await assistant.lmsAssistantTurn(viewer, "crea la materia costos de proyectos");
+    expect(turn.reply).toMatch(/la extensión se vinculó pero falló.*401/);
+
+    // Cuando la sesión llega bien, el error se borra.
+    await syncRoute.POST(post({ cookies: cookie }, key));
+    expect(await ext.getExtensionStatus(viewer)).toMatchObject({ stage: "synced", error: null });
+  });
+
+  it("consulta Canvas con el mismo navegador del que salió la sesión", async () => {
+    const { s, key } = await linkStudent();
+    const agents: (string | null | undefined)[] = [];
+    const lmsIndex = await import("@/server/lms");
+    const spy = (params: Parameters<typeof lmsIndex.createLmsClient>[0]) => {
+      agents.push(params.userAgent);
+      return lmsIndex.createLmsClient(params);
+    };
+    const auth = await guards.assertExtensionKey(`Bearer ${key}`);
+    await ext.syncExtensionCookies(auth.viewer, auth.link, cookie, spy, "Mozilla/5.0 (Navegador sintético)");
+    expect(agents).toEqual(["Mozilla/5.0 (Navegador sintético)"]);
+    const connection = await db.lmsConnection.findUniqueOrThrow({ where: { userId: s.id } });
+    expect(connection.userAgent).toBe("Mozilla/5.0 (Navegador sintético)");
   });
 
   it("si se pega el link de mcp-siglo en vez de la cookie, lo explica", async () => {

@@ -14,6 +14,9 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · La extensión avisa en qué paso falló y usa el navegador real
+En la primera prueba de Tomás con Siglo 21 la pantalla quedó en «Esperando a la extensión…» sin decir por qué. Ahora Educai guarda el último error al recibir la sesión (`LmsExtensionLink.lastError`, sin la cookie) y el asistente muestra en qué paso está: código sin usar, extensión vinculada sin sesión, o el motivo del fallo con el código HTTP de Canvas. Además, la extensión manda el user agent del navegador y Educai consulta Canvas con ese mismo valor (`LmsConnection.userAgent`), como hacía mcp-siglo con un user agent de Chrome. Con cookie y sin dato, se usa uno de Chrome. Migración aditiva `extension_diagnostico`. Extensión 1.0.1: hay que volver a descargarla.
+
 ### 2026-11-16 · Extensión de navegador para los Canvas que no dejan crear tokens
 Contexto: Siglo 21 no deja crear tokens y pegar la cookie a mano vence enseguida. Tomás compartió la extensión de mcp-siglo y pidió una nueva, optimizada.
 Alternativas: reusar la de mcp-siglo (crea una cuenta anónima por link, solo sirve para Siglo 21 y reenvía la cookie cada 10 minutos aunque no cambie); OAuth de Canvas (lo ideal, pero necesita una Developer Key que crea un administrador de la universidad).

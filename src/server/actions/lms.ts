@@ -7,7 +7,7 @@ import { text, type ActionState } from "@/lib/forms";
 import { TEXT } from "@/lib/texts";
 import { requireUser } from "@/server/auth/guards";
 import { LmsError } from "@/server/lms";
-import { createExtensionCode, getExtensionStatus } from "@/server/services/lms-extension";
+import { createExtensionCode, getExtensionStatus, type ExtensionStage } from "@/server/services/lms-extension";
 import { connectLms, disconnectLms, getLmsConnection, getLmsImportStatus, LmsServiceError, runLmsImport, type ImportStatus } from "@/server/services/lms";
 import { lmsAssistantTurn, type AssistantMessage, type AssistantTurn } from "@/server/services/lms-assistant";
 
@@ -93,8 +93,20 @@ export async function createExtensionCodeAction(baseUrl: string): Promise<{ code
 }
 
 /** Para que la pantalla se entere cuando la extensión terminó de conectar. */
-export async function lmsConnectionStatusAction(): Promise<{ connected: boolean; accountName: string | null; extensionLinked: boolean }> {
+export async function lmsConnectionStatusAction(): Promise<{
+  connected: boolean;
+  accountName: string | null;
+  extensionLinked: boolean;
+  extensionStage: ExtensionStage;
+  extensionError: string | null;
+}> {
   const viewer = await lmsViewer();
   const [connection, extension] = await Promise.all([getLmsConnection(viewer), getExtensionStatus(viewer)]);
-  return { connected: Boolean(connection), accountName: connection?.accountName ?? null, extensionLinked: extension.linked };
+  return {
+    connected: Boolean(connection),
+    accountName: connection?.accountName ?? null,
+    extensionLinked: extension.linked,
+    extensionStage: extension.stage,
+    extensionError: extension.error,
+  };
 }

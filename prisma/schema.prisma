@@ -1248,6 +1248,8 @@ model LmsConnection {
   credential  String
   /// "token" o "cookie" (Canvas con sesión del navegador).
   authKind    String      @default("token")
+  /// Navegador desde el que se copió la sesión (cookie de Canvas): se usa el mismo al consultar Canvas.
+  userAgent   String?
   accountName String?
   lastUsedAt  DateTime?
   createdAt   DateTime    @default(now())
@@ -1297,6 +1299,9 @@ model LmsExtensionLink {
   keyHash       String?   @unique
   linkedAt      DateTime?
   lastSyncAt    DateTime?
+  /// Último error al recibir la sesión, para mostrarlo en el asistente en vez de esperar sin avisar.
+  lastError     String?
+  lastErrorAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

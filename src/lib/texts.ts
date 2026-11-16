@@ -311,7 +311,9 @@ export const TEXT = {
       copy: "Copiar código",
       copied: "Copiado",
       expires: "El código sirve una sola vez y vence en 10 minutos.",
-      waiting: "Esperando a la extensión…",
+      waiting: "Esperando a que la extensión use el código… Abrí la extensión (ícono de Educai en la barra de Chrome), pegá el código y tocá Vincular.",
+      linked: "La extensión ya usó el código; esperando que mande tu sesión de Canvas. Tené Canvas abierto con la sesión iniciada y tocá «Sincronizar ahora» en la extensión.",
+      failed: (error: string) => `La extensión se vinculó, pero la conexión falló: ${error}`,
       done: (account: string) => `Listo, la extensión conectó tu Canvas como ${account}.`,
     },
     chat: {
@@ -321,6 +323,7 @@ export const TEXT = {
       welcomeTeacher: "Hola. Decime qué materia querés traer de tu LMS y la armo en Educai con sus módulos y lecturas. Por ejemplo: creá la materia «Costos de proyectos».",
       welcomeStudent: "Hola. Decime qué materia querés traer de tu campus y armo su carpeta con los módulos y las lecturas. Por ejemplo: creá la materia «Costos de proyectos».",
       noConnection: "Primero conectá tu LMS con el formulario de esta página. Después pedime la materia.",
+      extensionFailed: (error: string) => `Todavía no hay conexión: la extensión se vinculó pero falló al mandar la sesión de Canvas. ${error}`,
       notFound: (name: string, available: string[]) =>
         available.length
           ? `No encontré «${name}» entre tus materias del LMS. Las que veo son: ${available.join(", ")}.`
