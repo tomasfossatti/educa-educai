@@ -14,6 +14,11 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Las dudas se confirman dentro del chat
+Contexto: las dudas detectadas aparecían en una lista al pie de la conversación, con "Sí, es una duda" y "No, descartar", y solo dentro de esa charla. El diseño nuevo pide una tarjeta en el chat, "Parece que te costó «tema». ¿Es así?", con dos botones grandes.
+Decisión: el chat (el inicio y `/s/c/[id]`) muestra una tarjeta por duda pendiente de la materia elegida: las tres más nuevas en el inicio y las de esa charla en `/s/c/[id]`. "Sí" y "No" usan la misma acción de antes (`respondToDoubtAction` → `respondToSignal`). El fragmento que la respalda queda detrás de "Ver más". Mientras se analiza la charla recién terminada, el chat lo avisa en una frase y se actualiza solo. La regla de conteo no cambia: solo lo confirmado, o lo no respondido en 7 días con confianza alta, entra en los porcentajes del docente (`countsForTeacher`). El historial completo (confirmadas y descartadas) va a Mis datos.
+Consecuencias: sin migración. `listPendingDoubts` y `listMyDoubts` en `src/server/services/doubts.ts`, siempre filtradas por el estudiante y, las pendientes, por una carpeta propia (`assertFolderOwner`).
+
 ### 2026-11-16 · Umbrales del semáforo de Mi avance
 Contexto: Mi avance muestra un semáforo por tema, sin porcentajes. Lo tiene que calcular código determinístico a partir de `MasteryRecord`, no el modelo.
 Alternativas: verde desde 0,7 (con dos intentos perfectos ya sería verde, pero también con dos intentos mediocres); verde solo con tres intentos (deja en amarillo a quien acertó todo dos veces); verde desde 0,8.

@@ -4,7 +4,8 @@ import { BudgetNotice } from "@/components/student/budget-notice";
 import { ChatMessages } from "@/components/student/chat-messages";
 import { CourseSelector } from "@/components/student/course-selector";
 import { SelectionAsk } from "@/components/student/selection-ask";
-import { SubmitButton } from "@/components/ui/client";
+import { DoubtCards } from "@/components/student/doubt-cards";
+import { AutoRefresh, SubmitButton } from "@/components/ui/client";
 import { formatDate } from "@/lib/format";
 import { TEXT } from "@/lib/texts";
 import { acceptInviteAction, closeConversationAction } from "@/server/actions/student";
@@ -12,7 +13,8 @@ import { requireStudent } from "@/server/auth/guards";
 import { closeInactiveConversations, expireStaleRuns } from "@/server/engine/trigger";
 import { nextApprovedSession } from "@/server/services/class-sessions";
 import { getPendingInvites } from "@/server/services/student-home";
-import { citedChunks, getActiveConversation, getPanelState } from "@/server/services/student-panel";
+import { listPendingDoubts } from "@/server/services/doubts";
+import { citedChunks, getActiveConversation, getPanelState, isAnalyzingLastConversation } from "@/server/services/student-panel";
 import { JoinForm } from "./join/join-form";
 
 export const metadata: Metadata = { title: "Preguntar" };
@@ -53,9 +55,11 @@ export default async function StudentHome() {
     );
   }
 
-  const [conversation, nextClass] = await Promise.all([
+  const [conversation, nextClass, doubts, analyzing] = await Promise.all([
     getActiveConversation(viewer, current.folderId),
     current.courseId ? nextApprovedSession(current.courseId) : null,
+    listPendingDoubts(viewer, current.folderId),
+    isAnalyzingLastConversation(viewer, current.folderId),
   ]);
   const chunks = conversation ? await citedChunks(current, conversation.messages.map((m) => m.citations)) : new Map<string, string>();
   const hasMessages = Boolean(conversation && conversation.messages.length > 0);
@@ -77,6 +81,9 @@ export default async function StudentHome() {
           <ChatMessages messages={conversation.messages} chunks={chunks} />
         </SelectionAsk>
       )}
+      <AutoRefresh active={analyzing} />
+      {analyzing && <p className="text-sm text-muted" role="status">{s.doubtCard.analyzing}</p>}
+      <DoubtCards doubts={doubts} />
       <AskForm conversationId={conversation?.id} folderId={current.folderId} autoFocus />
       {conversation && hasMessages && (
         <form action={closeConversationAction.bind(null, conversation.id)}>

@@ -129,3 +129,18 @@ export async function getPanelTasks(viewer: Viewer, option: PanelOption) {
     select: { id: true, title: true },
   });
 }
+
+/**
+ * ¿Se está analizando la última charla terminada de esta materia? Mientras tanto el chat avisa que
+ * está mirando la charla y se actualiza solo hasta que aparecen las dudas.
+ */
+export async function isAnalyzingLastConversation(viewer: Viewer, folderId: string): Promise<boolean> {
+  await assertFolderOwner(viewer, folderId);
+  const last = await db.aIConversation.findFirst({
+    where: { folderId, studentId: viewer.id, status: "CLOSED" },
+    orderBy: { closedAt: "desc" },
+    select: { experience: { select: { runs: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true } } } } },
+  });
+  const status = last?.experience.runs[0]?.status;
+  return status === "QUEUED" || status === "RUNNING";
+}
