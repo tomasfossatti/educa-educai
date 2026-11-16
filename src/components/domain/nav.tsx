@@ -19,41 +19,6 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
   );
 }
 
-/** Navegación del estudiante: Inicio, Materia, Actividades, Desarrollo. */
-export function StudentNav({ defaultCourseId }: { defaultCourseId: string | null }) {
-  const pathname = usePathname();
-  const match = pathname.match(/^\/s\/courses\/([^/]+)/);
-  const courseId = match?.[1] ?? defaultCourseId;
-  const base = courseId ? `/s/courses/${courseId}` : null;
-  const section = match ? pathname.slice(match[0].length) : "";
-  return (
-    <>
-      <NavLink href="/s" label="Inicio" active={pathname === "/s"} />
-      <NavLink href="/s/asistente" label={TEXT.lms.navLabel} active={pathname === "/s/asistente"} />
-      {base && (
-        <>
-          <NavLink
-            href={base}
-            label="Materia"
-            active={Boolean(match) && (section === "" || section.startsWith("/tutor"))}
-          />
-          <NavLink
-            href={`${base}/activities`}
-            label="Actividades"
-            active={Boolean(match) && section.startsWith("/activities")}
-          />
-          <NavLink
-            href={`${base}/development`}
-            label="Desarrollo"
-            active={Boolean(match) && section.startsWith("/development")}
-          />
-          <NavLink href={`${base}/ficha`} label={TEXT.file.myTitle} active={Boolean(match) && section.startsWith("/ficha")} />
-        </>
-      )}
-    </>
-  );
-}
-
 /** Navegación del docente: Materia, Atención, Estudiantes, Actividades, Currícula. */
 export function TeacherNav({ courseId }: { courseId: string }) {
   const pathname = usePathname();

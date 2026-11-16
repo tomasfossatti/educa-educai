@@ -58,10 +58,22 @@ export async function login(page: Page, who: Person) {
   await page.waitForLoadState("networkidle");
 }
 
-/** Dirección de la carpeta de la materia de un estudiante (la crea el panel al entrar). */
+/**
+ * Carpeta de la materia de un estudiante. `world()` inscribe directo en la base, así que la carpeta la
+ * crea el panel al abrir el inicio (mientras se transmite la página): se espera a que exista.
+ */
+export async function subjectFolder(studentId: string, courseId: string) {
+  for (let i = 0; i < 50; i++) {
+    const folder = await db.folder.findFirst({ where: { studentId, courseId, kind: "SUBJECT" } });
+    if (folder) return folder;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  throw new Error("La carpeta de la materia no se creó al entrar al panel.");
+}
+
+/** Dirección de la carpeta de la materia de un estudiante. */
 export async function subjectFolderUrl(studentId: string, courseId: string): Promise<string> {
-  const folder = await db.folder.findFirstOrThrow({ where: { studentId, courseId, kind: "SUBJECT" } });
-  return `/s/folders/${folder.id}`;
+  return `/s/folders/${(await subjectFolder(studentId, courseId)).id}`;
 }
 
 /** Pregunta desde el inicio, que es el chat de la materia actual, y espera ver la pregunta. */

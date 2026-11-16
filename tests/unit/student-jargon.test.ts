@@ -35,11 +35,11 @@ const TRANSITIONAL_BLOCKS: string[] = [
   "myData",
   "profile",
   "quiz",
-  "sidebar",
   "upload",
 ];
 /** Archivos de pantallas viejas, en transición. Se vacía en el PR 12. */
 const TRANSITIONAL_FILES: string[] = [
+  "src/app/s/(app)/layout.tsx",
   "src/app/s/(app)/context/page.tsx",
   "src/app/s/(app)/courses/[courseId]/activities/[activityId]/submission-form.tsx",
   "src/app/s/(app)/courses/[courseId]/activities/page.tsx",

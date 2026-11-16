@@ -51,7 +51,9 @@ test("el docente conecta Canvas y crea «Costos de Proyectos» por chat con sus 
 test("el estudiante trae una materia a su carpeta y el chat pregunta si el nombre es ambiguo", async ({ page }) => {
   const w = await world({ students: 1 });
   await login(page, w.students[0]);
-  await page.getByRole("link", { name: "Asistente" }).first().click();
+  // El asistente del LMS está en el menú de arriba a la derecha.
+  await page.getByRole("button", { name: "Abrir menú de usuario" }).click();
+  await page.getByRole("link", { name: "Traer una materia de Canvas o Moodle" }).click();
   await expect(page).toHaveURL(/\/s\/asistente$/);
   await connectCanvas(page, TOKENS.student);
 

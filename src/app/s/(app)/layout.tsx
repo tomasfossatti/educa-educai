@@ -1,41 +1,34 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { AppShell } from "@/components/domain/shell";
-import { StudentNav } from "@/components/domain/nav";
+import { StudentShell } from "@/components/student/student-shell";
+import { TEXT } from "@/lib/texts";
 import { requireStudent } from "@/server/auth/guards";
 import { EVENT, todayKey, track } from "@/server/events";
-import { listStudentFolderLinks } from "@/server/services/folders";
-import { getCurrentCourseId, getStudentCourses } from "@/server/services/student-home";
-import { CURRENT_COURSE_COOKIE } from "@/lib/constants";
-import { TEXT } from "@/lib/texts";
+import { getCurrentCourseId } from "@/server/services/student-home";
+
+/** Mientras Mis datos no tiene su página propia, vive en "Tu contexto" (PR 10 de la simplificación). */
+const MY_DATA_HREF = "/s/context";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const { user } = await requireStudent();
-  const [enrollments, folders] = await Promise.all([getStudentCourses(user.id), listStudentFolderLinks(user.id)]);
-  const preferred = (await cookies()).get(CURRENT_COURSE_COOKIE)?.value;
-  const currentEnrollment = enrollments.find((e) => e.courseId === preferred) ?? enrollments[0];
-  const courseId = currentEnrollment?.courseId ?? (await getCurrentCourseId(user.id));
-  const courseTitle = currentEnrollment?.course?.name;
+  const courseId = await getCurrentCourseId(user.id);
+  const t = TEXT.student;
 
   // Recurrencia: un evento por estudiante y día.
   await track(EVENT.studentActiveDay, { userId: user.id, studentId: user.id, courseId, dedupeKey: `active:${user.id}:${todayKey()}` });
   return (
-    <AppShell
-      home="/s"
+    <StudentShell
       userName={user.name}
-      roleLabel="Estudiante"
-      courseId={courseId ?? undefined}
-      courseTitle={courseTitle}
-      folders={folders}
-      courses={enrollments.map((e) => ({ id: e.courseId, name: e.course.name }))}
-      nav={<StudentNav defaultCourseId={courseId} />}
-      userLinks={
-        <Link href="/s/context" className="text-ink-2 hover:text-ink">
-          {TEXT.sidebar.context}
-        </Link>
+      myDataHref={MY_DATA_HREF}
+      menuLinks={
+        <>
+          <Link href={MY_DATA_HREF}>{t.nav.myData}</Link>
+          {courseId && <Link href={`/s/courses/${courseId}/ficha`}>{t.myData.teacherSees}</Link>}
+          <Link href="/s/join">{t.myData.join}</Link>
+          <Link href="/s/asistente">{t.myData.lms}</Link>
+        </>
       }
     >
       {children}
-    </AppShell>
+    </StudentShell>
   );
 }

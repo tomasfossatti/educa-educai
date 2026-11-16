@@ -446,6 +446,7 @@ export const TEXT = {
       progress: "Mi avance",
       myData: "Mis datos",
       logout: "Salir",
+      role: "Estudiante",
     },
     selector: {
       label: "Elegir materia",

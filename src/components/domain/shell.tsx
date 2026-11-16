@@ -3,6 +3,19 @@ import { aiMode } from "@/server/ai";
 import { ShellHeader } from "@/components/domain/shell-header";
 import type { SidebarCourse, SidebarFolder } from "@/lib/sidebar";
 
+/** Aviso de que la IA está simulada o sin configurar (no aparece con la IA real). */
+export function AiModeBanner() {
+  const mode = aiMode();
+  if (mode === "live") return null;
+  return (
+    <div className="border-b border-warning/30 bg-surface-2 px-4 py-1 text-center text-xs text-warning shrink-0" role="status">
+      {mode === "scripted"
+        ? "Modo de prueba: la IA está simulada (AI_PROVIDER=scripted). Las salidas son deterministas y no interpretan realmente."
+        : "IA no configurada: se guardan conversaciones y entregas, pero no se generan respuestas del tutor ni análisis. Configurá ANTHROPIC_API_KEY en el servidor."}
+    </div>
+  );
+}
+
 /** Marco común: barra superior Obsidian + contenido centrado con ambientación. */
 export function AppShell({
   home,
@@ -31,16 +44,9 @@ export function AppShell({
   userLinks?: ReactNode;
   children: ReactNode;
 }) {
-  const mode = aiMode();
   return (
     <div className="min-h-screen flex flex-col">
-      {mode !== "live" && (
-        <div className="border-b border-warning/30 bg-surface-2 px-4 py-1 text-center text-xs text-warning shrink-0" role="status">
-          {mode === "scripted"
-            ? "Modo de prueba: la IA está simulada (AI_PROVIDER=scripted). Las salidas son deterministas y no interpretan realmente."
-            : "IA no configurada: se guardan conversaciones y entregas, pero no se generan respuestas del tutor ni análisis. Configurá ANTHROPIC_API_KEY en el servidor."}
-        </div>
-      )}
+      <AiModeBanner />
       <ShellHeader
         home={home}
         userName={userName}
