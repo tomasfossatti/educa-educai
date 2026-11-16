@@ -48,6 +48,8 @@ model User {
   teacherProfile TeacherProfile?
   productEvents  ProductEvent[]
   aiUsageEvents  AIUsageEvent[]  @relation("AIUsageActor")
+  lmsConnection  LmsConnection?
+  lmsImports     LmsImport[]
 }
 
 /// La cookie guarda un token aleatorio; acá solo se persiste su SHA-256.
@@ -169,6 +171,7 @@ model Course {
   classSessions    ClassSession[]
   materials        Material[]
   materialChunks   MaterialChunk[]
+  lmsImports       LmsImport[]
 
   @@index([teacherId])
 }
@@ -1029,8 +1032,11 @@ model Folder {
   course        Course?          @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  conversations AIConversation[]
-  contexts      FolderContext[]
+  conversations  AIConversation[]
+  contexts       FolderContext[]
+  materials      Material[]
+  materialChunks MaterialChunk[]
+  lmsImports     LmsImport[]
 
   @@unique([studentId, courseId])
   @@index([studentId, kind])
@@ -1068,10 +1074,18 @@ enum MaterialStatus {
 }
 
 /// Archivo de la cátedra (PDF, DOCX, PPTX o texto). Cada fragmento conoce su archivo y página.
+/// Pertenece a una cátedra (lo sube o importa el docente) o a la carpeta de un estudiante (lo importa
+/// él desde su LMS y solo lo ve él). Exactamente uno de los dos (restricción en la base).
 model Material {
   id           String          @id @default(cuid())
-  courseId     String
-  course       Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId     String?
+  course       Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  folderId     String?
+  folder       Folder?         @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  /// Módulo del LMS del que vino ("Módulo 1"), para agruparlo en pantalla.
+  module       String?
+  /// Dirección en el LMS, para no importar dos veces lo mismo.
+  sourceUrl    String?
   fileName     String
   mimeType     String
   version      Int             @default(1)
@@ -1083,14 +1097,17 @@ model Material {
   chunks       MaterialChunk[]
 
   @@index([courseId, status])
+  @@index([folderId, status])
 }
 
 model MaterialChunk {
   id         String                       @id @default(cuid())
   materialId String
   material   Material                     @relation(fields: [materialId], references: [id], onDelete: Cascade)
-  courseId   String
-  course     Course                       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId   String?
+  course     Course?                      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  folderId   String?
+  folder     Folder?                      @relation(fields: [folderId], references: [id], onDelete: Cascade)
   /// Página del PDF, diapositiva del PPTX o sección del DOCX (empieza en 1).
   page       Int
   position   Int
@@ -1100,6 +1117,7 @@ model MaterialChunk {
   createdAt  DateTime                     @default(now())
 
   @@index([courseId])
+  @@index([folderId])
   @@index([materialId, page])
 }
 
@@ -1209,4 +1227,58 @@ model ClassSessionItem {
   curriculumItem   CurriculumItem @relation(fields: [curriculumItemId], references: [id], onDelete: Cascade)
 
   @@id([classSessionId, curriculumItemId])
+}
+
+// ───────────────────────────── Conexión con el LMS ─────────────────────────────
+
+enum LmsProvider {
+  CANVAS
+  MOODLE
+}
+
+/// Conexión de un usuario (docente o estudiante) con su LMS. La credencial se guarda cifrada
+/// (AES-256-GCM, clave LMS_ENCRYPTION_KEY) y nunca vuelve a la pantalla.
+model LmsConnection {
+  id          String      @id @default(cuid())
+  userId      String      @unique
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider    LmsProvider
+  baseUrl     String
+  credential  String
+  /// "token" o "cookie" (Canvas con sesión del navegador).
+  authKind    String      @default("token")
+  accountName String?
+  lastUsedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+enum LmsImportStatus {
+  RUNNING
+  DONE
+  FAILED
+}
+
+/// Una importación de una materia del LMS: crea la cátedra (docente) o la carpeta (estudiante) y baja su material.
+model LmsImport {
+  id            String          @id @default(cuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      LmsProvider
+  lmsCourseId   String
+  lmsCourseName String
+  courseId      String?
+  course        Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  folderId      String?
+  folder        Folder?         @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  status        LmsImportStatus @default(RUNNING)
+  total         Int             @default(0)
+  done          Int             @default(0)
+  failed        Int             @default(0)
+  modules       Int             @default(0)
+  error         String?
+  createdAt     DateTime        @default(now())
+  finishedAt    DateTime?
+
+  @@index([userId, createdAt])
 }

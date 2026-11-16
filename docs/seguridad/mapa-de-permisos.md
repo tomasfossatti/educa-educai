@@ -53,6 +53,7 @@ Las páginas bajo `/s` pasan por el layout `src/app/s/(app)/layout.tsx` (`requir
 | `/s/folders/[folderId]/quiz/[quizId]` | `requireStudent`; el servicio verifica el dueño |
 | `/s/courses/[courseId]/...` (ficha, evidencia, conclusiones, actividades, desarrollo, tutor) | `requireEnrolledStudent`; las lecturas filtran por el estudiante de la sesión |
 | `/t`, `/t/new` | `requireTeacher` |
+| `/t/asistente`, `/s/asistente` | `requireTeacher` o `requireStudent`; la conexión se lee por el usuario de la sesión y nunca incluye la credencial |
 | `/t/courses/[courseId]/...` (vista, material, temas, clases, atención, insights, métricas, actividades, entregas, estudiantes) | `requireCourseTeacher` |
 | `/t/courses/[courseId]/students/[studentId]` | `requireTeacherStudent`; la ficha y el snapshot exigen consentimiento (`loadStudentFile`) |
 | `/t/courses/[courseId]/evidence/[evidenceId]` y `/inferences/[inferenceId]` | `requireCourseTeacher` y `openEvidenceAsTeacher` u `openInferenceAsTeacher` (consentimiento y `AccessLog`) |
@@ -67,6 +68,7 @@ Las páginas bajo `/s` pasan por el layout `src/app/s/(app)/layout.tsx` (`requir
 | `actions/auth.ts` | `registerAction`, `loginAction`, `logoutAction` | Públicas. Login con límite de intentos por correo e IP |
 | `actions/folders.ts` | Conversación, pregunta, subida, hilo, respuesta a una duda, borrado, quiz, edición y borrado de contexto | `requireStudent` (función `viewer()`) y el servicio verifica que la carpeta, la conversación o el hecho sean del estudiante |
 | `actions/student.ts` | Onboarding, contexto, privacidad, unirse a una cátedra, invitación, conversación del tutor heredado, entregas, respuesta a una conclusión, borrar cuenta | `requireStudent` o `requireEnrolledStudent`; borrar la cuenta pide escribir el correo |
+| `actions/lms.ts` | Conectar y desconectar el LMS, turno del chat del asistente, estado de una importación | `requireUser` (función `lmsViewer()`); el servicio admite solo docente o estudiante, importa a una cátedra del propio docente o a una carpeta del propio estudiante, y el estado solo se lee si la importación es del usuario. Las direcciones del LMS se validan contra SSRF |
 | `actions/teacher.ts` | Cátedra, programa y temas, actividades, invitaciones, quitar estudiante, revisión de conclusiones, intervenciones, material, clases y slides | `requireCourseTeacher`, o `requireTeacher` más un filtro por `course.teacherId` en la consulta (`reviewInferenceAction`, `setTeacherActionStatusAction`) |
 
 ## Reglas V1 a V15 y sus tests

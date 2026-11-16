@@ -1,3 +1,4 @@
+import { TEXT } from "@/lib/texts";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
@@ -67,6 +68,9 @@ export default async function TeacherHome() {
             <p>Prepará el contexto, observá señales agregadas y decidí qué hacer en la próxima clase.</p>
           </div>
           <div className="header-actions">
+            <Link className="btn secondary" href="/t/asistente">
+              {TEXT.lms.homeLink}
+            </Link>
             <Link className={`${courses.length ? "btn secondary" : "btn"} teacher-create-course`} href="/t/new">
               Crear materia
             </Link>

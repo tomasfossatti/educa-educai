@@ -13,7 +13,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const preferred = (await cookies()).get(CURRENT_COURSE_COOKIE)?.value;
   const currentEnrollment = enrollments.find((e) => e.courseId === preferred) ?? enrollments[0];
   const courseId = currentEnrollment?.courseId ?? (await getCurrentCourseId(user.id));
-  const courseTitle = currentEnrollment?.course?.name ?? "Estrategia y Validación de Negocios";
+  const courseTitle = currentEnrollment?.course?.name;
 
   // Recurrencia: un evento por estudiante y día.
   await track(EVENT.studentActiveDay, { userId: user.id, studentId: user.id, courseId, dedupeKey: `active:${user.id}:${todayKey()}` });
@@ -24,8 +24,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
       roleLabel="Estudiante"
       courseId={courseId ?? undefined}
       courseTitle={courseTitle}
-      currentClassNumber={4}
-      totalClasses={8}
       nav={<StudentNav defaultCourseId={courseId} />}
       userLinks={
         <Link href="/s/context" className="text-ink-2 hover:text-ink">

@@ -11,6 +11,7 @@ import {
   FileText,
   Presentation,
   LogOut,
+  Sparkles,
 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
@@ -38,9 +39,9 @@ export function Sidebar({
   userName,
   roleLabel,
   courseId: propCourseId,
-  courseTitle = "Materia activa",
-  currentClassNumber = 1,
-  totalClasses = 12,
+  courseTitle,
+  currentClassNumber,
+  totalClasses,
 }: SidebarProps) {
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
@@ -108,7 +109,7 @@ export function Sidebar({
         {/* Contenido con navegación */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
           {/* Cursada actual */}
-          {!isTeacher && (
+          {!isTeacher && courseTitle && (
             <div className="space-y-1 px-2 pt-1 pb-1">
               <Link
                 href={studentCourseId ? `/s/courses/${studentCourseId}` : "/s"}
@@ -118,9 +119,11 @@ export function Sidebar({
                 <h3 className="text-sm font-bold text-ink tracking-tight group-hover:text-primary transition-colors leading-snug">
                   {courseTitle}
                 </h3>
-                <p className="text-xs text-muted mt-0.5 font-medium">
-                  Clase {currentClassNumber} de {totalClasses}
-                </p>
+                {currentClassNumber && totalClasses ? (
+                  <p className="text-xs text-muted mt-0.5 font-medium">
+                    Clase {currentClassNumber} de {totalClasses}
+                  </p>
+                ) : null}
               </Link>
             </div>
           )}
@@ -181,6 +184,18 @@ export function Sidebar({
               </ButtonLink>
             </div>
           )}
+
+          <div className="space-y-1">
+            <ButtonLink
+              href={isTeacher ? "/t/asistente" : "/s/asistente"}
+              variant={pathname.endsWith("/asistente") ? "secondary" : "ghost"}
+              size="sm"
+              className="w-full justify-start gap-3"
+            >
+              <Sparkles className="size-4 text-primary shrink-0" />
+              <span>{TEXT.lms.navLabel}</span>
+            </ButtonLink>
+          </div>
         </div>
 
         {/* Footer del sidebar */}

@@ -1,6 +1,5 @@
 "use server";
 
-import { randomInt } from "node:crypto";
 import type { ActionType, ReviewStatus } from "@prisma/client";
 import { refresh } from "@/server/next-refresh";
 import { notFound, redirect } from "next/navigation";
@@ -16,13 +15,8 @@ import { computeAndStoreSnapshot } from "@/server/engine/snapshot";
 import { EVENT, track } from "@/server/events";
 import { startCurriculumExtraction } from "@/server/services/curriculum";
 import { approveSlides, createClassSession, generateSlides, SlidesError, updateSlides } from "@/server/services/class-sessions";
+import { createCourseForTeacher } from "@/server/services/courses";
 import { ingestMaterial, MaterialError } from "@/server/services/material";
-
-const JOIN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-function generateJoinCode(): string {
-  return Array.from({ length: 6 }, () => JOIN_ALPHABET[randomInt(JOIN_ALPHABET.length)]).join("");
-}
 
 // ───────────── Materia ─────────────
 
@@ -36,15 +30,8 @@ export async function createCourseAction(_prev: ActionState | null, formData: Fo
   const parsed = courseSchema.safeParse({ name: text(formData, "name"), description: optionalText(formData, "description") });
   if (!parsed.success) return { error: "Revisá los campos marcados.", fieldErrors: fieldErrorsFrom(parsed.error) };
 
-  let courseId: string | null = null;
-  for (let attempt = 0; attempt < 5 && !courseId; attempt++) {
-    const joinCode = generateJoinCode();
-    if (await db.course.findUnique({ where: { joinCode } })) continue;
-    const course = await db.course.create({
-      data: { ...parsed.data, joinCode, teacherId: user.id, institutionId: profile.institutionId },
-    });
-    courseId = course.id;
-  }
+  const course = await createCourseForTeacher({ ...parsed.data, teacherId: user.id, institutionId: profile.institutionId });
+  const courseId = course?.id;
   if (!courseId) return { error: "No se pudo generar un código de materia. Intentá de nuevo." };
   redirect(`/t/courses/${courseId}/curriculum`);
 }

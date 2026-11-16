@@ -18,7 +18,8 @@ export type AIOperation =
   | "context.facts"
   | "context.summary"
   | "slides.generate"
-  | "profile.improve";
+  | "profile.improve"
+  | "lms.assistant";
 
 export type Effort = "low" | "medium" | "high";
 
