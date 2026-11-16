@@ -7,13 +7,12 @@ Claude Code actualiza este archivo al terminar cada sesión. Tomás lo lee una v
 - Etapa en curso: 6. Abiertas: 1 (revisar la lista de esquema), 2 (prueba con IA real), 4 (medición de precisión con IA real) y 6 (producción). La 3 y la 5 están cerradas. En la 6, Tomás descartó el abogado y la revisión de seguridad externa.
 - Staging: https://educai-staging.vercel.app (Vercel + Neon, con contraseña de sitio). IA real con la cadena de respaldo gratuita (Groq y OpenRouter); `npm run test:staging` en verde con IA real.
 - IA real: cadena de proveedores gratuitos (`AI_PROVIDER=fallback`: Groq, Gemini, OpenRouter). DeepSeek queda en la cadena para cuando tenga saldo. Planes gratuitos: solo datos sintéticos.
-- Asistente del LMS (pedido de Tomás, fuera del spec original): docente y estudiante conectan Canvas o Moodle y piden por chat "crea la materia «Costos de proyectos»"; Educai la arma y baja módulos y lecturas. Para Canvas sin tokens (Siglo 21) hay una extensión de navegador que se vincula con un código y mantiene la sesión. Primera prueba real de Tomás con «Costos de proyectos»: se conectó y bajó las 16 lecturas, pero como texto; corregido para que baje el PDF (ver `DECISIONES.md`, 2026-11-16).
+- Asistente del LMS (pedido de Tomás, fuera del spec original): docente y estudiante conectan Canvas o Moodle y piden por chat "crea la materia «Costos de proyectos»"; Educai la arma y baja módulos y lecturas. Para Canvas sin tokens (Siglo 21) hay una extensión de navegador que se vincula con un código y mantiene la sesión. Primera prueba real de Tomás con «Costos de proyectos»: se conectó y bajó las 16 lecturas, pero como texto; corregido para que baje el PDF y confirmado por Tomás en staging (ver `DECISIONES.md`, 2026-11-16).
 - Pasos que dependen de Tomás:
   1. Revisar la muestra de etiquetas: la medición preliminar con Gemini dio 95,8% de precisión y la etapa 4 se cierra con esa revisión.
   2. Rotar las claves de Groq y OpenRouter, que quedaron escritas en el chat, y cargar las nuevas en Vercel y en la sesión.
   3. Revisar la lista de esquema en `DECISIONES.md` (etapa 1).
-  4. Volver a pedir "crea la materia «Costos de proyectos»" en staging cuando se despliegue la corrección de las lecturas: tienen que quedar 12 PDF (módulos 2 a 4) y 4 textos (módulo 1, PDF escaneados), todos con su título, y el chat avisa de los 4 textos.
-  5. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
+  4. Producción: decidir el plan de la base (ver `ENTORNOS_Y_DESPLIEGUE.md`, "Producción"). Claude Code arma el proyecto igual que staging.
 
 ## Etapas
 
@@ -71,6 +70,7 @@ Todo con el proveedor guionado; la calidad de los textos del modelo real queda p
 
 Una entrada por sesión, la más reciente arriba: fecha, qué se hizo, qué falta, gasto de IA de la sesión.
 
+- 2026-11-16 (continuación) · Tomás confirmó en staging «Costos de proyectos» con 12 PDF y 4 textos, todos con título. Los archivos sin páginas (TXT, MD, DOCX) citan "sección" en vez de "pág." en toda la interfaz y en lo que recibe la IA. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Lecturas de Siglo 21 con su PDF. La prueba real de Tomás bajó las 16 lecturas de «Costos de proyectos» como texto: las lecturas de meca no eran Articulate Rise. Se verificó contra las 16 lecturas reales (contenido completo y en el orden correcto; los 4 PDF del módulo 1 son escaneados). Ahora se baja el PDF si tiene texto, con el título real, se avisa cuando entra como texto y la nueva importación reemplaza la anterior. Gasto de IA: 0 USD.
 - 2026-11-16 (continuación) · Extensión de navegador para Canvas sin tokens: vinculación por código de un solo uso, sesión al día y prueba de punta a punta con la extensión real cargada en Chromium. Gasto de IA: 0 USD.
 - 2026-11-16 · Inicio sin datos inventados (#41). Asistente del LMS para docente y estudiante: conexión cifrada con Canvas o Moodle, chat que entiende "crea la materia «…»", importación de módulos y lecturas (incluido el formato de Siglo 21 portado de mcp-siglo) a la cátedra o a una carpeta privada del estudiante, con LMS de mentira para los tests de integración y de punta a punta. La barra lateral del estudiante dejó de mostrar "Clase 4 de 8". Falta la prueba con el Canvas real de Tomás. Gasto de IA: 0 USD en los tests (proveedor guionado).

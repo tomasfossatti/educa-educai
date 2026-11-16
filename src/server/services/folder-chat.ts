@@ -6,6 +6,7 @@ import { AccessDenied, assertFolderOwner, hasActiveConsent, type Viewer } from "
 import { db } from "@/server/db";
 import { onConversationClosed, queueInterpretation } from "@/server/engine/trigger";
 import { contextForPrompt } from "@/server/services/folder-context";
+import { citationLabelForModel } from "@/domain/citations";
 import { searchMaterial, type MaterialHit } from "@/server/services/material";
 
 /** Lo que se guarda en Message.citations para una respuesta del chat de carpeta. */
@@ -54,7 +55,7 @@ export async function startFolderConversation(viewer: Viewer, folderId: string, 
 
 function fragmentsBlock(hits: MaterialHit[]): string {
   if (hits.length === 0) return "FRAGMENTOS DEL MATERIAL: (ninguno encontrado)";
-  return ["FRAGMENTOS DEL MATERIAL:", ...hits.map((h, i) => `[${i + 1}] ${h.fileName}, página ${h.page}:\n${h.text}`)].join("\n");
+  return ["FRAGMENTOS DEL MATERIAL:", ...hits.map((h, i) => `[${i + 1}] ${h.fileName}, ${citationLabelForModel(h.fileName, h.page)}:\n${h.text}`)].join("\n");
 }
 
 /**

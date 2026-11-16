@@ -5,6 +5,8 @@ import { generateStructured } from "@/server/ai";
 import { AccessDenied, assertCourseTeacher, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { getClassOverview } from "@/server/services/class-view";
+import { citationLabelForModel } from "@/domain/citations";
+import { TEXT } from "@/lib/texts";
 import { searchMaterial, type MaterialHit } from "@/server/services/material";
 
 export class SlidesError extends Error {}
@@ -103,7 +105,7 @@ export async function generateSlides(viewer: Viewer, sessionId: string) {
       {
         role: "user",
         content: [
-          `FRAGMENTOS DEL MATERIAL:\n${hits.map((h, i) => `[${i + 1}] ${h.fileName}, página ${h.page}:\n${h.text}`).join("\n")}`,
+          `FRAGMENTOS DEL MATERIAL:\n${hits.map((h, i) => `[${i + 1}] ${h.fileName}, ${citationLabelForModel(h.fileName, h.page)}:\n${h.text}`).join("\n")}`,
           `TEMAS: ${topics.map((t) => t.title).join(", ")}`,
           session.objective ? `OBJETIVO DE LA CLASE: ${session.objective}` : "",
           `DUDAS FRECUENTES: ${doubts.length ? doubts.join(" ") : "sin datos todavía"}`,
@@ -162,7 +164,7 @@ export async function exportSlidesPptx(viewer: Viewer, sessionId: string): Promi
       s.bullets.map((b) => ({ text: b, options: { bullet: true } })),
       { x: 0.6, y: 1.7, w: 12, h: 4.6, fontSize: 18, valign: "top" },
     );
-    slide.addText(`Fuente: ${s.sources.map((src) => `${src.fileName}, pág. ${src.page}`).join("; ")}`, { x: 0.6, y: 6.7, w: 12, h: 0.4, fontSize: 11, color: "666666" });
+    slide.addText(`Fuente: ${s.sources.map((src) => TEXT.citation.source(src.fileName, src.page)).join("; ")}`, { x: 0.6, y: 6.7, w: 12, h: 0.4, fontSize: 11, color: "666666" });
     if (s.notes) slide.addNotes(s.notes);
   }
   const data = (await pptx.write({ outputType: "nodebuffer" })) as Buffer;

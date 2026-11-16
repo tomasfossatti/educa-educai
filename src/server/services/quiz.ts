@@ -4,6 +4,7 @@ import { computeMastery, quizCorrectness } from "@/domain/topic-mastery";
 import { generateStructured } from "@/server/ai";
 import { AccessDenied, assertFolderOwner, type Viewer } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { citationLabelForModel } from "@/domain/citations";
 import { searchMaterial, type MaterialHit } from "@/server/services/material";
 
 export class QuizError extends Error {}
@@ -66,7 +67,7 @@ export async function createQuiz(viewer: Viewer, folderId: string, topicId: stri
   const hits = await searchMaterial(folder.courseId, `${topic.title} ${topic.description ?? ""}`, 8);
   if (hits.length === 0) throw new QuizError("No hay material de la cátedra sobre este tema todavía: no se puede armar un quiz con fuente.");
 
-  const fragments = hits.map((h, i) => `[${i + 1}] ${h.fileName}, página ${h.page}:\n${h.text}`).join("\n");
+  const fragments = hits.map((h, i) => `[${i + 1}] ${h.fileName}, ${citationLabelForModel(h.fileName, h.page)}:\n${h.text}`).join("\n");
   const output = await generateStructured({
     operation: "quiz.generate",
     system: SYSTEM,

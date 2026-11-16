@@ -38,7 +38,7 @@ function Messages({ messages, chunks }: { messages: Msg[]; chunks: Map<string, s
                 {citations.items.map((c) => (
                   <details key={c.n}>
                     <summary className="cursor-pointer">
-                      [{c.n}] {c.fileName}, {t.page(c.page)} · {TEXT.thread.showSource}
+                      [{c.n}] {c.fileName}, {t.page(c.page, c.fileName)} · {TEXT.thread.showSource}
                     </summary>
                     <p className="mt-1 whitespace-pre-wrap text-ink-2">{chunks.get(c.chunkId) ?? "—"}</p>
                   </details>

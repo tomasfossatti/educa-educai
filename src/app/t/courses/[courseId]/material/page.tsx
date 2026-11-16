@@ -36,7 +36,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ cours
                       <p className="truncate text-sm font-medium text-ink">{m.fileName}</p>
                       <p className="text-xs text-muted">
                         {t.version(m.version)} · {formatDate(m.createdAt)}
-                        {m.status === "READY" && m.pageCount != null && ` · ${t.pages(m.pageCount)} · ${t.fragments(m._count.chunks)}`}
+                        {m.status === "READY" && m.pageCount != null && ` · ${t.pages(m.pageCount, m.fileName)} · ${t.fragments(m._count.chunks)}`}
                       </p>
                       {m.status === "FAILED" && m.error && <p className="mt-1 text-xs text-danger">{m.error}</p>}
                     </div>

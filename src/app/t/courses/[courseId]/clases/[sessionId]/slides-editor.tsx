@@ -30,7 +30,7 @@ export function SlidesEditor({ courseId, sessionId, slides }: { courseId: string
             <Field label={t.notes} htmlFor={`notes${i}`} optional>
               <Textarea id={`notes${i}`} name={`notes${i}`} defaultValue={s.notes} className="min-h-16" />
             </Field>
-            <p className="text-xs text-muted">{t.source(s.sources.map((src) => `${src.fileName}, pág. ${src.page}`).join("; "))}</p>
+            <p className="text-xs text-muted">{t.source(s.sources.map((src) => TEXT.citation.source(src.fileName, src.page)).join("; "))}</p>
           </li>
         ))}
       </ol>
