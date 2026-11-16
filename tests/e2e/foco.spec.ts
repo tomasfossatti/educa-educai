@@ -36,8 +36,8 @@ test("en el primer ingreso el estudiante elige de dónde salen los ejemplos", as
   const user = await db.user.findUniqueOrThrow({ where: { email }, include: { studentProfile: true } });
   expect(user.studentProfile?.personalizationFocus).toBe("WORK");
 
-  // Se puede cambiar después desde Tu contexto.
-  await page.goto("/s/context");
+  // Se puede cambiar después desde Mis datos, en Mi perfil.
+  await page.goto("/s/mis-datos#perfil");
   await page.locator('input[name="personalizationFocus"][value="PROJECT"]').check();
   await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(page.getByText("Contexto actualizado.")).toBeVisible();

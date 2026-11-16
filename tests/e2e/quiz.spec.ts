@@ -48,6 +48,8 @@ test("el docente sube material y la estudiante practica un tema con un quiz que 
   await expect(student.getByRole("button", { name: "Hipotesis falsables: En camino" })).toBeVisible();
 
   const course = await db.course.findUniqueOrThrow({ where: { id: w.course.id } });
+  // La dirección vieja de la ficha abre "Lo que ve mi docente sobre mí", con el mismo dato que ve el docente.
   await student.goto(`/s/courses/${course.id}/ficha`);
-  await expect(student.getByText("dominio 50% (1 intento)")).toBeVisible();
+  await expect(student).toHaveURL(/\/s\/mis-datos#docente$/);
+  await expect(student.locator("#docente").getByText("1 práctica, avance 50 de 100")).toBeVisible();
 });

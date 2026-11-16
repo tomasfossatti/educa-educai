@@ -51,8 +51,10 @@ test("el docente conecta Canvas y crea «Costos de Proyectos» por chat con sus 
 test("el estudiante trae una materia a su carpeta y el chat pregunta si el nombre es ambiguo", async ({ page }) => {
   const w = await world({ students: 1 });
   await login(page, w.students[0]);
-  // El asistente del LMS está en el menú de arriba a la derecha.
+  // El asistente del LMS está en Mis datos (menú de arriba a la derecha).
   await page.getByRole("button", { name: "Abrir menú de usuario" }).click();
+  await page.getByRole("link", { name: "Mis datos" }).first().click();
+  await page.locator("#lms summary").click();
   await page.getByRole("link", { name: "Traer una materia de Canvas o Moodle" }).click();
   await expect(page).toHaveURL(/\/s\/asistente$/);
   await connectCanvas(page, TOKENS.student);
@@ -62,9 +64,11 @@ test("el estudiante trae una materia a su carpeta y el chat pregunta si el nombr
 
   await ask(page, "creá la materia «Costos de Proyectos»");
   await expect(page.getByText(/Listo: «Costos de Proyectos» tiene 16 archivos/)).toBeVisible({ timeout: 45_000 });
+  // "Abrir la materia" la deja como la actual y abre su chat; su material está en Mis datos.
   await page.getByRole("link", { name: "Abrir la materia" }).click();
-  await expect(page).toHaveURL(/\/s\/folders\/[^/]+$/);
-  await expect(page.getByRole("heading", { name: "Costos de Proyectos" })).toBeVisible();
-  await expect(page.getByText("Material de la materia")).toBeVisible();
+  await expect(page).toHaveURL(/\/s$/);
+  await expect(page.getByRole("main").getByRole("heading", { name: "Costos de Proyectos" })).toBeVisible();
+  await page.goto("/s/mis-datos#lms");
+  await expect(page.getByText("Material de la materia: Costos de Proyectos")).toBeVisible();
   await expect(page.getByText(/Costos fijos y variables\.pdf/)).toBeVisible();
 });

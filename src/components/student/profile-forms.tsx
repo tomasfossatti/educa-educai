@@ -6,12 +6,13 @@ import { FormMessage, PendingButton, useActionForm } from "@/components/ui/clien
 import { TEXT } from "@/lib/texts";
 import { deleteAccountAction, updateContextAction } from "@/server/actions/student";
 
+const L = TEXT.student.profileForm;
 const FIELDS = [
   { name: "currentContext", label: TEXT.profile.work, hint: TEXT.profile.workHint, required: false },
-  { name: "interests", label: "Intereses", hint: TEXT.profile.hints.interests, required: false },
-  { name: "goals", label: "Objetivos", hint: TEXT.profile.hints.goals, required: true },
-  { name: "strengths", label: "Fortalezas que percibís", hint: TEXT.profile.hints.strengths, required: false },
-  { name: "difficulties", label: "Dificultades que percibís", hint: TEXT.profile.hints.difficulties, required: false },
+  { name: "interests", label: L.interests, hint: TEXT.profile.hints.interests, required: false },
+  { name: "goals", label: L.goals, hint: TEXT.profile.hints.goals, required: true },
+  { name: "strengths", label: L.strengths, hint: TEXT.profile.hints.strengths, required: false },
+  { name: "difficulties", label: L.difficulties, hint: TEXT.profile.hints.difficulties, required: false },
 ] as const;
 
 type Defaults = Record<(typeof FIELDS)[number]["name"] | "workPreferences", string>;
@@ -25,7 +26,7 @@ export function ContextForm({ defaults, focus }: { defaults: Defaults; focus: "W
         <legend className="text-sm font-medium text-ink">{TEXT.profile.focusQuestion}</legend>
         <p className="text-xs text-muted">{TEXT.profile.focusHint}</p>
         {(["PROJECT", "WORK"] as const).map((value) => (
-          <label key={value} className="flex items-center gap-2 text-sm">
+          <label key={value} className="flex min-h-11 items-center gap-2 text-sm">
             <input type="radio" name="personalizationFocus" value={value} defaultChecked={focus === value} required /> {TEXT.profile.focus[value]}
           </label>
         ))}
@@ -37,13 +38,15 @@ export function ContextForm({ defaults, focus }: { defaults: Defaults; focus: "W
         </Field>
       ))}
       <fieldset className="space-y-2">
-        <legend className="text-sm font-medium text-ink">Cómo preferís trabajar</legend>
+        <legend className="text-sm font-medium text-ink">{L.workPreferences}</legend>
         <p className="text-xs text-muted">{TEXT.profile.hints.workPreferences}</p>
         {TEXT.profile.workPreferenceOptions.map((option) => (
           <Checkbox key={option} name="workPreferences" value={option} label={option} defaultChecked={defaults.workPreferences.split("; ").includes(option)} />
         ))}
       </fieldset>
-      <PendingButton pending={pending}>Guardar cambios</PendingButton>
+      <PendingButton pending={pending} pendingText={L.saving} className="min-h-11">
+        {L.save}
+      </PendingButton>
     </form>
   );
 }
@@ -53,11 +56,11 @@ export function DeleteAccountForm({ email }: { email: string }) {
   return (
     <form method="post" onSubmit={onSubmit} className="max-w-md space-y-3">
       <FormMessage state={state} />
-      <Field label={`Para confirmar, escribí tu email (${email})`} htmlFor="confirmEmail" error={state?.fieldErrors?.confirmEmail}>
+      <Field label={L.confirmEmail(email)} htmlFor="confirmEmail" error={state?.fieldErrors?.confirmEmail}>
         <Input id="confirmEmail" name="confirmEmail" type="email" autoComplete="off" required />
       </Field>
-      <PendingButton pending={pending} variant="danger" pendingText="Eliminando…">
-        Eliminar cuenta y datos
+      <PendingButton pending={pending} variant="danger" pendingText={L.deleting} className="min-h-11">
+        {L.deleteButton}
       </PendingButton>
     </form>
   );

@@ -144,3 +144,28 @@ export async function isAnalyzingLastConversation(viewer: Viewer, folderId: stri
   const status = last?.experience.runs[0]?.status;
   return status === "QUEUED" || status === "RUNNING";
 }
+
+/** Todas las charlas del estudiante (propias y subidas), con la materia a la que pertenecen, para Mis datos. */
+export async function listMyConversations(viewer: Viewer) {
+  if (viewer.role !== "STUDENT") return [];
+  return db.aIConversation.findMany({
+    where: { studentId: viewer.id, folderId: { not: null } },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    select: { id: true, title: true, origin: true, createdAt: true, folder: { select: { name: true, kind: true } } },
+  });
+}
+
+/**
+ * Conclusiones activas sobre el estudiante en una materia, como las puede ver él (sin las que el
+ * docente marcó como incorrectas), para responderlas desde Mis datos.
+ */
+export async function listMyConclusions(viewer: Viewer, courseId: string) {
+  if (viewer.role !== "STUDENT") return [];
+  return db.inference.findMany({
+    where: { studentId: viewer.id, courseId, state: "ACTIVE", reviewStatus: { not: "INCORRECT" } },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: { id: true, statement: true, studentStatement: true, curriculumItem: { select: { title: true } } },
+  });
+}

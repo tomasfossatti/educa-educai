@@ -1,13 +1,13 @@
 import type { FolderContext } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmSubmit } from "@/components/ui/client";
-import { List, ListItem, Notice, Section } from "@/components/ui/layout";
+import { List, ListItem, Notice } from "@/components/ui/layout";
 import { formatRelative } from "@/lib/format";
 import { TEXT } from "@/lib/texts";
 import { deleteContextAction } from "@/server/actions/folders";
 import { EditContextForm } from "./context-form";
 
-/** Contexto de la carpeta: resumen cruzado, hechos (editables y borrables) e historial. */
+/** Lo que la IA sabe del estudiante en una materia: resumen cruzado, hechos (editables y borrables) e historial. */
 export function ContextSection({
   summary,
   facts,
@@ -37,7 +37,8 @@ export function ContextSection({
     </ListItem>
   );
   return (
-    <Section title={t.title} description={t.description}>
+    <div className="space-y-4">
+      <p className="text-sm text-muted">{t.description}</p>
       {!consent && <Notice>{t.noConsent}</Notice>}
       <div className="space-y-6">
         <div className="space-y-2">
@@ -61,6 +62,6 @@ export function ContextSection({
           </details>
         )}
       </div>
-    </Section>
+    </div>
   );
 }

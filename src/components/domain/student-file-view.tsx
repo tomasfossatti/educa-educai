@@ -4,12 +4,42 @@ import { formatDate, formatRelative } from "@/lib/format";
 import { TEXT } from "@/lib/texts";
 import type { StudentFile } from "@/server/services/student-file";
 
+/** Rótulos de la ficha. Cambian las palabras, nunca los datos. */
+export interface StudentFileLabels {
+  profile: string;
+  career: string;
+  year: string;
+  project: string;
+  focusLabel: string;
+  projectLinks: string;
+  noProjectLinks: string;
+  topics: string;
+  doubts: (n: number) => string;
+  mastery: (score: number | null, attempts: number) => string;
+  evidence: string;
+  noEvidence: string;
+  activity: string;
+  noActivity: string;
+  uploaded: string;
+}
+
+const TEACHER_LABELS: StudentFileLabels = { ...TEXT.file, focusLabel: TEXT.profile.focusLabel };
+
 /**
- * Ficha de un estudiante en una materia. La usan el docente y "Mi ficha" del estudiante:
- * un solo componente garantiza que los dos vean exactamente lo mismo (V7).
+ * Ficha de un estudiante en una materia. La usan el docente y "Lo que ve mi docente sobre mí" del
+ * estudiante: un solo componente garantiza que los dos vean exactamente los mismos datos (V7). El
+ * estudiante la ve con rótulos en palabras simples (`labels`); el docente, con los de siempre.
  */
-export function StudentFileView({ file, projectLinks }: { file: StudentFile; projectLinks: { id: string; content: string; createdAt: Date }[] }) {
-  const t = TEXT.file;
+export function StudentFileView({
+  file,
+  projectLinks,
+  labels = TEACHER_LABELS,
+}: {
+  file: StudentFile;
+  projectLinks: { id: string; content: string; createdAt: Date }[];
+  labels?: StudentFileLabels;
+}) {
+  const t = labels;
   return (
     <div className="space-y-10">
       <Section title={t.profile}>
@@ -17,7 +47,7 @@ export function StudentFileView({ file, projectLinks }: { file: StudentFile; pro
           <KeyValue label={t.career}>{file.student.career ?? "—"}</KeyValue>
           <KeyValue label={t.year}>{file.student.studyYear ?? "—"}</KeyValue>
           <KeyValue label={t.project}>{file.student.projectDescription ?? "—"}</KeyValue>
-          <KeyValue label={TEXT.profile.focusLabel}>{TEXT.profile.focusShort[file.student.personalizationFocus]}</KeyValue>
+          <KeyValue label={t.focusLabel}>{TEXT.profile.focusShort[file.student.personalizationFocus]}</KeyValue>
         </dl>
       </Section>
 
