@@ -3,6 +3,7 @@
 import type { ActionType, ReviewStatus } from "@prisma/client";
 import { refresh } from "@/server/next-refresh";
 import { notFound, redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 import { activityPromptsSchema } from "@/domain/activity";
 import { fieldErrorsFrom, optionalText, text, type ActionState } from "@/lib/forms";
@@ -13,7 +14,7 @@ import { requireCourseTeacher, requireTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { computeAndStoreSnapshot } from "@/server/engine/snapshot";
 import { EVENT, track } from "@/server/events";
-import { startCurriculumExtraction } from "@/server/services/curriculum";
+import { claimMaterialProposal, runCurriculumExtraction, startCurriculumExtraction } from "@/server/services/curriculum";
 import { approveSlides, createClassSession, generateSlides, SlidesError, updateSlides } from "@/server/services/class-sessions";
 import { createCourseForTeacher } from "@/server/services/courses";
 import { ingestMaterial, MaterialError } from "@/server/services/material";
@@ -82,6 +83,13 @@ const itemStatusSchema = z.enum(["ACCEPTED", "ARCHIVED", "PROPOSED"]);
 export async function setCurriculumItemStatusAction(itemId: string, status: "ACCEPTED" | "ARCHIVED" | "PROPOSED"): Promise<void> {
   const item = await ownedItem(itemId);
   await db.curriculumItem.update({ where: { id: item.id }, data: { status: itemStatusSchema.parse(status) } });
+  refresh();
+}
+
+/** Propone los temas con el material de la cátedra, sin programa. Corre después de responder. */
+export async function proposeCurriculumFromMaterialAction(courseId: string): Promise<void> {
+  const { user } = await requireCourseTeacher(courseId);
+  if (await claimMaterialProposal(courseId, user.id)) after(() => runCurriculumExtraction(courseId, user.id, null));
   refresh();
 }
 

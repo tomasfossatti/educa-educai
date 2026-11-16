@@ -8,7 +8,8 @@ import { TEXT } from "@/lib/texts";
 import { requireUser } from "@/server/auth/guards";
 import { LmsError } from "@/server/lms";
 import { createExtensionCode, getExtensionStatus, type ExtensionStage } from "@/server/services/lms-extension";
-import { connectLms, disconnectLms, getLmsConnection, getLmsImportStatus, LmsServiceError, runLmsImport, type ImportStatus } from "@/server/services/lms";
+import { runCurriculumExtraction } from "@/server/services/curriculum";
+import { claimTopicsForImport, connectLms, disconnectLms, getLmsConnection, getLmsImportStatus, LmsServiceError, runLmsImport, type ImportStatus } from "@/server/services/lms";
 import { lmsAssistantTurn, type AssistantMessage, type AssistantTurn } from "@/server/services/lms-assistant";
 
 /** Docente o estudiante: cada uno conecta su propio LMS e importa a lo suyo. */
@@ -69,6 +70,18 @@ export async function lmsImportStatusAction(importId: string): Promise<ImportSta
   } catch {
     return null;
   }
+}
+
+/**
+ * Con la importación lista, la IA propone los temas de la cátedra. Va en su propio pedido para tener el
+ * tope de tiempo completo y no depender de lo que tardó la descarga.
+ */
+export async function proposeTopicsAction(importId: string): Promise<boolean> {
+  const viewer = await lmsViewer();
+  const claimed = await claimTopicsForImport(viewer, String(importId));
+  if (!claimed) return false;
+  after(() => runCurriculumExtraction(claimed.courseId, viewer.id, null));
+  return true;
 }
 
 /** Origen público de Educai para el código (Vercel lo manda en x-forwarded-*). */

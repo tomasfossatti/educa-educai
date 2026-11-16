@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · La propuesta de temas corre en su propio pedido y no queda trabada
+Contexto: con «Taller de innovación», Tomás vio la materia en «Procesando programa». La propuesta corría al final de la importación, en el mismo proceso en segundo plano, y Vercel corta ese proceso a los 5 minutos (`maxDuration` del asistente). La descarga de 16 PDF más una llamada a la IA gratuita (hasta 3 minutos, con un reintento) puede pasarse; si se corta, la currícula quedaba en EXTRACTING para siempre, sin forma de reintentar desde la pantalla.
+Alternativas: subir el tope (el plan de Vercel lo limita); una cola de trabajos (infraestructura nueva); separar la propuesta en otro pedido y recuperar las que se cortan.
+Decisión: la importación solo avisa. Cuando el chat ve la importación lista, pide la propuesta en otro pedido (`proposeTopicsAction`), con el tope completo. La reserva es atómica (no corre dos veces). Una currícula en EXTRACTING por más de 6 minutos pasa a «con error» al abrir el inicio o «Currícula». En «Currícula» hay un botón «Proponer temas con el material» para pedirla sin el chat.
+Consecuencias: sin migración. Si la persona cierra el chat antes de que termine la descarga, la propuesta se pide desde «Currícula».
+
 ### 2026-11-16 · La importación del LMS propone los temas sin pedir el programa
 Contexto: Tomás trajo «Costos de proyectos» con el asistente y la materia quedó en «Currícula sin cargar». Para tener temas había que subir el programa a mano, cuando el pedido era justamente que lo hiciera el asistente. Sin temas aprobados no hay dudas por tema, dominio, quiz ni slides.
 Alternativas: buscar el programa en Canvas (no todas las cátedras lo publican y en Siglo 21 no está confirmado); proponer los temas con las lecturas importadas; aprobar los temas sin revisión (el spec pide que el docente los apruebe).

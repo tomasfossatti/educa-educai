@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/button";
 import { requireTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { recoverStaleExtractions } from "@/server/services/curriculum";
 
 export const metadata: Metadata = { title: "Tus materias" };
 
@@ -44,6 +45,7 @@ function CourseStatusIcon({ type }: { type: CourseStatusType }) {
 
 export default async function TeacherHome() {
   const { user } = await requireTeacher();
+  await recoverStaleExtractions(user.id);
   const courses = await db.course.findMany({
     where: { teacherId: user.id },
     orderBy: { createdAt: "desc" },

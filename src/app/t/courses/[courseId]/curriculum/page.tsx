@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { TEXT } from "@/lib/texts";
 import { Badge } from "@/components/ui/badge";
 import { AutoRefresh, SubmitButton } from "@/components/ui/client";
 import { EmptyState, List, ListItem, Notice, PageHeader, Section } from "@/components/ui/layout";
 import { curriculumKindPlural } from "@/domain/labels";
-import { acceptAllProposedAction, confirmCurriculumAction, setCurriculumItemStatusAction } from "@/server/actions/teacher";
+import { acceptAllProposedAction, confirmCurriculumAction, proposeCurriculumFromMaterialAction, setCurriculumItemStatusAction } from "@/server/actions/teacher";
 import { isAIConfigured } from "@/server/ai";
 import { requireCourseTeacher } from "@/server/auth/guards";
 import { db } from "@/server/db";
+import { canProposeFromMaterial, recoverStaleExtractions } from "@/server/services/curriculum";
 import { ItemForm, ProgramForm } from "./forms";
 
 export const metadata: Metadata = { title: "Currícula" };
@@ -15,7 +17,10 @@ const KINDS = ["CONCEPT", "OBJECTIVE", "COMPETENCY", "CRITERION"] as const;
 
 export default async function CurriculumPage({ params }: { params: Promise<{ courseId: string }> }) {
   const { courseId } = await params;
-  const { course } = await requireCourseTeacher(courseId);
+  const { user, course: loaded } = await requireCourseTeacher(courseId);
+  // Una propuesta que se cortó a mitad de camino no puede quedar "procesando" para siempre.
+  const recovered = loaded.curriculumStatus === "EXTRACTING" && (await recoverStaleExtractions(user.id)) > 0;
+  const course = recovered ? await db.course.findUniqueOrThrow({ where: { id: courseId } }) : loaded;
   const items = await db.curriculumItem.findMany({
     where: { courseId },
     orderBy: [{ kind: "asc" }, { position: "asc" }],
@@ -26,6 +31,7 @@ export default async function CurriculumPage({ params }: { params: Promise<{ cou
   const parents = items.filter((i) => (i.kind === "OBJECTIVE" || i.kind === "COMPETENCY") && i.status !== "ARCHIVED").map((i) => ({ id: i.id, title: i.title }));
   const extracting = course.curriculumStatus === "EXTRACTING";
   const aiReady = isAIConfigured();
+  const fromMaterial = aiReady && (await canProposeFromMaterial(courseId, user.id));
 
   return (
     <>
@@ -65,6 +71,14 @@ export default async function CurriculumPage({ params }: { params: Promise<{ cou
         )}
 
         {(course.curriculumStatus === "NOT_STARTED" || course.curriculumStatus === "FAILED") && (
+          <>
+          {fromMaterial && (
+            <Section title={TEXT.curriculum.fromMaterial.title} description={TEXT.curriculum.fromMaterial.description}>
+              <form action={proposeCurriculumFromMaterialAction.bind(null, courseId)}>
+                <SubmitButton pendingText={TEXT.curriculum.fromMaterial.pending}>{TEXT.curriculum.fromMaterial.button}</SubmitButton>
+              </form>
+            </Section>
+          )}
           <Section title="Cargar el programa" description="Educai propone una estructura; vos la revisás y la confirmás.">
             {aiReady ? (
               <ProgramForm courseId={courseId} defaultText={course.programText ?? ""} />
@@ -72,6 +86,7 @@ export default async function CurriculumPage({ params }: { params: Promise<{ cou
               <Notice tone="attention">El servicio de IA no está configurado. Podés cargar los ítems manualmente abajo.</Notice>
             )}
           </Section>
+          </>
         )}
 
         {items.length > 0 && (

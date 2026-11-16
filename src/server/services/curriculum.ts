@@ -136,20 +136,39 @@ export async function programTextFromMaterial(courseId: string): Promise<string 
 }
 
 /**
- * Después de traer una materia del LMS: si el docente todavía no cargó el programa, la IA propone los
- * temas a partir del material importado. Quedan "propuestos" hasta que el docente los revise y confirme,
- * como con el programa. No toca una currícula en revisión o ya configurada.
+ * Reserva la propuesta de temas con el material: pasa la currícula a EXTRACTING solo si está sin cargar
+ * o con error y la cátedra es del docente. Es atómico, así que dos pedidos simultáneos no la corren dos
+ * veces. Devuelve true si quien llama tiene que correr la extracción (`runCurriculumExtraction`).
  */
-export async function proposeCurriculumFromMaterial(courseId: string, teacherId: string): Promise<boolean> {
-  const course = await db.course.findUnique({ where: { id: courseId }, select: { teacherId: true, curriculumStatus: true } });
-  if (!course || course.teacherId !== teacherId) return false;
-  if (course.curriculumStatus !== "NOT_STARTED" && course.curriculumStatus !== "FAILED") return false;
+export async function claimMaterialProposal(courseId: string, teacherId: string): Promise<boolean> {
+  const course = await db.course.findFirst({ where: { id: courseId, teacherId }, select: { curriculumStatus: true } });
+  if (!course || (course.curriculumStatus !== "NOT_STARTED" && course.curriculumStatus !== "FAILED")) return false;
   const programText = await programTextFromMaterial(courseId);
   if (!programText) return false;
-  await db.course.update({
-    where: { id: courseId },
-    data: { curriculumStatus: "EXTRACTING", curriculumError: null, programText, programFileName: null },
+  const { count } = await db.course.updateMany({
+    where: { id: courseId, teacherId, curriculumStatus: { in: ["NOT_STARTED", "FAILED"] } },
+    data: { curriculumStatus: "EXTRACTING", curriculumError: null, curriculumNotes: null, programText, programFileName: null },
   });
-  await runCurriculumExtraction(courseId, teacherId, null);
-  return true;
+  return count === 1;
+}
+
+/** ¿Se pueden proponer los temas con el material? Currícula sin cargar o con error, y material listo. */
+export async function canProposeFromMaterial(courseId: string, teacherId: string): Promise<boolean> {
+  const course = await db.course.findFirst({ where: { id: courseId, teacherId }, select: { curriculumStatus: true } });
+  if (!course || (course.curriculumStatus !== "NOT_STARTED" && course.curriculumStatus !== "FAILED")) return false;
+  return (await db.material.count({ where: { courseId, status: "READY" } })) > 0;
+}
+
+/**
+ * Una extracción corre en segundo plano con un tope de 5 minutos (Vercel). Si el proceso se corta, la
+ * materia quedaría en EXTRACTING para siempre: pasado este plazo se da por fallida y se puede pedir de nuevo.
+ */
+export const STALE_EXTRACTION_MS = 6 * 60 * 1000;
+
+export async function recoverStaleExtractions(teacherId: string, now = new Date()): Promise<number> {
+  const { count } = await db.course.updateMany({
+    where: { teacherId, curriculumStatus: "EXTRACTING", updatedAt: { lt: new Date(now.getTime() - STALE_EXTRACTION_MS) } },
+    data: { curriculumStatus: "FAILED", curriculumError: "La propuesta de temas se interrumpió antes de terminar. Pedila de nuevo." },
+  });
+  return count;
 }
