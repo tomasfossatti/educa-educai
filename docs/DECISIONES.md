@@ -14,6 +14,12 @@ Consecuencias: qué cambia en el código, los datos o el spec.
 
 ## Decisiones de la construcción
 
+### 2026-11-16 · Un estudiante quitado vuelve solo si el docente lo invita
+Contexto: en la ronda de QA, el docente quitó a una estudiante ("Dejarás de ver su información en este curso") y ella volvió a entrar con el código de la materia, sin que el docente hiciera nada. Al revés, invitarla de nuevo por email no hacía nada, porque su invitación ya figuraba como aceptada. El spec no dice qué pasa al quitar a alguien.
+Alternativas: dejar que el código la reactive (el docente pierde el control de quién está); cambiar el código de la materia cada vez que se quita a alguien (afecta a toda la clase); bloquear el código para quien fue quitado y reabrir la invitación por email.
+Decisión: el código no reactiva una inscripción quitada y le explica al estudiante que le pida a su docente que lo invite. Invitar de nuevo un email cuya invitación ya se aceptó, y que hoy no está inscripto, la vuelve a abrir; al aceptarla, la inscripción se reactiva.
+Consecuencias: sin migración. La lógica pasa a `src/server/services/enrollment.ts`, con tests de integración.
+
 ### 2026-11-16 · La propuesta de temas corre en su propio pedido y no queda trabada
 Contexto: con «Taller de innovación», Tomás vio la materia en «Procesando programa». La propuesta corría al final de la importación, en el mismo proceso en segundo plano, y Vercel corta ese proceso a los 5 minutos (`maxDuration` del asistente). La descarga de 16 PDF más una llamada a la IA gratuita (hasta 3 minutos, con un reintento) puede pasarse; si se corta, la currícula quedaba en EXTRACTING para siempre, sin forma de reintentar desde la pantalla.
 Alternativas: subir el tope (el plan de Vercel lo limita); una cola de trabajos (infraestructura nueva); separar la propuesta en otro pedido y recuperar las que se cortan.

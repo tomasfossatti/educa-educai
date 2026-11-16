@@ -17,6 +17,7 @@ import { EVENT, track } from "@/server/events";
 import { claimMaterialProposal, runCurriculumExtraction, startCurriculumExtraction } from "@/server/services/curriculum";
 import { approveSlides, createClassSession, generateSlides, SlidesError, updateSlides } from "@/server/services/class-sessions";
 import { createCourseForTeacher } from "@/server/services/courses";
+import { inviteEmails } from "@/server/services/enrollment";
 import { ingestMaterial, MaterialError } from "@/server/services/material";
 
 // ───────────── Materia ─────────────
@@ -261,7 +262,7 @@ export async function inviteStudentsAction(_prev: ActionState | null, formData: 
     return { error: invalid.length ? `Emails inválidos: ${invalid.join(", ")}` : "Ingresá al menos un email o subí un CSV.", fieldErrors: { emails: "Revisá la lista." } };
   }
   if (emails.length > 200) return { error: "Máximo 200 emails por vez." };
-  await db.courseInvite.createMany({ data: emails.map((email) => ({ courseId, email })), skipDuplicates: true });
+  await inviteEmails(courseId, emails);
   refresh();
   return {
     ok: true,

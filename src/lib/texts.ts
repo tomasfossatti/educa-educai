@@ -90,6 +90,11 @@ export const TEXT = {
     focusRequired: "Elegí de dónde salen los ejemplos.",
     workRequiredForFocus: "Contanos qué hacés hoy para poder usarlo en los ejemplos.",
   },
+  enrollment: {
+    invalidCode: "El código tiene 6 caracteres (letras y números).",
+    unknownCode: "No encontramos una materia con ese código.",
+    removed: "Tu docente te quitó de esta materia. Si querés volver, pedile que te invite de nuevo.",
+  },
   folders: {
     sectionTitle: "Tus carpetas",
     sectionDescription: "Conversá con la IA sobre cada materia y sobre tu proyecto. Las respuestas citan el material de la cátedra.",

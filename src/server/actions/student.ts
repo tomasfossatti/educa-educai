@@ -14,6 +14,7 @@ import { db } from "@/server/db";
 import { onConversationClosed, queueInterpretation, retryInterpretation } from "@/server/engine/trigger";
 import { EVENT, track } from "@/server/events";
 import { setAnalysisConsent } from "@/server/services/consent";
+import { enrollWithCode } from "@/server/services/enrollment";
 import { ensureStudentFolders } from "@/server/services/folders";
 import { deleteExperienceCascade, deleteStudentAccount } from "@/server/services/privacy";
 import { ImproveTextError, improveProfileText } from "@/server/services/profile-writing";
@@ -89,20 +90,6 @@ function contextData(v: z.infer<typeof contextSchema>) {
 
 async function setCurrentCourse(courseId: string) {
   (await cookies()).set(CURRENT_COURSE_COOKIE, courseId, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 180 });
-}
-
-async function enrollWithCode(studentId: string, rawCode: string): Promise<{ courseId: string } | { error: string }> {
-  const code = rawCode.replace(/\s+/g, "").toUpperCase();
-  if (!/^[A-Z0-9]{6}$/.test(code)) return { error: "El código tiene 6 caracteres (letras y números)." };
-  const course = await db.course.findUnique({ where: { joinCode: code } });
-  if (!course) return { error: "No encontramos una materia con ese código." };
-  await db.enrollment.upsert({
-    where: { courseId_studentId: { courseId: course.id, studentId } },
-    create: { courseId: course.id, studentId },
-    update: { status: "ACTIVE" },
-  });
-  await ensureStudentFolders(studentId);
-  return { courseId: course.id };
 }
 
 export async function completeOnboardingAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {
