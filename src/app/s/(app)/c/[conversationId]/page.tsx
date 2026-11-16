@@ -5,52 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { AutoRefresh, ConfirmSubmit, SubmitButton } from "@/components/ui/client";
 import { EmptyState, List, ListItem, Notice, PageHeader, Quote, Section } from "@/components/ui/layout";
 import { cn } from "@/lib/cn";
+import { ChatMessages } from "@/components/student/chat-messages";
 import { TEXT } from "@/lib/texts";
 import { requireStudent } from "@/server/auth/guards";
 import { deleteFolderConversationAction, respondToDoubtAction } from "@/server/actions/folders";
 import { closeConversationAction } from "@/server/actions/student";
 import { listConversationDoubts } from "@/server/services/doubts";
-import { getOwnFolderConversation, type MessageCitations } from "@/server/services/folder-chat";
-import { AskForm } from "./ask-form";
-import { SelectionAsk } from "./selection-ask";
+import { getOwnFolderConversation } from "@/server/services/folder-chat";
+import { AskForm } from "@/components/student/ask-form";
+import { SelectionAsk } from "@/components/student/selection-ask";
 import { BudgetNotice } from "@/components/student/budget-notice";
 
 export const metadata: Metadata = { title: "Charla" };
-
-type Msg = { id: string; role: "STUDENT" | "TUTOR"; content: string; citations: unknown };
-
-/** Mensajes con sus fuentes; cada fuente muestra el texto citado (seleccionable para preguntar sobre él). */
-function Messages({ messages, chunks }: { messages: Msg[]; chunks: Map<string, string> }) {
-  const t = TEXT.student.ask;
-  return (
-    <ol className="space-y-4">
-      {messages.map((m) => {
-        const citations = m.citations as MessageCitations | null;
-        const isStudent = m.role === "STUDENT";
-        return (
-          <li key={m.id} className={cn("rounded-xl border p-4", isStudent ? "border-line bg-surface-2" : "border-line bg-surface")}>
-            <p className="mb-1 text-xs font-medium text-muted">{isStudent ? t.you : t.ai}</p>
-            <p className="whitespace-pre-wrap text-base text-ink">{m.content}</p>
-            {!isStudent && citations?.items.length ? (
-              <div className="mt-3 space-y-1 border-t border-line pt-2 text-sm text-muted">
-                <span className="font-medium">{t.sources}</span>
-                {citations.items.map((c) => (
-                  <details key={c.n}>
-                    <summary className="cursor-pointer py-1">
-                      [{c.n}] {t.source(c.fileName, c.page)} · {t.seeText}
-                    </summary>
-                    <p className="mt-1 whitespace-pre-wrap text-ink-2">{chunks.get(c.chunkId) ?? "—"}</p>
-                  </details>
-                ))}
-              </div>
-            ) : null}
-            {!isStudent && citations?.noSource && <p className="mt-3 text-sm text-attention">{t.noSource}</p>}
-          </li>
-        );
-      })}
-    </ol>
-  );
-}
 
 /** Una charla del estudiante: el único chat, con citas del material y preguntas sobre un pedazo de texto. */
 export default async function ConversationPage({
@@ -84,7 +50,7 @@ export default async function ConversationPage({
       ) : (
         <div className={cn("grid gap-6", openThread && "lg:grid-cols-[1fr_22rem]")}>
           <SelectionAsk conversationId={conversation.id}>
-            <Messages messages={conversation.messages} chunks={chunks} />
+            <ChatMessages messages={conversation.messages} chunks={chunks} />
           </SelectionAsk>
           {openThread && (
             <aside className="space-y-3 rounded-xl border border-primary/30 p-4" aria-label={t.threadTitle}>
@@ -93,7 +59,7 @@ export default async function ConversationPage({
                 <TextLink href={base}>{t.closeThread}</TextLink>
               </div>
               <Quote>{openThread.anchor}</Quote>
-              <Messages messages={openThread.messages} chunks={chunks} />
+              <ChatMessages messages={openThread.messages} chunks={chunks} />
               {conversation.status === "ACTIVE" && <AskForm conversationId={conversation.id} threadId={openThread.id} />}
             </aside>
           )}

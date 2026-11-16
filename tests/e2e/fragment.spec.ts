@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { makePdf } from "./documents";
-import { login, world } from "./support";
+import { askFromHome, login, world } from "./support";
 
 async function uploadMaterial(page: Page, courseId: string) {
   await page.goto(`/t/courses/${courseId}/material`);
@@ -43,13 +43,8 @@ test("pregunta sobre un fragmento seleccionado sin perder la conversación princ
 
   const page = await browser.newPage();
   await login(page, w.students[0]);
-  await page.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
-  await page.waitForURL("**/s/folders/**");
-  await page.getByRole("button", { name: "Nueva conversación" }).click();
-  await page.waitForURL("**/c/**");
-  await page.waitForLoadState("networkidle");
-  await page.fill("textarea[name=question]", "¿Qué hace falsable a una hipótesis?");
-  await page.getByRole("button", { name: "Preguntar", exact: true }).click();
+  // El inicio es el chat de la materia: se pregunta sin abrir nada antes.
+  await askFromHome(page, "¿Qué hace falsable a una hipótesis?");
   await expect(page.getByText("Fuentes:")).toBeVisible();
 
   // El fragmento citado se puede ver debajo de la respuesta.

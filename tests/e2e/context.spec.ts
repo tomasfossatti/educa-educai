@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { login, world } from "./support";
+import { login, subjectFolderUrl, world } from "./support";
 
 async function chatAndFinish(page: Page, folderUrl: string, questions: string[]) {
   await page.goto(folderUrl);
@@ -20,9 +20,7 @@ async function chatAndFinish(page: Page, folderUrl: string, questions: string[])
 test("la IA guarda hechos de la carpeta y la estudiante los corrige y borra", async ({ page }) => {
   const w = await world();
   await login(page, w.students[0]);
-  await page.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
-  await page.waitForURL("**/s/folders/**");
-  const folderUrl = page.url();
+  const folderUrl = await subjectFolderUrl(w.students[0].id, w.course.id);
 
   await chatAndFinish(page, folderUrl, ["No sé cómo medir una hipótesis", "¿Sirven las encuestas?"]);
   await chatAndFinish(page, folderUrl, ["Ahora pregunto por segmentación", "¿Por edad alcanza?"]);

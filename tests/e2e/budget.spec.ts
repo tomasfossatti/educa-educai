@@ -12,10 +12,7 @@ test("tope semanal de IA: aviso al 80% y chat en pausa al llegar al tope", async
   const w = await world();
   const student = w.students[0];
   await login(page, student);
-  await page.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
-  await page.waitForURL("**/s/folders/**");
-  await page.getByRole("button", { name: "Nueva conversación" }).click();
-  await page.waitForURL("**/c/**");
+  await page.goto("/s");
   await page.waitForLoadState("networkidle");
   await expect(page.getByText("cupo semanal de IA")).toHaveCount(0);
 

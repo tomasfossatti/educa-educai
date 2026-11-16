@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { makePdf } from "./documents";
-import { db, login, world } from "./support";
+import { db, login, subjectFolderUrl, world } from "./support";
 
 test("el docente sube material y la estudiante hace un quiz del tema y ve su dominio", async ({ browser }) => {
   const w = await world();
@@ -18,8 +18,7 @@ test("el docente sube material y la estudiante hace un quiz del tema y ve su dom
 
   const student = await browser.newPage();
   await login(student, w.students[0]);
-  await student.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
-  await student.waitForURL("**/s/folders/**");
+  await student.goto(await subjectFolderUrl(w.students[0].id, w.course.id));
   const topic = student.locator("li", { hasText: "Hipotesis falsables" });
   await expect(topic.getByText("Sin intentos")).toBeVisible();
   await topic.getByRole("button", { name: "Hacer quiz" }).click();

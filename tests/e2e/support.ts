@@ -57,3 +57,17 @@ export async function login(page: Page, who: Person) {
   await page.waitForURL((u) => !u.pathname.startsWith("/login"));
   await page.waitForLoadState("networkidle");
 }
+
+/** Dirección de la carpeta de la materia de un estudiante (la crea el panel al entrar). */
+export async function subjectFolderUrl(studentId: string, courseId: string): Promise<string> {
+  const folder = await db.folder.findFirstOrThrow({ where: { studentId, courseId, kind: "SUBJECT" } });
+  return `/s/folders/${folder.id}`;
+}
+
+/** Pregunta desde el inicio, que es el chat de la materia actual, y espera ver la pregunta. */
+export async function askFromHome(page: Page, question: string) {
+  await page.goto("/s");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("textbox", { name: "Tu pregunta" }).fill(question);
+  await page.getByRole("button", { name: "Preguntar", exact: true }).click();
+}

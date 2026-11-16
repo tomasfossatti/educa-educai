@@ -471,7 +471,7 @@ export const TEXT = {
       threadTitle: "Pregunta sobre un pedazo de texto",
       closeThread: "Cerrar",
       threads: (n: number) => `Preguntas sobre pedazos de texto (${n})`,
-      nextClass: (date: string, topics: string) => `Próxima clase: ${date} · ${topics}`,
+      nextClass: (date: string, topics: string) => `Próxima clase del ${date}: ${topics}`,
       closed: "Esta charla terminó. Podés empezar otra.",
       error: "No pude responder. Probá de nuevo en un rato.",
     },

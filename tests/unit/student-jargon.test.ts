@@ -25,7 +25,6 @@ const FICHA_ALLOWED_FILES = [/^src\/app\/s\/\(app\)\/mis-datos\//];
 /** Bloques de TEXT que usan pantallas viejas, en transición. Se vacía en el PR 12. */
 const TRANSITIONAL_BLOCKS: string[] = [
   "chat",
-  "classes",
   "consent",
   "context",
   "doubts",
@@ -47,7 +46,6 @@ const TRANSITIONAL_FILES: string[] = [
   "src/app/s/(app)/courses/[courseId]/development/page.tsx",
   "src/app/s/(app)/courses/[courseId]/evidence/[evidenceId]/page.tsx",
   "src/app/s/(app)/courses/[courseId]/inferences/[inferenceId]/page.tsx",
-  "src/app/s/(app)/page.tsx",
   "src/app/s/onboarding/onboarding-form.tsx",
 ];
 

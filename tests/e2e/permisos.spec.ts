@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { db, login, world } from "./support";
+import { askFromHome, db, login, subjectFolderUrl, world } from "./support";
 
 /**
  * Intentos de acceso cambiando ids en la URL (V3, V4, V8): cada uno tiene que terminar en la
@@ -29,16 +29,10 @@ test("ni otro estudiante ni el docente de otra cátedra abren datos ajenos cambi
   // Ana conversa en su carpeta de la materia A.
   const anaPage = await browser.newPage();
   await login(anaPage, ana);
-  await anaPage.locator('a[href^="/s/folders/"]', { hasText: "Materia" }).first().click();
-  await anaPage.waitForURL("**/s/folders/**");
-  const folderUrl = new URL(anaPage.url()).pathname;
-  await anaPage.getByRole("button", { name: "Nueva conversación" }).click();
-  await anaPage.waitForURL("**/c/**");
-  await anaPage.waitForLoadState("networkidle");
-  await anaPage.fill("textarea[name=question]", secret);
-  await anaPage.getByRole("button", { name: "Preguntar", exact: true }).click();
+  await askFromHome(anaPage, secret);
   await expect(anaPage.getByText(secret)).toBeVisible();
-  const conversationUrl = new URL(anaPage.url()).pathname;
+  const folderUrl = await subjectFolderUrl(ana.id, a.course.id);
+  const conversationUrl = `/s/c/${(await db.aIConversation.findFirstOrThrow({ where: { studentId: ana.id } })).id}`;
 
   // Evidencia derivada de esa conversación, como la dejaría el motor.
   const conversation = await db.aIConversation.findFirstOrThrow({ where: { studentId: ana.id } });
