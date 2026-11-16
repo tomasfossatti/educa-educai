@@ -34,7 +34,6 @@ const TRANSITIONAL_BLOCKS: string[] = [
   "material",
   "myData",
   "profile",
-  "quiz",
   "upload",
 ];
 /** Archivos de pantallas viejas, en transición. Se vacía en el PR 12. */

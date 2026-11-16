@@ -99,3 +99,33 @@ export async function citedChunks(folder: { folderId: string; courseId: string |
   const rows = await db.materialChunk.findMany({ where: { id: { in: ids }, ...scope }, select: { id: true, text: true } });
   return new Map(rows.map((r) => [r.id, r.text]));
 }
+
+/**
+ * Temas aprobados de la materia actual, con el registro de avance del propio estudiante.
+ * Una materia sin cátedra (LMS o proyecto) no tiene temas aprobados.
+ */
+export async function getPanelTopics(viewer: Viewer, option: PanelOption) {
+  await assertFolderOwner(viewer, option.folderId);
+  if (!option.courseId) return [];
+  return db.curriculumItem.findMany({
+    where: { courseId: option.courseId, status: "ACCEPTED", kind: "CONCEPT" },
+    orderBy: { position: "asc" },
+    select: {
+      id: true,
+      title: true,
+      masteryRecords: { where: { studentId: viewer.id }, select: { score: true, attempts: true } },
+    },
+  });
+}
+
+/** Tareas publicadas por el docente de la materia actual (solo si el estudiante está inscripto). */
+export async function getPanelTasks(viewer: Viewer, option: PanelOption) {
+  if (!option.courseId) return [];
+  const enrolled = await db.enrollment.findFirst({ where: { studentId: viewer.id, courseId: option.courseId, status: "ACTIVE" } });
+  if (!enrolled) return [];
+  return db.activity.findMany({
+    where: { courseId: option.courseId, status: "PUBLISHED" },
+    orderBy: { publishedAt: "desc" },
+    select: { id: true, title: true },
+  });
+}

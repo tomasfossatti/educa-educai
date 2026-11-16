@@ -5,7 +5,6 @@ import { notFound, redirect } from "next/navigation";
 import { text, type ActionState } from "@/lib/forms";
 import { TEXT } from "@/lib/texts";
 import { AIError } from "@/server/ai";
-import { budgetResetLabel } from "@/server/ai/budget";
 import { AccessDenied, requireStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { respondToSignal } from "@/server/services/doubts";
@@ -18,11 +17,6 @@ import { createQuiz, QuizError, submitQuiz } from "@/server/services/quiz";
 async function viewer() {
   const { user } = await requireStudent();
   return { id: user.id, role: user.role };
-}
-
-/** Mensaje para el estudiante cuando falla la IA: el tope semanal tiene su propio aviso. */
-function aiErrorMessage(error: AIError): string {
-  return error.kind === "budget_exceeded" ? TEXT.budget.exceeded(budgetResetLabel()) : TEXT.chat.aiUnavailable;
 }
 
 function denyAsNotFound(error: unknown): never {
@@ -100,17 +94,21 @@ export async function deleteFolderConversationAction(conversationId: string): Pr
   redirect(conversation.folderId ? `/s/folders/${conversation.folderId}` : "/s");
 }
 
+/**
+ * Practicar un tema: arma el quiz y lo abre. Si no se puede, vuelve a Practicar con un aviso simple
+ * (`error`: sin material suficiente, tope semanal o la IA no respondió).
+ */
 export async function startQuizAction(folderId: string, topicId: string): Promise<void> {
   const v = await viewer();
   let quizId: string;
   try {
     quizId = (await createQuiz(v, folderId, topicId)).id;
   } catch (error) {
-    if (error instanceof QuizError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(error.message)}`);
-    if (error instanceof AIError) redirect(`/s/folders/${folderId}?quizError=${encodeURIComponent(aiErrorMessage(error))}`);
+    if (error instanceof QuizError) redirect("/s/practicar?error=notEnough");
+    if (error instanceof AIError) redirect(`/s/practicar?error=${error.kind === "budget_exceeded" ? "budget" : "busy"}`);
     denyAsNotFound(error);
   }
-  redirect(`/s/folders/${folderId}/quiz/${quizId}`);
+  redirect(`/s/practicar/${quizId}`);
 }
 
 export async function submitQuizAction(_prev: ActionState | null, formData: FormData): Promise<ActionState> {

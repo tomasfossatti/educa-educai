@@ -6,7 +6,7 @@ import { SubmitButton } from "@/components/ui/client";
 import { EmptyState, List, ListItem, Notice, PageHeader, Section } from "@/components/ui/layout";
 import { formatRelative } from "@/lib/format";
 import { TEXT } from "@/lib/texts";
-import { startFolderConversationAction, startQuizAction } from "@/server/actions/folders";
+import { startFolderConversationAction } from "@/server/actions/folders";
 import { AccessDenied, assertFolderOwner, requireStudent } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { listFolderContext } from "@/server/services/folder-context";
@@ -17,15 +17,8 @@ import { BudgetNotice } from "@/components/student/budget-notice";
 
 export const metadata: Metadata = { title: TEXT.folders.sectionTitle };
 
-export default async function FolderPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ folderId: string }>;
-  searchParams: Promise<{ quizError?: string }>;
-}) {
+export default async function FolderPage({ params }: { params: Promise<{ folderId: string }> }) {
   const { folderId } = await params;
-  const { quizError } = await searchParams;
   const { user, profile } = await requireStudent();
   const folder = await assertFolderOwner({ id: user.id, role: user.role }, folderId).catch((e) => {
     if (e instanceof AccessDenied) notFound();
@@ -39,13 +32,6 @@ export default async function FolderPage({
   const context = await listFolderContext({ id: user.id, role: user.role }, folderId);
   // Carpeta de una materia traída del LMS por el estudiante: su propio material (solo lo ve él).
   const ownMaterial = folder.kind === "SUBJECT" && !folder.courseId ? await listMaterials({ folderId }) : null;
-  const topics = folder.courseId
-    ? await db.curriculumItem.findMany({
-        where: { courseId: folder.courseId, status: "ACCEPTED", kind: "CONCEPT" },
-        orderBy: { position: "asc" },
-        select: { id: true, title: true, masteryRecords: { where: { studentId: user.id }, select: { score: true } } },
-      })
-    : [];
 
   return (
     <div className="shell space-y-10">
@@ -79,26 +65,6 @@ export default async function FolderPage({
           </List>
         )}
       </Section>
-      {folder.courseId && topics.length > 0 && (
-        <Section title={TEXT.quiz.practiceTitle} description={TEXT.quiz.practiceDescription}>
-          {quizError && <Notice tone="attention">{quizError}</Notice>}
-          <List>
-            {topics.map((topic) => (
-              <ListItem key={topic.id} className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-sm text-ink">{topic.title}</span>
-                <span className="flex items-center gap-2">
-                  <Badge tone="muted">{topic.masteryRecords[0] ? TEXT.quiz.mastery(topic.masteryRecords[0].score) : TEXT.quiz.noMastery}</Badge>
-                  <form action={startQuizAction.bind(null, folderId, topic.id)}>
-                    <SubmitButton size="sm" variant="secondary" pendingText={TEXT.quiz.starting}>
-                      {TEXT.quiz.start}
-                    </SubmitButton>
-                  </form>
-                </span>
-              </ListItem>
-            ))}
-          </List>
-        </Section>
-      )}
       {ownMaterial && (
         <Section title={TEXT.lms.material.title} description={TEXT.lms.material.description}>
           {ownMaterial.length === 0 ? (
